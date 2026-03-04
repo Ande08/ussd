@@ -1,0 +1,3 @@
+<resources>
+    <string name="accessibility_service_description">Serviço para ler e extrair saldo de janelas USSD.</string>
+</resources>
