@@ -2,7 +2,6 @@ package com.example.siminfo
 
 import android.Manifest
 import android.content.BroadcastReceiver
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -25,9 +24,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import androidx.core.app.NotificationCompat
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -38,7 +35,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -223,22 +219,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun startUniversalConsultation(context: Context, sims: List<SubscriptionInfo>) {
-        if (sims.isEmpty()) return
-        val vodacomSims = sims.filter { info ->
-            val name = info.carrierName.toString() + info.displayName.toString()
-            name.contains("Vodacom", ignoreCase = true)
-        }
-        if (vodacomSims.isEmpty()) {
-            Toast.makeText(context, "Nenhum chip Vodacom detectado.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        isConsultingAll.value = true
-        pendingSims.clear()
-        pendingSims.addAll(vodacomSims)
-        triggerNextSim(context)
-    }
-
     private fun findBestSimForTransfer(amountMb: Double): SubscriptionInfo? {
         val sims = getSimInfo(this).filter { info ->
             val name = info.carrierName.toString() + info.displayName.toString()
@@ -381,14 +361,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreenContainer(onLogout: () -> Unit) {
         val navController = androidx.navigation.compose.rememberNavController()
-        val items = listOf("dashboard", "fleet", "settings")
         var selectedItem by remember { mutableIntStateOf(0) }
 
         Scaffold(
             bottomBar = {
                 NavigationBar(containerColor = Color(0xFF121212)) {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
                     
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Home, contentDescription = null) },
@@ -520,7 +497,7 @@ class MainActivity : ComponentActivity() {
                 "Tá liberado pra Netflix! Eu cuido dos pagamentos 📺",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
 
