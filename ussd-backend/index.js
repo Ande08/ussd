@@ -56,9 +56,15 @@ db.serialize(() => {
             name TEXT,
             balance TEXT,
             paused BOOLEAN DEFAULT 0,
+            battery INTEGER DEFAULT 100,
             last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Auto-migrate to add battery if it doesn't exist
+    db.run("ALTER TABLE devices ADD COLUMN battery INTEGER DEFAULT 100", (err) => {
+        if (!err) console.log("Added battery column to devices table.");
+    });
 
     // Insert a default admin device for immediate testing if it doesn't exist
     db.run(`INSERT OR IGNORE INTO devices (username, password, name) VALUES ('admin', 'admin123', 'Celular Principal')`);
@@ -105,13 +111,13 @@ app.post('/api/device/login', async (req, res) => {
 
 // 3. App Endpoint: Status Heartbeat
 app.post('/api/device/status', async (req, res) => {
-    const { username, balance, paused } = req.body;
+    const { username, balance, paused, battery } = req.body;
     if (!username) return res.status(400).json({ error: 'Username é obrigatório.' });
 
     try {
         await dbRun(
-            `UPDATE devices SET balance = ?, paused = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
-            [String(balance), paused ? 1 : 0, username]
+            `UPDATE devices SET balance = ?, paused = ?, battery = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
+            [String(balance), paused ? 1 : 0, battery !== undefined ? battery : 100, username]
         );
         res.json({ success: true });
     } catch (err) {
@@ -125,11 +131,19 @@ app.post('/api/transfer/pending', async (req, res) => {
     if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
 
     try {
+        // Find device's available balance to filter jobs it can't handle
+        const device = await dbGet(`SELECT balance FROM devices WHERE username = ?`, [username]);
+        if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado.' });
+
+        const deviceBalance = parseFloat(device.balance || 0);
+
         // Atomic transaction: Find the oldest PENDENTE and lock it immediately for this username
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
+        // Only pick jobs that the device has enough balance to process
         const pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' ORDER BY created_at ASC LIMIT 1`
+            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND CAST(amount AS REAL) <= ? ORDER BY created_at ASC LIMIT 1`,
+            [deviceBalance]
         );
 
         if (!pending) {
@@ -181,7 +195,7 @@ app.post('/api/transfer/update', async (req, res) => {
 // 6. Dashboard Endpoint: View all devices
 app.get('/api/devices', async (req, res) => {
     try {
-        const devices = await dbAll(`SELECT username, name, balance, paused, last_seen FROM devices`);
+        const devices = await dbAll(`SELECT username, name, balance, paused, battery, last_seen FROM devices`);
         res.json({ devices });
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar dispositivos.' });
