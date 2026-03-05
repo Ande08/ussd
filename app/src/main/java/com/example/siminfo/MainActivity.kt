@@ -902,7 +902,7 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(deviceList) { device ->
+                items(deviceList, key = { it.username }) { device ->
                     DeviceCard(device)
                 }
                 if (deviceList.isEmpty()) {
