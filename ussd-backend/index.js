@@ -199,12 +199,15 @@ app.post('/api/device/login', async (req, res) => {
             console.log(`[Login Success] Account Auth OK. Syncing device: ${username}`);
             const accountId = accRow.id;
 
-            // 2. Manage Device Association
+            // 2. Manage Device Association (Universally compatible Upsert)
             await dbRun(
-                `INSERT INTO devices (username, account_id, name, balance, paused) 
-                 VALUES (?, ?, ?, '0 MB', 0)
-                 ON CONFLICT(username) DO UPDATE SET account_id = ?, name = EXCLUDED.name`,
-                [username, accountId, name || username, accountId]
+                `INSERT OR IGNORE INTO devices (username, account_id, name, balance, paused) 
+                 VALUES (?, ?, ?, '0 MB', 0)`,
+                [username, accountId, name || username]
+            );
+            await dbRun(
+                `UPDATE devices SET account_id = ?, name = ? WHERE username = ?`,
+                [accountId, name || username, username]
             );
 
             res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
@@ -212,7 +215,6 @@ app.post('/api/device/login', async (req, res) => {
             const accExists = await dbGet(`SELECT name, password FROM accounts WHERE name = ?`, [account]);
             if (accExists) {
                 console.log(`[Login Fail] Account found: ${account}, but password mismatch.`);
-                // console.log(`[DEBUG] Attempted: "${password}", Expected: "${accExists.password}"`); // Uncomment ONLY for extreme debugging
                 res.status(401).json({ success: false, error: 'Senha da conta incorreta' });
             } else {
                 console.log(`[Login Fail] Account not found: "${account}"`);
@@ -251,11 +253,15 @@ app.post('/api/device/register', async (req, res) => {
         );
         const accountId = accResult.lastID;
 
-        // Associate the first device
+        // Associate the first device (Universally compatible Upsert)
         await dbRun(
-            `INSERT INTO devices (username, account_id, name, balance, paused) 
+            `INSERT OR IGNORE INTO devices (username, account_id, name, balance, paused) 
              VALUES (?, ?, ?, '0 MB', 0)`,
             [username, accountId, name || username]
+        );
+        await dbRun(
+            `UPDATE devices SET account_id = ?, name = ? WHERE username = ?`,
+            [accountId, name || username, username]
         );
 
         res.status(201).json({ success: true, message: 'Conta criada e aparelho associado.' });
