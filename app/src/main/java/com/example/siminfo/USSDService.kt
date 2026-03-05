@@ -64,16 +64,16 @@ class USSDService : AccessibilityService() {
                 sendBroadcast(intent)
                 handler.postDelayed({ dismissUssd(nodeInfo) }, 1000) // 1s delay to ensure button is clickable
             }
-            normalizedText.contains("quantos megas") -> {
-                Log.d("USSDService", "Matching: Amount step. Text: $text")
-                pendingTransferAmount.value?.let { amount ->
-                    findAndInput(nodeInfo, amount)
-                }
-            }
-            normalizedText.contains("numero do recipiente") || normalizedText.contains("número do recipiente") || normalizedText.contains("digita o numero") -> {
+            normalizedText.contains("numero do recipiente") || normalizedText.contains("número do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") -> {
                 Log.d("USSDService", "Matching: Number step. Text: $text")
                 pendingTransferNumber.value?.let { number ->
                     findAndInput(nodeInfo, number)
+                }
+            }
+            normalizedText.contains("quantos megas") || normalizedText.contains("quantidade") || normalizedText.contains("introduza o valor") || (normalizedText.contains("quantos") && normalizedText.contains("megas")) -> {
+                Log.d("USSDService", "Matching: Amount step. Text: $text")
+                pendingTransferAmount.value?.let { amount ->
+                    findAndInput(nodeInfo, amount)
                 }
             }
             normalizedText.contains("insuficiente") || normalizedText.contains("indisponivel") || normalizedText.contains("erro") -> {

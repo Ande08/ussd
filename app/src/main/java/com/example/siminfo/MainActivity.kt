@@ -350,15 +350,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getBatteryPercentage(): Int {
-        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
-            applicationContext.registerReceiver(null, ifilter)
-        }
-        val level: Int = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) ?: -1
-        val scale: Int = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1) ?: -1
-        return if (level != -1 && scale != -1) {
-            (level * 100 / scale.toFloat()).toInt()
+        val bm = getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager
+        return bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY).let { if (it < 0) 100 else it }
+    }
+
+    private fun getDeviceId(): String {
+        return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
+    }
+
+    private fun getDeviceName(): String {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+        return if (model.startsWith(manufacturer)) {
+            model.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
         } else {
-            100 // fallback
+            manufacturer.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() } + " " + model
         }
     }
 
@@ -779,10 +785,12 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                     Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
                     val sims = remember(context) { getSimInfo(context) }
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        ussdBalances.forEach { (subId, balance) ->
+                        ussdBalances.keys.sorted().forEach { subId ->
+                            val balance = ussdBalances[subId] ?: ""
+                            val simIndex = sims.indexOfFirst { it.subscriptionId == subId } + 1
                             val simName = sims.find { it.subscriptionId == subId }?.displayName ?: "SIM $subId"
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(text = simName.toString(), color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                Text(text = "Chip $simIndex ($simName)", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
                                 Text(text = balance, color = Color.LightGray, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                             }
                         }
@@ -857,29 +865,45 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
             Text(btnStatus, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // --- REAL-TIME LOGS SECTION ---
-        Text("HISTÓRICO DE CONEXÃO", style = MaterialTheme.typography.labelSmall, color = Color.Gray, modifier = Modifier.align(Alignment.Start))
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Black)
+        var showLogsDialog by remember { mutableStateOf(false) }
+        Button(
+            onClick = { showLogsDialog = true },
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier.padding(12.dp).fillMaxSize(),
-                reverseLayout = true
-            ) {
-                items(connectionLogs.asReversed()) { log ->
-                    Text(
-                        text = log,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                        color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("✅") || log.contains("🟢")) Color(0xFF4CAF50) else Color.LightGray
-                    )
+            Icon(Icons.Default.History, contentDescription = null, tint = Color.White)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Ver Histórico / Logs", color = Color.White)
+        }
+
+        if (showLogsDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogsDialog = false },
+                title = { Text("Histórico de Conexão") },
+                text = {
+                    Box(modifier = Modifier.height(400.dp)) {
+                        LazyColumn(
+                            modifier = Modifier.padding(8.dp).fillMaxSize(),
+                            reverseLayout = true
+                        ) {
+                            items(connectionLogs.asReversed()) { log ->
+                                Text(
+                                    text = log,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                    color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("✅") || log.contains("🟢")) Color(0xFF4CAF50) else Color.LightGray
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showLogsDialog = false }) { Text("FECHAR") }
                 }
-            }
+            )
         }
     }
 
@@ -1041,10 +1065,11 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                 }
 
                 if (showRegisterDialog) {
-                    var regUser by remember { mutableStateOf("") }
+                    val activity = LocalContext.current as? MainActivity
+                    var regUser by remember { mutableStateOf(activity?.getDeviceId() ?: "") }
                     var regPass by remember { mutableStateOf("") }
                     var regAcc by remember { mutableStateOf("") }
-                    var regName by remember { mutableStateOf("") }
+                    var regName by remember { mutableStateOf(activity?.getDeviceName() ?: "") }
                     var isRegLoading by remember { mutableStateOf(false) }
                     var regError by remember { mutableStateOf("") }
 
