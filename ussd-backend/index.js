@@ -209,11 +209,13 @@ app.post('/api/device/login', async (req, res) => {
 
             res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
         } else {
-            console.log(`[Login Fail] Invalid credentials for account: ${account}`);
-            const accExists = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
+            const accExists = await dbGet(`SELECT name, password FROM accounts WHERE name = ?`, [account]);
             if (accExists) {
+                console.log(`[Login Fail] Account found: ${account}, but password mismatch.`);
+                // console.log(`[DEBUG] Attempted: "${password}", Expected: "${accExists.password}"`); // Uncomment ONLY for extreme debugging
                 res.status(401).json({ success: false, error: 'Senha da conta incorreta' });
             } else {
+                console.log(`[Login Fail] Account not found: "${account}"`);
                 res.status(404).json({ success: false, error: 'Conta não encontrada. Use "Criar Conta" primeiro.' });
             }
         }
