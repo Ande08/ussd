@@ -1066,6 +1066,7 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
 
 @Composable
 fun FleetManagementScreen() {
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         while (true) {
             try {
