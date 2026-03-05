@@ -85,19 +85,27 @@ db.serialize(() => {
         if (!err) console.log("Added account column to devices table.");
     });
 
-    // Migration: Populate accounts from old devices data if needed
-    db.run(`
-        INSERT INTO accounts (name, password)
-        SELECT DISTINCT account, password FROM devices 
-        WHERE account IS NOT NULL AND password IS NOT NULL
-        AND account NOT IN (SELECT name FROM accounts)
-    `, (err) => {
-        if (!err) {
+    // Migration: Populate accounts from old devices data if columns exist
+    db.all("PRAGMA table_info(devices)", (err, columns) => {
+        if (err) return;
+        const hasAccount = columns.find(c => c.name === 'account');
+        const hasPassword = columns.find(c => c.name === 'password');
+
+        if (hasAccount && hasPassword) {
             db.run(`
-                UPDATE devices 
-                SET account_id = (SELECT id FROM accounts WHERE accounts.name = devices.account)
-                WHERE account_id IS NULL AND account IS NOT NULL
-            `);
+                INSERT INTO accounts (name, password)
+                SELECT DISTINCT account, password FROM devices 
+                WHERE account IS NOT NULL AND password IS NOT NULL
+                AND account NOT IN (SELECT name FROM accounts)
+            `, (err) => {
+                if (!err) {
+                    db.run(`
+                        UPDATE devices 
+                        SET account_id = (SELECT id FROM accounts WHERE accounts.name = devices.account)
+                        WHERE account_id IS NULL AND account IS NOT NULL
+                    `);
+                }
+            });
         }
     });
 
