@@ -16,211 +16,175 @@ class USSDService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        // Filter specifically for the phone package as requested
+        if (event.packageName?.toString() != "com.android.phone") return
+
         val currentTime = System.currentTimeMillis()
-        if (currentTime - lastEventTime < 1000) return // Debounce fast events
+        if (currentTime - lastEventTime < 800) return // Debounce fast events
         
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || 
             event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             
-            // Use rootInActiveWindow for a more complete view of the screen
             val nodeInfo = rootInActiveWindow ?: event.source ?: return
             
-            // Give UI time to settle
+            // Give UI a tiny moment to settle as per specs ("efficient and silent")
             handler.postDelayed({
-                val text = traverseNode(nodeInfo)
-                if (text.isBlank() || text == lastProcessedText) {
-                    return@postDelayed
-                }
-                
-                lastProcessedText = text
-                lastEventTime = System.currentTimeMillis()
-                Log.d("USSDService", "Screen text detected: \n$text")
+                val extractedText = StringBuilder()
+                val hasInput = checkInteractiveAndExtractText(nodeInfo, extractedText)
+                val fullText = extractedText.toString().trim()
 
-                processUssdLogic(nodeInfo, text)
-            }, 800)
+                if (fullText.isBlank() || fullText == lastProcessedText) return@postDelayed
+                
+                lastProcessedText = fullText
+                lastEventTime = System.currentTimeMillis()
+                Log.d("USSDService", "Captured Text: \n$fullText | Interactive: $hasInput")
+
+                processUssdLogic(nodeInfo, fullText, hasInput)
+            }, 500)
         }
     }
 
-    private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String) {
+    /**
+     * Recursive scan to extract all text and detect if it's an interactive menu (has EditText)
+     */
+    private fun checkInteractiveAndExtractText(node: AccessibilityNodeInfo?, outText: StringBuilder): Boolean {
+        if (node == null) return false
+        var interactive = false
+
+        if (node.className?.toString() == "android.widget.EditText") {
+            interactive = true
+        }
+
+        if (node.text != null && node.text.isNotBlank()) {
+            outText.append(node.text).append("\n")
+        }
+
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i)
+            if (child != null) {
+                if (checkInteractiveAndExtractText(child, outText)) {
+                    interactive = true
+                }
+            }
+        }
+        return interactive
+    }
+
+    private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String, isInteractive: Boolean) {
         val normalizedText = text.lowercase()
-        Log.d("USSDService", "Processing normalized text: $normalizedText")
 
-        // 1. Handle Balance Inquiry (Existing)
-        if (normalizedText.contains("internet") || normalizedText.contains("saldo")) {
-            if (!normalizedText.contains("quantos megas") && !normalizedText.contains("digita o numero")) {
-                val intent = Intent("com.example.siminfo.USSD_RESULT")
-                intent.putExtra("ussd_text", text)
-                sendBroadcast(intent)
+        // 1. Success Patterns
+        if (normalizedText.contains("sucesso") || normalizedText.contains("concluido") || 
+            normalizedText.contains("concluida") || normalizedText.contains("enviado") || 
+            normalizedText.contains("realizada") || normalizedText.contains("confirmado")) {
+            
+            // Safety check: ensure it's not just the menu option
+            if (!isInteractive || (!normalizedText.contains("transferir") && !normalizedText.contains("megas"))) {
+                Log.d("USSDService", "!!! SUCCESS DETECTED !!!")
+                broadcastStatus("SUCCESS", text)
+                autoDismiss(nodeInfo)
+                return
             }
         }
 
-        // 2. Handle Automated Transfer Steps (Flexible Matching)
-        when {
-            (normalizedText.contains("sucesso") || normalizedText.contains("transferiste") || normalizedText.contains("enviado") || normalizedText.contains("concluido") || normalizedText.contains("concluida") || normalizedText.contains("confirmado")) 
-            && !normalizedText.contains("transferir megas") && !normalizedText.contains("transferencia de megas") -> {
-                Log.d("USSDService", "!!! SUCCESS DETECTED !!! Text: $text")
-                val intent = Intent("com.example.siminfo.TRANSFER_STATUS")
-                intent.putExtra("status", "SUCCESS")
-                intent.putExtra("message", text)
-                sendBroadcast(intent)
-                handler.postDelayed({ dismissUssd(nodeInfo) }, 1000) // 1s delay to ensure button is clickable
-            }
-            normalizedText.contains("numero do recipiente") || normalizedText.contains("número do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") -> {
-                Log.d("USSDService", "Matching: Number step. Text: $text")
-                pendingTransferNumber.value?.let { number ->
-                    findAndInput(nodeInfo, number)
-                }
-            }
-            normalizedText.contains("quantos megas") || normalizedText.contains("quantidade") || normalizedText.contains("introduza o valor") || (normalizedText.contains("quantos") && normalizedText.contains("megas")) -> {
-                Log.d("USSDService", "Matching: Amount step. Text: $text")
-                pendingTransferAmount.value?.let { amount ->
-                    findAndInput(nodeInfo, amount)
-                }
-            }
-            normalizedText.contains("insuficiente") || normalizedText.contains("indisponivel") || normalizedText.contains("erro") -> {
-                Log.d("USSDService", "Matching: Failure detected. Text: $text")
-                val intent = Intent("com.example.siminfo.TRANSFER_STATUS")
-                intent.putExtra("status", "FAILURE")
-                intent.putExtra("message", text)
-                sendBroadcast(intent)
-                dismissUssd(nodeInfo)
-            }
-            normalizedText.contains("servicos de internet") || normalizedText.contains("serviços de internet") -> {
-                if (pendingTransferAmount.value != null) {
-                    Log.d("USSDService", "Matching: Services step. Text: $text")
-                    findAndInput(nodeInfo, "8")
-                }
-            }
-            normalizedText.contains("transferir megas") -> {
-                if (pendingTransferAmount.value != null) {
-                    Log.d("USSDService", "Matching: Transfer step. Text: $text")
-                    findAndInput(nodeInfo, "2")
-                }
-            }
-            normalizedText.contains("saldo") || normalizedText.contains("internet") -> {
-                Log.d("USSDService", "Matching: General balance popup or unexpected menu. Text: $text")
-                dismissUssd(nodeInfo)
-            }
+        // 2. Error Patterns
+        if (normalizedText.contains("insuficiente") || normalizedText.contains("invalido") || 
+            normalizedText.contains("falha") || normalizedText.contains("erro")) {
+            Log.d("USSDService", "!!! FAILURE DETECTED !!!")
+            broadcastStatus("FAILURE", text)
+            autoDismiss(nodeInfo)
+            return
         }
+
+        // 3. Intermediate Steps (Only if interactive)
+        if (isInteractive) {
+            when {
+                normalizedText.contains("numero do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") -> {
+                    pendingTransferNumber.value?.let { findAndInput(nodeInfo, it) }
+                }
+                normalizedText.contains("quantos megas") || normalizedText.contains("quantidade") || normalizedText.contains("introduza o valor") -> {
+                    pendingTransferAmount.value?.let { findAndInput(nodeInfo, it) }
+                }
+                normalizedText.contains("servicos de internet") || normalizedText.contains("serviços de internet") -> {
+                    if (pendingTransferAmount.value != null) findAndInput(nodeInfo, "8")
+                }
+                normalizedText.contains("transferir megas") -> {
+                    if (pendingTransferAmount.value != null) findAndInput(nodeInfo, "2")
+                }
+            }
+        } else {
+            // Final response message but no specific success/error caught yet?
+            // Broadcast as generic result for logs
+            broadcastResult(text)
+            autoDismiss(nodeInfo)
+        }
+    }
+
+    private fun broadcastStatus(status: String, message: String) {
+        val intent = Intent("com.example.siminfo.TRANSFER_STATUS")
+        intent.putExtra("status", status)
+        intent.putExtra("message", message)
+        sendBroadcast(intent)
+    }
+
+    private fun broadcastResult(text: String) {
+        val intent = Intent("com.example.siminfo.USSD_RESULT")
+        intent.putExtra("ussd_text", text)
+        sendBroadcast(intent)
     }
 
     private fun findAndInput(node: AccessibilityNodeInfo, text: String) {
-        Log.d("USSDService", "Finding input field for: $text")
-        
-        // Find EditText (Multiple Strategies)
         val editTexts = mutableListOf<AccessibilityNodeInfo>()
+        findNodesByClassName(node, "android.widget.EditText", editTexts)
         
-        // Strategy A: By ID
-        val byId = node.findAccessibilityNodeInfosByViewId("android:id/input_field")
-        if (!byId.isNullOrEmpty()) {
-            Log.d("USSDService", "EditText found by ID")
-            editTexts.addAll(byId)
+        val sendLabels = listOf("Send", "Enviar", "Enviar ", "Submeter")
+        var sendButton: AccessibilityNodeInfo? = null
+        for (label in sendLabels) {
+            sendButton = node.findAccessibilityNodeInfosByText(label)?.firstOrNull()
+            if (sendButton != null) break
         }
-        
-        // Strategy B: By ClassName (Manual)
-        if (editTexts.isEmpty()) {
-            findNodesByClassName(node, "android.widget.EditText", editTexts)
-            if (editTexts.isNotEmpty()) Log.d("USSDService", "EditText found by ClassName")
-        }
-        
-        // Find Send Button (Multiple Strategies)
-        var sendButton: AccessibilityNodeInfo? = node.findAccessibilityNodeInfosByViewId("android:id/button1")?.firstOrNull()
         if (sendButton == null) {
-            sendButton = node.findAccessibilityNodeInfosByText("Send")?.firstOrNull()
-            if (sendButton == null) sendButton = node.findAccessibilityNodeInfosByText("Enviar")?.firstOrNull()
-            if (sendButton != null) Log.d("USSDService", "Send button found by Text")
-        } else {
-            Log.d("USSDService", "Send button found by ID")
+            sendButton = node.findAccessibilityNodeInfosByViewId("android:id/button1")?.firstOrNull()
         }
 
         if (editTexts.isNotEmpty()) {
             val editText = editTexts[0]
             val arguments = Bundle()
             arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
-            val success = editText.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
-            Log.d("USSDService", "Input set text result: $success for value: $text")
+            editText.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
 
-            // Short delay between input and click
             handler.postDelayed({
-                if (sendButton != null && sendButton.isClickable) {
-                    val clickSuccess = sendButton.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    Log.d("USSDService", "Send button clicked: $clickSuccess")
-                } else {
-                    Log.e("USSDService", "Send button NOT found or NOT clickable")
-                }
-            }, 400)
-        } else {
-            Log.e("USSDService", "CRITICAL: No EditText found on this screen!")
+                sendButton?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }, 300)
         }
     }
 
     private fun findNodesByClassName(node: AccessibilityNodeInfo, className: String, result: MutableList<AccessibilityNodeInfo>) {
-        if (node.className?.toString() == className) {
-            result.add(node)
-        }
+        if (node.className?.toString() == className) result.add(node)
         for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
-            if (child != null) {
-                findNodesByClassName(child, className, result)
-            }
+            node.getChild(i)?.let { findNodesByClassName(it, className, result) }
         }
     }
 
-    private fun dismissUssd(node: AccessibilityNodeInfo) {
-        Log.d("USSDService", "Attempting to dismiss USSD...")
-        
-        // Strategy 1: Standard OK buttons by View ID
-        val okById = node.findAccessibilityNodeInfosByViewId("android:id/button1")
-        if (!okById.isNullOrEmpty()) {
-            val btn = okById[0]
-            if (btn.isClickable) {
-                btn.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                Log.d("USSDService", "Dismissed USSD by ID (button1)")
-                return
-            }
-        }
-
-        // Strategy 2: Common labels (check node and parent)
-        val dismissLabels = listOf("OK", "Cancelar", "Cancel", "Rejeitar", "Sair", "Submeter", "Concluir", "Aceitar", "Accept", "Sim")
-        for (label in dismissLabels) {
-            val list = node.findAccessibilityNodeInfosByText(label)
-            for (dismissNode in list) {
-                if (dismissNode.isClickable) {
-                    dismissNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    Log.d("USSDService", "Dismissed USSD by label: $label")
-                    return
-                } else if (dismissNode.parent?.isClickable == true) {
-                    dismissNode.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    Log.d("USSDService", "Dismissed USSD by label parent: $label")
-                    return
+    private fun autoDismiss(node: AccessibilityNodeInfo) {
+        Log.d("USSDService", "Auto-dismissing dialog...")
+        handler.postDelayed({
+            val dismissLabels = listOf("OK", "Fechar", "Aceitar", "Accept", "Concluir", "Sair", "Cancel")
+            for (label in dismissLabels) {
+                val list = node.findAccessibilityNodeInfosByText(label)
+                for (dismissNode in list) {
+                    if (dismissNode.isClickable) {
+                        dismissNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        return@postDelayed
+                    } else if (dismissNode.parent?.isClickable == true) {
+                        dismissNode.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        return@postDelayed
+                    }
                 }
             }
-        }
-
-        // Strategy 3: Fallback - Click ANY clickable button found on the screen
-        val allButtons = mutableListOf<AccessibilityNodeInfo>()
-        findNodesByClassName(node, "android.widget.Button", allButtons)
-        for (btn in allButtons) {
-            if (btn.isClickable) {
-                btn.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                Log.d("USSDService", "Dismissed USSD by clicking ANY button fallback")
-                return
-            }
-        }
-    }
-
-    private fun traverseNode(node: AccessibilityNodeInfo): String {
-        var text = ""
-        if (node.text != null) {
-            text += node.text.toString() + "\n"
-        }
-        for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
-            if (child != null) {
-                text += traverseNode(child)
-            }
-        }
-        return text
+            // ID fallback
+            node.findAccessibilityNodeInfosByViewId("android:id/button1")?.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        }, 600) // Fast dismissal (< 1s total)
     }
 
     override fun onInterrupt() {}
