@@ -13,9 +13,10 @@ class BootReceiver : BroadcastReceiver() {
             
             val prefs = context.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
             val username = prefs.getString("USERNAME", null)
+            val isEnabled = prefs.getBoolean("POLLING_ENABLED", false)
             
-            // Only start if user was logged in
-            if (username != null) {
+            // Only start if user was logged in and polling is enabled
+            if (username != null && isEnabled) {
                 val serviceIntent = Intent(context, PollService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(serviceIntent)

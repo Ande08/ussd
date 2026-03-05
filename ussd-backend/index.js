@@ -305,10 +305,34 @@ app.post('/api/transfer/pending', async (req, res) => {
         // Atomic transaction: Find a job assigned specifically to this user or unassigned belonging to this account
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
-        const pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND (assigned_to = ? OR (assigned_to IS NULL AND (owner_account = ? OR owner_account IS NULL))) ORDER BY created_at ASC LIMIT 1`,
-            [username, device.account_name]
+        // First, check if there's a job explicitly assigned to this device
+        let pending = await dbGet(
+            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND assigned_to = ? ORDER BY created_at ASC LIMIT 1`,
+            [username]
         );
+
+        // If no explicit job, look for unassigned jobs for this account, but ONLY if the device is not paused
+        if (!pending && device.paused === 0) {
+            // Find the oldest unassigned job
+            const unassigned = await dbAll(
+                `SELECT * FROM transfers WHERE status = 'PENDENTE' AND assigned_to IS NULL AND (owner_account = ? OR owner_account IS NULL) ORDER BY created_at ASC`,
+                [device.account_name]
+            );
+
+            // Find the first unassigned job this device can afford
+            const deviceBalance = parseFloat(device.balance || 0);
+            pending = unassigned.find(job => parseFloat(job.amount || 0) <= deviceBalance);
+
+            // If device cannot afford any unassigned job, or there are no unassigned jobs, return null
+            if (!pending) {
+                await dbRun("COMMIT");
+                return res.json({ message: 'Nenhum pedido pendente ou saldo insuficiente.', job: null });
+            }
+        } else if (!pending) {
+            // Device is paused and has no explicitly assigned jobs
+            await dbRun("COMMIT");
+            return res.json({ message: 'Dispositivo pausado e sem pedidos diretos.', job: null });
+        }
 
         if (!pending) {
             await dbRun("COMMIT");

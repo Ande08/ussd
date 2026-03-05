@@ -542,12 +542,13 @@ class MainActivity : ComponentActivity() {
             registerReceiver(resultReceiver, filter)
         }
 
-        startBackendPolling()
-        requestIgnoreBatteryOptimizations()
-
         val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
         currentUsername = prefs.getString("USERNAME", null)?.trim()
         currentAccount = prefs.getString("ACCOUNT", null)?.trim()
+        isBackendPollingEnabled.value = prefs.getBoolean("POLLING_ENABLED", false)
+
+        startBackendPolling()
+        requestIgnoreBatteryOptimizations()
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
@@ -712,6 +713,9 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                     checked = isBackendPollingEnabled.value,
                     onCheckedChange = { isChecked ->
                         isBackendPollingEnabled.value = isChecked
+                        val prefs = (context as? MainActivity)?.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
+                        prefs?.edit()?.putBoolean("POLLING_ENABLED", isChecked)?.apply()
+                        
                         // Sync with server pause state
                         (context as? MainActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
                             try {
