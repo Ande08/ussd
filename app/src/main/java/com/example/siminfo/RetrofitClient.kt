@@ -71,10 +71,12 @@ data class Device(
     val username: String,
     val name: String?,
     val balance: String?,
-    val paused: Boolean,
+    val paused: Int, // SQLite returns 1/0
     val battery: Int,
     val last_seen: String?
-)
+) {
+    val isPaused: Boolean get() = paused == 1
+}
 
 data class DeviceListResponse(
     val devices: List<Device>

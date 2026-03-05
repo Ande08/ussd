@@ -1131,11 +1131,14 @@ fun FleetManagementScreen() {
     LaunchedEffect(Unit) {
         while (true) {
             try {
-                val response = RetrofitClient.api.getDevices(currentAccount)
+                val accToSearch = currentAccount?.trim() ?: ""
+                Log.d("FleetQuery", "Searching devices for account: '$accToSearch'")
+                val response = RetrofitClient.api.getDevices(accToSearch)
+                Log.d("FleetQuery", "Found ${response.devices.size} devices")
                 deviceList.clear()
                 deviceList.addAll(response.devices)
             } catch (e: Exception) {
-                Log.e("MainActivity", "Erro ao buscar aparelhos: ${e.message}")
+                Log.e("FleetQuery", "Erro ao buscar aparelhos: ${e.message}")
             }
             delay(10000)
         }
@@ -1198,11 +1201,11 @@ fun DeviceCard(device: Device) {
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if (device.paused) Color.Gray else Color(0xFF4CAF50)))
+            Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if (device.isPaused) Color.Gray else Color(0xFF4CAF50)))
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(device.name ?: device.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text(if (device.isPaused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 
                 // --- PAUSE/RESUME BUTTON ---
                 val scope = rememberCoroutineScope()
@@ -1210,12 +1213,12 @@ fun DeviceCard(device: Device) {
                     onClick = {
                         scope.launch(Dispatchers.IO) {
                             try {
-                                RetrofitClient.api.togglePause(PauseRequest(device.username, !device.paused))
+                                RetrofitClient.api.togglePause(PauseRequest(device.username, !device.isPaused))
                                 withContext(Dispatchers.Main) {
                                     // Local optimistic update
                                     val idx = deviceList.indexOfFirst { it.username == device.username }
                                     if (idx != -1) {
-                                        deviceList[idx] = deviceList[idx].copy(paused = !device.paused)
+                                        deviceList[idx] = deviceList[idx].copy(paused = if (!device.isPaused) 1 else 0)
                                     }
                                 }
                             } catch (e: Exception) {
@@ -1225,7 +1228,7 @@ fun DeviceCard(device: Device) {
                     },
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(if (device.paused) "RETOMAR" else "PAUSAR", color = if (device.paused) Color(0xFF4CAF50) else Color.Red, style = MaterialTheme.typography.labelSmall)
+                    Text(if (device.isPaused) "RETOMAR" else "PAUSAR", color = if (device.isPaused) Color(0xFF4CAF50) else Color.Red, style = MaterialTheme.typography.labelSmall)
                 }
             }
             Column(horizontalAlignment = Alignment.End) {

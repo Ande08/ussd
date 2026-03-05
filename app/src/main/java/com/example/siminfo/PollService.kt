@@ -34,13 +34,13 @@ class PollService : Service() {
         pollJob = serviceScope.launch {
             while (isActive) {
                 // Ensure session is loaded (especially if started by BootReceiver)
-                if (currentUsername == null || currentAccount == null) {
+                if (currentUsername.isNullOrBlank() || currentAccount.isNullOrBlank()) {
                     val prefs = applicationContext.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
                     currentUsername = prefs.getString("USERNAME", null)
                     currentAccount = prefs.getString("ACCOUNT", null)
                 }
 
-                if (!isBackendPollingEnabled.value || currentUsername == null) {
+                if (!isBackendPollingEnabled.value || currentUsername.isNullOrBlank()) {
                     delay(3000)
                     continue
                 }
@@ -50,7 +50,8 @@ class PollService : Service() {
                     val currentBattery = (applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
                         .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                     
-                    val totalBalanceStr = ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString()
+                    val totalBalanceStr = ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString() + " MB"
+                    Log.d("PollService", "💖 Heartbeat -> User: $currentUsername, Balance: $totalBalanceStr, Paused: ${!isBackendPollingEnabled.value}")
                     
                     RetrofitClient.api.updateDeviceStatus(
                         DeviceStatusRequest(currentUsername!!, totalBalanceStr, !isBackendPollingEnabled.value, currentBattery)
