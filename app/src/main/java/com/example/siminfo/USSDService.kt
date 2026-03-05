@@ -56,7 +56,7 @@ class USSDService : AccessibilityService() {
 
         // 2. Handle Automated Transfer Steps (Flexible Matching)
         when {
-            normalizedText.contains("sucesso") || normalizedText.contains("transferiste") || normalizedText.contains("enviado") -> {
+            normalizedText.contains("sucesso") || normalizedText.contains("transferiste") || normalizedText.contains("enviado") || normalizedText.contains("transferencia") || normalizedText.contains("transferência") -> {
                 Log.d("USSDService", "!!! SUCCESS DETECTED !!! Text: $text")
                 val intent = Intent("com.example.siminfo.TRANSFER_STATUS")
                 intent.putExtra("status", "SUCCESS")
