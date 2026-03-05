@@ -87,6 +87,7 @@ val waitingList = mutableStateListOf<QueuedTransfer>()
 val isAccessibilityEnabled = mutableStateOf(false)
 var currentUsername: String? = null
 var currentAccount: String? = null // New: Owner of this device group
+val connectionLogs = mutableStateListOf<String>() // Global logs
 
 // Previously in companion object
 val lastExtractedBalance = mutableStateOf<String?>(null)
@@ -103,7 +104,7 @@ class MainActivity : ComponentActivity() {
     // Backend Job tracking
     private var currentBackendJobId: Int? = null
     private var isPollingPaused = false
-    private val connectionLogs = mutableStateListOf<String>()
+    
     
     // Transfer Queue State
     private var activeTransferInfo: QueuedTransfer? = null
@@ -678,38 +679,55 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // The Sphere
-        Box(
-            modifier = Modifier
-                .size(240.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(Color(0xFFff8a65), Color(0xFFba68c8), Color(0xFFe53935)),
-                        tileMode = TileMode.Clamp
+        // --- SERVICE SWITCH (Functional & Faster) ---
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = if (isBackendPollingEnabled.value) Color(0xFF2E7D32).copy(alpha = 0.1f) else Color(0xFF1C1C1E))
+        ) {
+            Row(
+                modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (isBackendPollingEnabled.value) "SERVIÇO ATIVO" else "SERVIÇO DESLIGADO",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isBackendPollingEnabled.value) Color(0xFF4CAF50) else Color.Gray
                     )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Canvas(modifier = Modifier.fillMaxSize()) { /* Glow */ }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        // Status Chip
-        Surface(
-            color = Color(0xFF1B3B26),
-            shape = CircleShape,
-            modifier = Modifier.height(32.dp).padding(horizontal = 8.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp)) {
-                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Serviço Iniciado", color = Color(0xFF4CAF50), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = if (isBackendPollingEnabled.value) "A processar pedidos..." else "Toque para iniciar",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+                Switch(
+                    checked = isBackendPollingEnabled.value,
+                    onCheckedChange = { isChecked ->
+                        isBackendPollingEnabled.value = isChecked
+                        // Sync with server pause state
+                        (context as? MainActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+                            try {
+                                RetrofitClient.api.togglePause(PauseRequest(currentUsername ?: "", !isChecked))
+                            } catch (e: Exception) { Log.e("MainActivity", "Error sync pause") }
+                        }
+                        
+                        // AUTO-BALANCE CHECK when starting
+                        if (isChecked) {
+                            (context as? MainActivity)?.startConsultarTodos()
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color(0xFF4CAF50),
+                        checkedTrackColor = Color(0xFF4CAF50).copy(alpha = 0.5f)
+                    )
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         if (!isAccessibilityEnabled.value) {
             Card(
@@ -827,19 +845,41 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
         
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Action Buttons Row 2: Consultar Saldo
+        // Action Buttons Row 2: Manual Sync
         val activity = LocalContext.current as? MainActivity
-        Button(
+        OutlinedButton(
             onClick = { activity?.startConsultarTodos() },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(16.dp),
             enabled = activity?.isConsultingAll?.value != true
         ) {
-            Icon(Icons.Default.Info, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            val btnStatus = activity?.consultationStatus?.value ?: "Consultar Todos"
-            Text(btnStatus, color = Color.White, fontWeight = FontWeight.Bold)
+            val btnStatus = activity?.consultationStatus?.value ?: "Sincronizar Saldos Agora"
+            Text(btnStatus, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- REAL-TIME LOGS SECTION ---
+        Text("HISTÓRICO DE CONEXÃO", style = MaterialTheme.typography.labelSmall, color = Color.Gray, modifier = Modifier.align(Alignment.Start))
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Black)
+        ) {
+            LazyColumn(
+                modifier = Modifier.padding(12.dp).fillMaxSize(),
+                reverseLayout = true
+            ) {
+                items(connectionLogs.asReversed()) { log ->
+                    Text(
+                        text = log,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("✅") || log.contains("🟢")) Color(0xFF4CAF50) else Color.LightGray
+                    )
+                }
+            }
         }
     }
 
