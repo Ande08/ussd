@@ -713,8 +713,7 @@ fun SimInfoScreen(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(simList) { info ->
-                    val balance = ussdBalancesMap[info.subscriptionId]
-                    SimCardItem(info, balance, transferAmount, transferNumber, onTransfer)
+                    SimCardItem(info, transferAmount, transferNumber, onTransfer)
                 }
                 
 
@@ -780,7 +779,7 @@ fun QueuedTransferItem(queued: QueuedTransfer, onRetry: (QueuedTransfer) -> Unit
 }
 
 @Composable
-fun SimCardItem(info: SubscriptionInfo, balance: String?, amount: String, number: String, onTransfer: (SubscriptionInfo, String, String) -> Unit) {
+fun SimCardItem(info: SubscriptionInfo, amount: String, number: String, onTransfer: (SubscriptionInfo, String, String) -> Unit) {
     val context = LocalContext.current
     val isVodacom = info.carrierName.toString().contains("Vodacom", ignoreCase = true) || info.displayName.toString().contains("Vodacom", ignoreCase = true)
 
