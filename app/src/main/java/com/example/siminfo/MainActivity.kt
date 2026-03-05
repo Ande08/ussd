@@ -86,6 +86,7 @@ val deviceList = mutableStateListOf<Device>()
 val waitingList = mutableStateListOf<QueuedTransfer>()
 val isAccessibilityEnabled = mutableStateOf(false)
 var currentUsername: String? = null
+var currentAccount: String? = null // New: Owner of this device group
 
 // Previously in companion object
 val lastExtractedBalance = mutableStateOf<String?>(null)
@@ -319,7 +320,9 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 addLog("📤 Enviando pedido cloud: $amount MB -> $number")
-                val response = RetrofitClient.api.scheduleTransfer(ScheduleTransferRequest(number, amount))
+                val response = RetrofitClient.api.scheduleTransfer(
+                    ScheduleTransferRequest(number, amount, currentUsername) // Pass requester ID
+                )
                 withContext(Dispatchers.Main) {
                     if (response.id != null) {
                         Toast.makeText(this@MainActivity, "Agendado com Sucesso! (ID ${response.id})", Toast.LENGTH_SHORT).show()
@@ -540,6 +543,7 @@ class MainActivity : ComponentActivity() {
 
         val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
         currentUsername = prefs.getString("USERNAME", null)
+        currentAccount = prefs.getString("ACCOUNT", null)
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
@@ -548,9 +552,14 @@ class MainActivity : ComponentActivity() {
 
                     if (!isLoggedIn) {
                         LoginScreen(
-                            onLoginSuccess = { user, pass ->
-                                prefs.edit().putString("USERNAME", user).putString("PASSWORD", pass).apply()
+                            onLoginSuccess = { user, pass, acc ->
+                                prefs.edit()
+                                    .putString("USERNAME", user)
+                                    .putString("PASSWORD", pass)
+                                    .putString("ACCOUNT", acc)
+                                    .apply()
                                 currentUsername = user
+                                currentAccount = acc
                                 isLoggedIn = true
                             }
                         )
@@ -559,6 +568,7 @@ class MainActivity : ComponentActivity() {
                             onLogout = {
                                 prefs.edit().clear().apply()
                                 currentUsername = null
+                                currentAccount = null
                                 isBackendPollingEnabled.value = false
                                 isLoggedIn = false
                             }
@@ -893,9 +903,10 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
 }
 
 @Composable
-fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
+fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var account by remember { mutableStateOf("") } // New field
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -913,9 +924,18 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
+                value = account,
+                onValueChange = { account = it },
+                label = { Text("Conta / Usuário (Ex: SuperNet)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Nome do Aparelho (Login)") },
+                label = { Text("ID do Aparelho (Ex: Celular1)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -938,7 +958,7 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
 
                 Button(
                     onClick = {
-                        if (username.isBlank() || password.isBlank()) {
+                        if (username.isBlank() || password.isBlank() || account.isBlank()) {
                             errorMessage = "Preencha todos os campos"
                             return@Button
                         }
@@ -946,11 +966,11 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
                         errorMessage = ""
                         coroutineScope.launch(Dispatchers.IO) {
                             try {
-                                val response = RetrofitClient.api.loginDevice(LoginRequest(username, password))
+                                val response = RetrofitClient.api.loginDevice(LoginRequest(username, password, account))
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
                                     if (response.success) {
-                                        onLoginSuccess(username, password)
+                                        onLoginSuccess(username, password, account)
                                     } else {
                                         errorMessage = response.error ?: "Senha Incorreta"
                                     }

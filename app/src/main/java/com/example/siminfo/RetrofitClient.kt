@@ -36,7 +36,8 @@ data class UpdateResponse(
 
 data class LoginRequest(
     val username: String,
-    val password: String
+    val password: String,
+    val account: String // New field: Group devices by account/owner
 )
 
 data class LoginResponse(
@@ -73,7 +74,8 @@ data class SimpleResponse(
 
 data class ScheduleTransferRequest(
     val number: String,
-    val amount: String
+    val amount: String,
+    val username: String? // New field: ID of the device requesting the transfer
 )
 
 data class ScheduleTransferResponse(

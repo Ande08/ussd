@@ -65,9 +65,15 @@ db.serialize(() => {
     db.run("ALTER TABLE transfers ADD COLUMN assigned_to TEXT", (err) => {
         if (!err) console.log("Added assigned_to column to transfers table.");
     });
+    db.run("ALTER TABLE transfers ADD COLUMN owner_account TEXT", (err) => {
+        if (!err) console.log("Added owner_account column to transfers table.");
+    });
 
     db.run("ALTER TABLE devices ADD COLUMN battery INTEGER DEFAULT 100", (err) => {
         if (!err) console.log("Added battery column to devices table.");
+    });
+    db.run("ALTER TABLE devices ADD COLUMN account TEXT", (err) => {
+        if (!err) console.log("Added account column to devices table.");
     });
 
     // Insert a default admin device for immediate testing if it doesn't exist
@@ -78,31 +84,36 @@ db.serialize(() => {
 
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
-    const { number, amount } = req.body;
+    const { number, amount, username } = req.body; // username is the requester
     if (!number || !amount) {
         return res.status(400).json({ error: 'Número e Quantidade são obrigatórios.' });
     }
 
     try {
-        // --- CENTRALIZED ROUTING LOGIC ---
-        // Find best eligible device: Not paused, online (< 2 min), balance >= amount, not already processing
+        // Find the requester's account
+        let ownerAccount = null;
+        if (username) {
+            const requester = await dbGet(`SELECT account FROM devices WHERE username = ?`, [username]);
+            ownerAccount = requester ? requester.account : null;
+        }
+
+        // --- CENTRALIZED ROUTING LOGIC (Account Aware) ---
         const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
 
+        // Find eligible devices in the SAME account (or unassigned account if fallback needed)
         const eligibleDevices = await dbAll(`
             SELECT username, name, balance FROM devices 
-            WHERE paused = 0 AND last_seen > ?
-        `, [twoMinutesAgo]);
+            WHERE paused = 0 AND last_seen > ? AND (account = ? OR account IS NULL)
+        `, [twoMinutesAgo, ownerAccount]);
 
         let assignedTo = null;
         let assignedName = "Fila Geral (Aguardando Dispositivo)";
 
         if (eligibleDevices.length > 0) {
-            // Further filter by balance and current workload (optional: pick one with least jobs or highest balance)
             const amountVal = parseFloat(amount);
             const capableDevices = eligibleDevices.filter(d => parseFloat(d.balance || 0) >= amountVal);
 
             if (capableDevices.length > 0) {
-                // Sort by balance descending to use the one with most credits first
                 capableDevices.sort((a, b) => parseFloat(b.balance) - parseFloat(a.balance));
                 assignedTo = capableDevices[0].username;
                 assignedName = capableDevices[0].name || assignedTo;
@@ -110,8 +121,8 @@ app.post('/api/transfer', async (req, res) => {
         }
 
         const result = await dbRun(
-            `INSERT INTO transfers (number, amount, status, assigned_to) VALUES (?, ?, 'PENDENTE', ?)`,
-            [number, amount, assignedTo]
+            `INSERT INTO transfers (number, amount, status, assigned_to, owner_account) VALUES (?, ?, 'PENDENTE', ?, ?)`,
+            [number, amount, assignedTo, ownerAccount]
         );
 
         res.status(201).json({
@@ -130,13 +141,16 @@ app.post('/api/transfer', async (req, res) => {
 
 // 2. App Endpoint: Device Login
 app.post('/api/device/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, account } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Usuário e senha são obrigatórios.' });
 
     try {
         const device = await dbGet(`SELECT * FROM devices WHERE username = ? AND password = ?`, [username, password]);
         if (device) {
-            await dbRun(`UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE username = ?`, [username]);
+            await dbRun(
+                `UPDATE devices SET account = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
+                [account || device.account, username]
+            );
             res.json({ success: true, message: 'Login efetuado com sucesso', name: device.name });
         } else {
             res.status(401).json({ success: false, error: 'Credenciais inválidas' });
@@ -168,12 +182,16 @@ app.post('/api/transfer/pending', async (req, res) => {
     if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
 
     try {
-        // Atomic transaction: Find a job assigned specifically to this user or unassigned (backup)
+        // Find device's account
+        const device = await dbGet(`SELECT account FROM devices WHERE username = ?`, [username]);
+        if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado.' });
+
+        // Atomic transaction: Find a job assigned specifically to this user or unassigned belonging to this account
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
         const pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND (assigned_to = ? OR assigned_to IS NULL) ORDER BY created_at ASC LIMIT 1`,
-            [username]
+            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND (assigned_to = ? OR (assigned_to IS NULL AND (owner_account = ? OR owner_account IS NULL))) ORDER BY created_at ASC LIMIT 1`,
+            [username, device.account]
         );
 
         if (!pending) {
