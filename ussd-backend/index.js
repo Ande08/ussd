@@ -78,6 +78,9 @@ db.serialize(() => {
 
     // Insert a default admin device for immediate testing if it doesn't exist
     db.run(`INSERT OR IGNORE INTO devices (username, password, name) VALUES ('admin', 'admin123', 'Celular Principal')`);
+
+    // One-time cleanup for existing data (Trim whitespace)
+    db.run(`UPDATE devices SET account = TRIM(account), password = TRIM(password), username = TRIM(username) WHERE account IS NOT NULL`);
 });
 
 // --- API ROUTES ---
@@ -141,14 +144,26 @@ app.post('/api/transfer', async (req, res) => {
 
 // 2. App Endpoint: Device Login (Account-Based)
 app.post('/api/device/login', async (req, res) => {
-    const { username, password, account, name } = req.body; // username is the Device UID
-    if (!account || !password || !username) return res.status(400).json({ error: 'Conta, senha e ID do aparelho são obrigatórios.' });
+    let { username, password, account, name } = req.body;
+
+    // Trim and normalize
+    username = username?.trim();
+    password = password?.trim();
+    account = account?.trim();
+    name = name?.trim();
+
+    if (!account || !password || !username) {
+        return res.status(400).json({ error: 'Conta, senha e ID do aparelho são obrigatórios.' });
+    }
 
     try {
+        console.log(`[Login Attempt] UI: ${username}, Account: ${account}`);
+
         // Authenticate by checking if ANY device already exists with this account/password combination
         const accountValid = await dbGet(`SELECT username FROM devices WHERE account = ? AND password = ? LIMIT 1`, [account, password]);
 
         if (accountValid) {
+            console.log(`[Login Success] Validating device UID: ${username}`);
             // Find if THIS specific device exists
             const device = await dbGet(`SELECT username FROM devices WHERE username = ?`, [username]);
 
@@ -167,6 +182,7 @@ app.post('/api/device/login', async (req, res) => {
             }
             res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
         } else {
+            console.log(`[Login Fail] Unauthorized or wrong password for account: ${account}`);
             // Check if account exists but password is wrong
             const accountExists = await dbGet(`SELECT username FROM devices WHERE account = ? LIMIT 1`, [account]);
             if (accountExists) {
@@ -183,7 +199,13 @@ app.post('/api/device/login', async (req, res) => {
 
 // 2b. App Endpoint: Device Registration (Account Creation)
 app.post('/api/device/register', async (req, res) => {
-    const { username, password, name, account } = req.body;
+    let { username, password, name, account } = req.body;
+
+    username = username?.trim();
+    password = password?.trim();
+    account = account?.trim();
+    name = name?.trim();
+
     if (!username || !password || !account) {
         return res.status(400).json({ error: 'ID, Senha e Conta são obrigatórios.' });
     }

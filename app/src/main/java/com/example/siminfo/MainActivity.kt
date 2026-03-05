@@ -549,8 +549,8 @@ class MainActivity : ComponentActivity() {
         startBackendPolling()
 
         val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
-        currentUsername = prefs.getString("USERNAME", null)
-        currentAccount = prefs.getString("ACCOUNT", null)
+        currentUsername = prefs.getString("USERNAME", null)?.trim()
+        currentAccount = prefs.getString("ACCOUNT", null)?.trim()
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
@@ -560,13 +560,15 @@ class MainActivity : ComponentActivity() {
                     if (!isLoggedIn) {
                         LoginScreen(
                             onLoginSuccess = { user, pass, acc ->
+                                val tUser = user.trim()
+                                val tAcc = acc.trim()
                                 prefs.edit()
-                                    .putString("USERNAME", user)
-                                    .putString("PASSWORD", pass)
-                                    .putString("ACCOUNT", acc)
+                                    .putString("USERNAME", tUser)
+                                    .putString("PASSWORD", pass.trim())
+                                    .putString("ACCOUNT", tAcc)
                                     .apply()
-                                currentUsername = user
-                                currentAccount = acc
+                                currentUsername = tUser
+                                currentAccount = tAcc
                                 isLoggedIn = true
                             }
                         )
@@ -1014,7 +1016,9 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
 
                 Button(
                     onClick = {
-                        if (password.isBlank() || account.isBlank()) {
+                        val trimmedAcc = account.trim()
+                        val trimmedPass = password.trim()
+                        if (trimmedPass.isBlank() || trimmedAcc.isBlank()) {
                             errorMessage = "Preencha conta e senha"
                             return@Button
                         }
@@ -1025,11 +1029,11 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                         
                         coroutineScope.launch(Dispatchers.IO) {
                             try {
-                                val response = RetrofitClient.api.loginDevice(LoginRequest(deviceId, password, account, deviceName))
+                                val response = RetrofitClient.api.loginDevice(LoginRequest(deviceId, trimmedPass, trimmedAcc, deviceName))
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
                                     if (response.success) {
-                                        onLoginSuccess(deviceId, password, account)
+                                        onLoginSuccess(deviceId, trimmedPass, trimmedAcc)
                                     } else {
                                         errorMessage = response.error ?: "Senha Incorreta"
                                     }
@@ -1084,7 +1088,9 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                             Button(
                                 enabled = !isRegLoading,
                                 onClick = {
-                                    if (regPass.isBlank() || regAcc.isBlank()) {
+                                    val trimmedAcc = regAcc.trim()
+                                    val trimmedPass = regPass.trim()
+                                    if (trimmedPass.isBlank() || trimmedAcc.isBlank()) {
                                         regError = "Preencha conta e senha"
                                         return@Button
                                     }
@@ -1094,14 +1100,14 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                                     
                                     coroutineScope.launch(Dispatchers.IO) {
                                         try {
-                                            val resp = RetrofitClient.api.registerDevice(RegisterRequest(deviceId, regPass, deviceName, regAcc))
+                                            val resp = RetrofitClient.api.registerDevice(RegisterRequest(deviceId, trimmedPass, deviceName, trimmedAcc))
                                             withContext(Dispatchers.Main) {
                                                 isRegLoading = false
                                                 if (resp.success) {
                                                     showRegisterDialog = false
                                                     // Auto-fill login
-                                                    account = regAcc
-                                                    password = regPass
+                                                    account = trimmedAcc
+                                                    password = trimmedPass
                                                 } else {
                                                     regError = resp.error ?: "Erro no registro"
                                                 }
