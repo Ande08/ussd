@@ -968,7 +968,6 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
 
 @Composable
 fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
-    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var account by remember { mutableStateOf("") } // New field
     var isLoading by remember { mutableStateOf(false) }
