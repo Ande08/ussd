@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.text.style.TextAlign
 
 data class QueuedTransfer(
@@ -567,7 +568,7 @@ class MainActivity : ComponentActivity() {
                     Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
                     
                     if (ussdBalances.isNotEmpty()) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
+                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
                         
                         val sims = remember(context) { getSimInfo(context) }
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1028,18 +1029,22 @@ fun checkVodacomBalance(context: Context, subId: Int, onResult: (String) -> Unit
     val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
     val subSpecificManager = telephonyManager.createForSubscriptionId(subId)
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-        try {
-            subSpecificManager.sendUssdRequest("*100#", object : TelephonyManager.UssdResponseCallback() {
-                override fun onReceiveUssdResponse(telephonyManager: TelephonyManager?, request: String?, response: CharSequence?) {
-                    super.onReceiveUssdResponse(telephonyManager, request, response)
-                    onResult(response?.toString() ?: "")
-                }
-                override fun onReceiveUssdResponseFailed(telephonyManager: TelephonyManager?, request: String?, failureCode: Int) {
-                    super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode)
-                    onResult("Falha")
-                }
-            }, Handler(Looper.getMainLooper()))
-        } catch (_: Exception) { onResult("Erro") }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                subSpecificManager.sendUssdRequest("*100#", object : TelephonyManager.UssdResponseCallback() {
+                    override fun onReceiveUssdResponse(telephonyManager: TelephonyManager?, request: String?, response: CharSequence?) {
+                        super.onReceiveUssdResponse(telephonyManager, request, response)
+                        onResult(response?.toString() ?: "")
+                    }
+                    override fun onReceiveUssdResponseFailed(telephonyManager: TelephonyManager?, request: String?, failureCode: Int) {
+                        super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode)
+                        onResult("Falha")
+                    }
+                }, Handler(Looper.getMainLooper()))
+            } catch (_: Exception) { onResult("Erro") }
+        } else {
+            onResult("API 26+ Requerido")
+        }
     } else onResult("Sem permissão")
 }
 
