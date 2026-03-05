@@ -65,6 +65,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.ui.text.style.TextAlign
 
 data class QueuedTransfer(
     val simId: Int,
@@ -85,7 +89,7 @@ class MainActivity : ComponentActivity() {
     // Backend Job tracking
     private var currentBackendJobId: Int? = null
     private var isPollingPaused = false
-    private var isBackendPollingEnabled = mutableStateOf(false)
+    private val isBackendPollingEnabled = mutableStateOf(false)
     private val connectionLogs = mutableStateListOf<String>()
     
     // Cloud Fleet State
@@ -469,7 +473,7 @@ class MainActivity : ComponentActivity() {
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = { /* Notifications */ }) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.LightGray)
+                    Icon(Icons.Default.Info, contentDescription = null, tint = Color.LightGray)
                 }
             }
 
@@ -563,7 +567,7 @@ class MainActivity : ComponentActivity() {
                     Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
                     
                     if (ussdBalances.isNotEmpty()) {
-                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
                         
                         val sims = remember(context) { getSimInfo(context) }
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -773,91 +777,90 @@ class MainActivity : ComponentActivity() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
-}
 
-@Composable
-fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
+    @Composable
+    fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var isLoading by remember { mutableStateOf(false) }
+        var errorMessage by remember { mutableStateOf("") }
+        val coroutineScope = rememberCoroutineScope()
 
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Famba Automator", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.height(32.dp))
+        Scaffold { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Famba Automator", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(32.dp))
 
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Nome do Aparelho (Login)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Senha") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Nome do Aparelho (Login)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
                 Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            Button(
-                onClick = {
-                    if (username.isBlank() || password.isBlank()) {
-                        errorMessage = "Preencha todos os campos"
-                        return@Button
-                    }
-                    isLoading = true
-                    errorMessage = ""
-                    coroutineScope.launch(Dispatchers.IO) {
-                        try {
-                            val response = RetrofitClient.api.loginDevice(LoginRequest(username, password))
-                            withContext(Dispatchers.Main) {
-                                isLoading = false
-                                if (response.success) {
-                                    onLoginSuccess(username, password)
-                                } else {
-                                    errorMessage = response.error ?: "Senha Incorreta"
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Senha") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (errorMessage.isNotEmpty()) {
+                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Button(
+                    onClick = {
+                        if (username.isBlank() || password.isBlank()) {
+                            errorMessage = "Preencha todos os campos"
+                            return@Button
+                        }
+                        isLoading = true
+                        errorMessage = ""
+                        coroutineScope.launch(Dispatchers.IO) {
+                            try {
+                                val response = RetrofitClient.api.loginDevice(LoginRequest(username, password))
+                                withContext(Dispatchers.Main) {
+                                    isLoading = false
+                                    if (response.success) {
+                                        onLoginSuccess(username, password)
+                                    } else {
+                                        errorMessage = response.error ?: "Senha Incorreta"
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    isLoading = false
+                                    errorMessage = "Erro de conexão: ${e.message}"
                                 }
                             }
-                        } catch (e: Exception) {
-                            withContext(Dispatchers.Main) {
-                                isLoading = false
-                                errorMessage = "Erro de conexão: ${e.message}"
-                            }
                         }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("ENTRAR", style = MaterialTheme.typography.titleMedium)
                     }
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
-                } else {
-                    Text("ENTRAR", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
     }
-}
 
     @Composable
     fun FleetManagementScreen() {
@@ -961,9 +964,11 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
             
             Spacer(modifier = Modifier.height(32.dp))
             Text("Aparelho Registado como:", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-            Text(currentUsername ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            val username = remember { currentUsername ?: "Desconhecido" }
+            Text(username, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
     }
+}
 
 
 

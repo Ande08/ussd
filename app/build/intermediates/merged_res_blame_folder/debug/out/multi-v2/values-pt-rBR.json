@@ -1,25 +1,8 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.siminfo.app-mergeDebugResources-39:/values-pt-rBR/values-pt-rBR.xml",
+            "outputFile": "com.example.siminfo.app-mergeDebugResources-45:/values-pt-rBR/values-pt-rBR.xml",
             "map": [
-                {
-                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\33bc414d5fb9a12f0cbac9fbe10d145b\\transformed\\jetified-ui-release\\res\\values-pt-rBR\\values-pt-rBR.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,200,286,383,482,568,651,748,839,926,998,1067,1152,1242,1318,1394,1461",
-                        "endColumns": "94,85,96,98,85,82,96,90,86,71,68,84,89,75,75,66,112",
-                        "endOffsets": "195,281,378,477,563,646,743,834,921,993,1062,1147,1237,1313,1389,1456,1569"
-                    },
-                    "to": {
-                        "startLines": "13,14,47,48,50,52,53,54,55,56,57,58,59,61,65,66,67",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "1296,1391,5113,5210,5391,5551,5634,5731,5822,5909,5981,6050,6135,6310,6669,6745,6812",
-                        "endColumns": "94,85,96,98,85,82,96,90,86,71,68,84,89,75,75,66,112",
-                        "endOffsets": "1386,1472,5205,5304,5472,5629,5726,5817,5904,5976,6045,6130,6220,6381,6740,6807,6920"
-                    }
-                },
                 {
                     "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\0556f004262f6c73a8941e13fc846507\\transformed\\jetified-material3-1.1.1\\res\\values-pt-rBR\\values-pt-rBR.xml",
                     "from": {
@@ -52,6 +35,23 @@
                         "startOffsets": "561,658,760,859,959,1066,1176,6471",
                         "endColumns": "96,101,98,99,106,109,119,100",
                         "endOffsets": "653,755,854,954,1061,1171,1291,6567"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\74cb5cb1db260a794f608e56cea48e30\\transformed\\jetified-ui-release\\res\\values-pt-rBR\\values-pt-rBR.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,200,286,383,482,568,651,748,839,926,998,1067,1152,1242,1318,1394,1461",
+                        "endColumns": "94,85,96,98,85,82,96,90,86,71,68,84,89,75,75,66,112",
+                        "endOffsets": "195,281,378,477,563,646,743,834,921,993,1062,1147,1237,1313,1389,1456,1569"
+                    },
+                    "to": {
+                        "startLines": "13,14,47,48,50,52,53,54,55,56,57,58,59,61,65,66,67",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "1296,1391,5113,5210,5391,5551,5634,5731,5822,5909,5981,6050,6135,6310,6669,6745,6812",
+                        "endColumns": "94,85,96,98,85,82,96,90,86,71,68,84,89,75,75,66,112",
+                        "endOffsets": "1386,1472,5205,5304,5472,5629,5726,5817,5904,5976,6045,6130,6220,6381,6740,6807,6920"
                     }
                 }
             ]

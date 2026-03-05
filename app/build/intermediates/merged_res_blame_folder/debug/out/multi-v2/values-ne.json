@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.siminfo.app-mergeDebugResources-39:/values-ne/values-ne.xml",
+            "outputFile": "com.example.siminfo.app-mergeDebugResources-45:/values-ne/values-ne.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\33bc414d5fb9a12f0cbac9fbe10d145b\\transformed\\jetified-ui-release\\res\\values-ne\\values-ne.xml",
+                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\74cb5cb1db260a794f608e56cea48e30\\transformed\\jetified-ui-release\\res\\values-ne\\values-ne.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.siminfo.app-mergeDebugResources-39:/values-pl/values-pl.xml",
+            "outputFile": "com.example.siminfo.app-mergeDebugResources-45:/values-pl/values-pl.xml",
             "map": [
                 {
                     "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\fa491052a0c4e52c4bc12c333827ee1c\\transformed\\core-1.12.0\\res\\values-pl\\values-pl.xml",
@@ -38,7 +38,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\33bc414d5fb9a12f0cbac9fbe10d145b\\transformed\\jetified-ui-release\\res\\values-pl\\values-pl.xml",
+                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\74cb5cb1db260a794f608e56cea48e30\\transformed\\jetified-ui-release\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
