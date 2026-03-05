@@ -990,16 +990,7 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
             OutlinedTextField(
                 value = account,
                 onValueChange = { account = it },
-                label = { Text("Conta / Usuário (Ex: SuperNet)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("ID do Aparelho (Ex: Celular1)") },
+                label = { Text("Nome da Conta (Ex: SuperNet)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -1008,7 +999,7 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Senha") },
+                label = { Text("Senha da Conta") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true
@@ -1022,19 +1013,23 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
 
                 Button(
                     onClick = {
-                        if (username.isBlank() || password.isBlank() || account.isBlank()) {
-                            errorMessage = "Preencha todos os campos"
+                        if (password.isBlank() || account.isBlank()) {
+                            errorMessage = "Preencha conta e senha"
                             return@Button
                         }
                         isLoading = true
                         errorMessage = ""
+                        val activity = LocalContext.current as? MainActivity
+                        val deviceId = activity?.getDeviceId() ?: "unknown"
+                        val deviceName = activity?.getDeviceName() ?: "Unknown Device"
+                        
                         coroutineScope.launch(Dispatchers.IO) {
                             try {
-                                val response = RetrofitClient.api.loginDevice(LoginRequest(username, password, account))
+                                val response = RetrofitClient.api.loginDevice(LoginRequest(deviceId, password, account, deviceName))
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
                                     if (response.success) {
-                                        onLoginSuccess(username, password, account)
+                                        onLoginSuccess(deviceId, password, account)
                                     } else {
                                         errorMessage = response.error ?: "Senha Incorreta"
                                     }
@@ -1075,16 +1070,14 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
 
                     AlertDialog(
                         onDismissRequest = { if (!isRegLoading) showRegisterDialog = false },
-                        title = { Text("Criar Nova Conta / Registro") },
+                        title = { Text("Definir Nova Conta") },
                         text = {
                             Column {
-                                OutlinedTextField(value = regAcc, onValueChange = { regAcc = it }, label = { Text("Conta (Ex: FambaSales)") }, modifier = Modifier.fillMaxWidth())
+                                Text("Aparelho identificado: ${activity?.getDeviceName()}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                OutlinedTextField(value = regAcc, onValueChange = { regAcc = it }, label = { Text("Nome da Conta (Ex: FambaSales)") }, modifier = Modifier.fillMaxWidth())
                                 Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedTextField(value = regUser, onValueChange = { regUser = it }, label = { Text("ID do Aparelho (Ex: Celular1)") }, modifier = Modifier.fillMaxWidth())
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedTextField(value = regName, onValueChange = { regName = it }, label = { Text("Nome (Ex: Samsung S21)") }, modifier = Modifier.fillMaxWidth())
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedTextField(value = regPass, onValueChange = { regPass = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation())
+                                OutlinedTextField(value = regPass, onValueChange = { regPass = it }, label = { Text("Escolha uma Senha") }, modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation())
                                 if (regError.isNotEmpty()) {
                                     Text(regError, color = Color.Red, style = MaterialTheme.typography.bodySmall)
                                 }
@@ -1094,21 +1087,24 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                             Button(
                                 enabled = !isRegLoading,
                                 onClick = {
-                                    if (regUser.isBlank() || regPass.isBlank() || regAcc.isBlank()) {
-                                        regError = "Preencha os campos obrigatórios"
+                                    if (regPass.isBlank() || regAcc.isBlank()) {
+                                        regError = "Preencha conta e senha"
                                         return@Button
                                     }
                                     isRegLoading = true
+                                    val deviceId = activity?.getDeviceId() ?: "unknown"
+                                    val deviceName = activity?.getDeviceName() ?: "Unknown Device"
+                                    
                                     coroutineScope.launch(Dispatchers.IO) {
                                         try {
-                                            val resp = RetrofitClient.api.registerDevice(RegisterRequest(regUser, regPass, regName, regAcc))
+                                            val resp = RetrofitClient.api.registerDevice(RegisterRequest(deviceId, regPass, deviceName, regAcc))
                                             withContext(Dispatchers.Main) {
                                                 isRegLoading = false
                                                 if (resp.success) {
                                                     showRegisterDialog = false
                                                     // Auto-fill login
-                                                    username = regUser
                                                     account = regAcc
+                                                    password = regPass
                                                 } else {
                                                     regError = resp.error ?: "Erro no registro"
                                                 }

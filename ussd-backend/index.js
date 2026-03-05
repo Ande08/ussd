@@ -139,28 +139,49 @@ app.post('/api/transfer', async (req, res) => {
     }
 });
 
-// 2. App Endpoint: Device Login
+// 2. App Endpoint: Device Login (Account-Based)
 app.post('/api/device/login', async (req, res) => {
-    const { username, password, account } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'Usuário e senha são obrigatórios.' });
+    const { username, password, account, name } = req.body; // username is the Device UID
+    if (!account || !password || !username) return res.status(400).json({ error: 'Conta, senha e ID do aparelho são obrigatórios.' });
 
     try {
-        const device = await dbGet(`SELECT * FROM devices WHERE username = ? AND password = ?`, [username, password]);
-        if (device) {
-            await dbRun(
-                `UPDATE devices SET account = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
-                [account || device.account, username]
-            );
-            res.json({ success: true, message: 'Login efetuado com sucesso', name: device.name });
+        // Authenticate by checking if ANY device already exists with this account/password combination
+        const accountValid = await dbGet(`SELECT username FROM devices WHERE account = ? AND password = ? LIMIT 1`, [account, password]);
+
+        if (accountValid) {
+            // Find if THIS specific device exists
+            const device = await dbGet(`SELECT username FROM devices WHERE username = ?`, [username]);
+
+            if (device) {
+                // Update existing device to join this account (allows switching accounts)
+                await dbRun(
+                    `UPDATE devices SET account = ?, password = ?, name = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
+                    [account, password, name || device.name, username]
+                );
+            } else {
+                // Auto-register new device into this existing account
+                await dbRun(
+                    `INSERT INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
+                    [username, password, name || username, account]
+                );
+            }
+            res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
         } else {
-            res.status(401).json({ success: false, error: 'Credenciais inválidas' });
+            // Check if account exists but password is wrong
+            const accountExists = await dbGet(`SELECT username FROM devices WHERE account = ? LIMIT 1`, [account]);
+            if (accountExists) {
+                res.status(401).json({ success: false, error: 'Senha da conta incorreta' });
+            } else {
+                res.status(404).json({ success: false, error: 'Conta não encontrada. Use "Criar Conta" primeiro.' });
+            }
         }
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Erro interno no login' });
     }
 });
 
-// 2b. App Endpoint: Device Registration
+// 2b. App Endpoint: Device Registration (Account Creation)
 app.post('/api/device/register', async (req, res) => {
     const { username, password, name, account } = req.body;
     if (!username || !password || !account) {
@@ -168,16 +189,17 @@ app.post('/api/device/register', async (req, res) => {
     }
 
     try {
-        const existing = await dbGet(`SELECT username FROM devices WHERE username = ?`, [username]);
-        if (existing) {
-            return res.status(400).json({ error: 'Este ID de Aparelho já existe.' });
+        const accountExists = await dbGet(`SELECT username FROM devices WHERE account = ? LIMIT 1`, [account]);
+        if (accountExists) {
+            return res.status(400).json({ error: 'Esta conta já existe. Use o Login.' });
         }
 
+        // Create the account by inserting the first device
         await dbRun(
-            `INSERT INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
+            `INSERT OR REPLACE INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
             [username, password, name || username, account]
         );
-        res.status(201).json({ success: true, message: 'Aparelho registado com sucesso.' });
+        res.status(201).json({ success: true, message: 'Conta criada e aparelho associado.' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao registar aparelho.' });

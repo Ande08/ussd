@@ -37,7 +37,8 @@ data class UpdateResponse(
 data class LoginRequest(
     val username: String,
     val password: String,
-    val account: String // New field: Group devices by account/owner
+    val account: String,
+    val name: String? = null
 )
 
 data class LoginResponse(
