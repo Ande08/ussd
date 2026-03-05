@@ -113,7 +113,7 @@ db.serialize(() => {
     db.run(`INSERT OR IGNORE INTO accounts (name, password) VALUES ('admin_acc', 'admin123')`);
 
     // One-time cleanup for existing data (Trim whitespace)
-    db.run(`UPDATE devices SET account = TRIM(account), password = TRIM(password), username = TRIM(username) WHERE account IS NOT NULL`);
+    db.run(`UPDATE devices SET account = TRIM(account), username = TRIM(username) WHERE account IS NOT NULL`);
 });
 
 // --- API ROUTES ---
