@@ -49,11 +49,36 @@ data class LoginResponse(
 data class DeviceStatusRequest(
     val username: String,
     val balance: String,
-    val paused: Boolean
+    val paused: Boolean,
+    val battery: Int
+)
+
+data class Device(
+    val username: String,
+    val name: String?,
+    val balance: String?,
+    val paused: Boolean,
+    val battery: Int,
+    val last_seen: String?
+)
+
+data class DeviceListResponse(
+    val devices: List<Device>
 )
 
 data class SimpleResponse(
     val success: Boolean,
+    val error: String?
+)
+
+data class ScheduleTransferRequest(
+    val number: String,
+    val amount: String
+)
+
+data class ScheduleTransferResponse(
+    val id: Int?,
+    val message: String?,
     val error: String?
 )
 
@@ -70,6 +95,12 @@ interface BackendApi {
 
     @POST("api/transfer/update")
     suspend fun updateTransferStatus(@Body request: UpdateStatusRequest): UpdateResponse
+    
+    @GET("api/devices")
+    suspend fun getDevices(): DeviceListResponse
+
+    @POST("api/transfer")
+    suspend fun scheduleTransfer(@Body request: ScheduleTransferRequest): ScheduleTransferResponse
 }
 
 // Retrofit Object

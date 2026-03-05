@@ -52,6 +52,19 @@ import androidx.core.content.ContextCompat
 
 import android.content.SharedPreferences
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.History
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.TileMode
 
 data class QueuedTransfer(
     val simId: Int,
@@ -75,6 +88,9 @@ class MainActivity : ComponentActivity() {
     private var isBackendPollingEnabled = mutableStateOf(false)
     private val connectionLogs = mutableStateListOf<String>()
     
+    // Cloud Fleet State
+    private val deviceList = mutableStateListOf<Device>()
+
     // Transfer Queue State
     private val waitingList = mutableStateListOf<QueuedTransfer>()
     private var activeTransferInfo: QueuedTransfer? = null
@@ -343,23 +359,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     } else {
-                        SimInfoScreen(
-                            isConsultingAll = isConsultingAll.value,
-                            consultationText = consultationStatus.value,
-                            waitingList = waitingList,
-                            onConsultAll = { sims -> startUniversalConsultation(this, sims) },
-                            onTransfer = { info, amount, num -> startDataTransfer(this, info, amount, num) },
-                            onSmartTransfer = { amount, num -> startSmartTransfer(this, amount, num) },
-                            ussdBalancesMap = ussdBalances,
-                            connectionLogs = connectionLogs,
-                            isBackendPollingEnabled = isBackendPollingEnabled,
-    
-                            onRetryQueued = { q -> 
-                                val sim = getSimInfo(this).find { it.subscriptionId == q.simId }
-                                if (sim != null) startDataTransfer(this, sim, q.amount, q.number)
-                                waitingList.remove(q) 
-                            },
-                            onRemoveQueued = { waitingList.remove(it) },
+                        MainScreenContainer(
                             onLogout = {
                                 prefs.edit().clear().apply()
                                 currentUsername = null
@@ -373,10 +373,298 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(resultReceiver)
-        cancelTransferTimeout()
+    @Composable
+    fun MainScreenContainer(onLogout: () -> Unit) {
+        val navController = androidx.navigation.compose.rememberNavController()
+        val items = listOf("dashboard", "fleet", "settings")
+        var selectedItem by remember { mutableIntStateOf(0) }
+
+        Scaffold(
+            bottomBar = {
+                NavigationBar(containerColor = Color(0xFF121212)) {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination
+                    
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                        label = { Text("Home") },
+                        selected = selectedItem == 0,
+                        onClick = {
+                            selectedItem = 0
+                            navController.navigate("dashboard") {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Devices, contentDescription = null) },
+                        label = { Text("Nuvem") },
+                        selected = selectedItem == 1,
+                        onClick = {
+                            selectedItem = 1
+                            navController.navigate("fleet") {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                        label = { Text("Config") },
+                        selected = selectedItem == 2,
+                        onClick = {
+                            selectedItem = 2
+                            navController.navigate("settings") {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        ) { padding ->
+            androidx.navigation.compose.NavHost(navController, startDestination = "dashboard", Modifier.padding(padding)) {
+                composable("dashboard") {
+                    DashboardScreen()
+                }
+                composable("fleet") {
+                    FleetManagementScreen()
+                }
+                composable("settings") {
+                    SettingsManagementScreen(onLogout)
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun DashboardScreen() {
+        val context = LocalContext.current
+        var showTransferDialog by remember { mutableStateOf(false) }
+        var transferNumber by remember { mutableStateOf("") }
+        var transferAmount by remember { mutableStateOf("") }
+        var countdownSeconds by remember { mutableIntStateOf(0) }
+        var isSubmitting by remember { mutableStateOf(false) }
+
+
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                // Placeholder for Logo
+                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.White)) {
+                    Text("Q", color = Color.Black, modifier = Modifier.align(Alignment.Center), fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text("Bem-vindo,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Super Net 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = { /* Notifications */ }) {
+                    Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.LightGray)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // The Sphere
+            Box(
+                modifier = Modifier
+                    .size(240.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(Color(0xFFff8a65), Color(0xFFba68c8), Color(0xFFe53935)),
+                            tileMode = TileMode.Clamp
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                // Inner glow / stars effect placeholder
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    // Just a subtle effect
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Status Chip
+            Surface(
+                color = Color(0xFF1B3B26),
+                shape = CircleShape,
+                modifier = Modifier.height(32.dp).padding(horizontal = 8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp)) {
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Serviço Iniciado", color = Color(0xFF4CAF50), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                "Tá liberado pra Netflix! Eu cuido dos pagamentos 📺",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Action Buttons
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = { showTransferDialog = true },
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(Icons.Default.Bolt, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agendar transf...")
+                }
+                Button(
+                    onClick = { /* Show waiting list log or similar */ },
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(Icons.Default.History, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Lista de espera")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Balance Card
+            Card(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text("Saldo Disponível", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    val totalBalanceMb by remember { derivedStateOf { ussdBalances.values.sumOf { parseBalanceToMb(it) } } }
+                    val totalBalanceFormatted = formatBalance(totalBalanceMb)
+                    
+                    Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+                    
+                    if (ussdBalances.isNotEmpty()) {
+                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
+                        
+                        val sims = remember(context) { getSimInfo(context) }
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ussdBalances.forEach { (subId, balance) ->
+                                val simName = sims.find { it.subscriptionId == subId }?.displayName ?: "SIM $subId"
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(text = simName.toString(), color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                    Text(text = balance, color = Color.LightGray, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Transfer Dialog with Countdown
+        if (showTransferDialog) {
+            AlertDialog(
+                onDismissRequest = { if (countdownSeconds == 0) showTransferDialog = false },
+                title = { Text(if (countdownSeconds > 0) "A Enviar em $countdownSeconds..." else "Agendar Transferência") },
+                text = {
+                    if (countdownSeconds > 0) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            CircularProgressIndicator(modifier = Modifier.size(64.dp), color = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Pode cancelar agora se quiser.", style = MaterialTheme.typography.bodySmall)
+                        }
+                    } else {
+                        Column {
+                            OutlinedTextField(
+                                value = transferNumber,
+                                onValueChange = { transferNumber = it },
+                                label = { Text("Número") },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = transferAmount,
+                                onValueChange = { transferAmount = it },
+                                label = { Text("Quantidade (MB)") },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    if (countdownSeconds == 0) {
+                        Button(onClick = {
+                            if (transferNumber.isNotBlank() && transferAmount.isNotBlank()) {
+                                // Start countdown
+                                isSubmitting = true
+                                countdownSeconds = 3
+                                lifecycleScope.launch {
+                                    while (countdownSeconds > 0) {
+                                        delay(1000)
+                                        countdownSeconds--
+                                    }
+                                    // Submit to Cloud
+                                    submitToCloud(transferNumber, transferAmount)
+                                    showTransferDialog = false
+                                    transferNumber = ""
+                                    transferAmount = ""
+                                }
+                            }
+                        }) { Text("Confirmar") }
+                    } else {
+                        TextButton(onClick = {
+                            countdownSeconds = 0
+                            showTransferDialog = false
+                        }) { Text("CANCELAR", color = Color.Red) }
+                    }
+                }
+            )
+        }
+    }
+
+    private fun submitToCloud(number: String, amount: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                addLog("📤 Enviando pedido cloud: $amount MB -> $number")
+                val response = RetrofitClient.api.scheduleTransfer(ScheduleTransferRequest(number, amount))
+                withContext(Dispatchers.Main) {
+                    if (response.id != null) {
+                        Toast.makeText(this@MainActivity, "Agendado com Sucesso! (ID ${response.id})", Toast.LENGTH_SHORT).show()
+                        addLog("✅ Pedido agendado na nuvem.")
+                    } else {
+                        Toast.makeText(this@MainActivity, "Erro: ${response.error}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Falha de conexão: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun addLog(msg: String) {
@@ -386,6 +674,19 @@ class MainActivity : ComponentActivity() {
         if (connectionLogs.size >= 50) connectionLogs.removeAt(0)
         connectionLogs.add(logEntry)
         Log.d("MainActivity", "AppLog: $msg")
+    }
+
+    private fun getBatteryPercentage(): Int {
+        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+            applicationContext.registerReceiver(null, ifilter)
+        }
+        val level: Int = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale: Int = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1) ?: -1
+        return if (level != -1 && scale != -1) {
+            (level * 100 / scale.toFloat()).toInt()
+        } else {
+            100 // fallback
+        }
     }
 
     private fun startBackendPolling() {
@@ -400,7 +701,8 @@ class MainActivity : ComponentActivity() {
                 // Heartbeat: Send current device status
                 try {
                     val totalBalanceStr = ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString()
-                    RetrofitClient.api.updateDeviceStatus(DeviceStatusRequest(currentUsername!!, totalBalanceStr, !isBackendPollingEnabled.value))
+                    val currentBattery = getBatteryPercentage()
+                    RetrofitClient.api.updateDeviceStatus(DeviceStatusRequest(currentUsername!!, totalBalanceStr, !isBackendPollingEnabled.value, currentBattery))
                 } catch (e: Exception) {
                     Log.e("MainActivity", "Erro no Heartbeat: ${e.message}")
                 }
@@ -557,256 +859,120 @@ fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
     }
 }
 
-@Composable
-fun SimInfoScreen(
-    isConsultingAll: Boolean,
-    consultationText: String,
-    waitingList: List<QueuedTransfer>,
-    onConsultAll: (List<SubscriptionInfo>) -> Unit,
-    onTransfer: (SubscriptionInfo, String, String) -> Unit,
-    onSmartTransfer: (String, String) -> Unit,
-    ussdBalancesMap: Map<Int, String>,
-    connectionLogs: List<String>,
-    isBackendPollingEnabled: MutableState<Boolean>,
-    onRetryQueued: (QueuedTransfer) -> Unit,
-    onRemoveQueued: (QueuedTransfer) -> Unit,
-    onLogout: () -> Unit
-) {
-    val context = LocalContext.current
-    var simList by remember { mutableStateOf<List<SubscriptionInfo>>(emptyList()) }
-    var transferAmount by remember { mutableStateOf("") }
-    var transferNumber by remember { mutableStateOf("") }
-    var showLogs by remember { mutableStateOf(false) }
-    val isAccessibilityEnabled = isAccessibilityServiceEnabled(context)
-    
-    val totalBalanceMb = ussdBalancesMap.values.sumOf { parseBalanceToMb(it) }
-    val totalBalanceFormatted = formatBalance(totalBalanceMb)
-
-    val permissions = mutableListOf(
-        Manifest.permission.READ_PHONE_STATE, 
-        Manifest.permission.CALL_PHONE, 
-        Manifest.permission.RECEIVE_SMS, 
-        Manifest.permission.READ_SMS
-    )
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ -> }
-
-    LaunchedEffect(Unit) {
-        if (permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) {
-            simList = getSimInfo(context)
-            onConsultAll(simList)
-        } else {
-            launcher.launch(permissions.toTypedArray())
+    @Composable
+    fun FleetManagementScreen() {
+        // Polling effect for device list
+        LaunchedEffect(Unit) {
+            while (true) {
+                try {
+                    val response = RetrofitClient.api.getDevices()
+                    deviceList.clear()
+                    deviceList.addAll(response.devices)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Erro ao buscar aparelhos: ${e.message}")
+                }
+                delay(10000) // Poll every 10 seconds
+            }
         }
-    }
 
-    Scaffold { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "🏠 ${MainActivity.currentUsername}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                IconButton(onClick = onLogout) {
-                    Text("🚪Sair", style = MaterialTheme.typography.labelLarge)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SALDO TOTAL DA MÁQUINA", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    Text(text = totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                }
-            }
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Text("Gestão da Frota", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Central Server Button
+            // Global Sync Button
             Button(
                 onClick = { isBackendPollingEnabled.value = !isBackendPollingEnabled.value },
                 modifier = Modifier.fillMaxWidth().height(80.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isBackendPollingEnabled.value) Color(0xFF4CAF50) else Color(0xFFF44336)
-                )
+                    containerColor = if (isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
+                ),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = if (isBackendPollingEnabled.value) "SERVIDOR LIGADO" else "LIGAR SERVIDOR (AUTO)",
+                    text = if (isBackendPollingEnabled.value) "PARAR SINCRONIA" else "INICIAR SINCRONIA",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedButton(onClick = { showLogs = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("Ver Logs do Servidor")
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            if (!isAccessibilityEnabled) {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), modifier = Modifier.padding(bottom = 16.dp)) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Serviço de Acessibilidade desativado. Ative 'SIM Info Reader'.")
-                        Button(onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }) {
-                            Text("Ativar")
-                        }
+            Text("Dispositivos na Conta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(deviceList) { device ->
+                    DeviceCard(device)
+                }
+                if (deviceList.isEmpty()) {
+                    item {
+                        Text("Nenhum outro aparelho online", modifier = Modifier.padding(16.dp), color = Color.DarkGray)
                     }
                 }
             }
+        }
+    }
 
-            // Global Transfer Inputs
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("Dados para Transferência", style = MaterialTheme.typography.titleSmall)
-                    OutlinedTextField(
-                        value = transferNumber,
-                        onValueChange = { transferNumber = it },
-                        label = { Text("Número do recipiente") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val pasteText = clipboard.primaryClip?.getItemAt(0)?.text?.toString()
-                                if (!pasteText.isNullOrBlank()) {
-                                    val digitsOnly = pasteText.filter { it.isDigit() }
-                                    if (digitsOnly.isNotEmpty()) {
-                                        transferNumber = digitsOnly
-                                    }
-                                }
-                            }) {
-                                Text("📋", style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = transferAmount,
-                        onValueChange = { transferAmount = it },
-                        label = { Text("Quantidade (MB)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = { onSmartTransfer(transferAmount, transferNumber) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text("Transferência Inteligente (Auto SIM)")
+    @Composable
+    fun DeviceCard(device: Device) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+        ) {
+            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                // Online indicator
+                Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if (device.paused) Color.Gray else Color(0xFF4CAF50)))
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(device.name ?: device.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(device.balance ?: "0 MB", fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Bolt, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFD600))
+                        Text("${device.battery}%", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
                 }
             }
+        }
+    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+    @Composable
+    fun SettingsManagementScreen(onLogout: () -> Unit) {
+        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Definições", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.weight(1f))
+                Text("v1.5.0", color = Color.DarkGray)
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedButton(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+            ) {
+                Text("SAIR DA CONTA", fontWeight = FontWeight.Bold)
+            }
             
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Chips Ativos", style = MaterialTheme.typography.titleMedium)
-                Button(onClick = { onConsultAll(simList) }, enabled = !isConsultingAll) {
-                    Text(consultationText)
-                }
-            }
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Aparelho Registado como:", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+            Text(currentUsername ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
+    }
 
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(simList) { info ->
-                    SimCardItem(info, transferAmount, transferNumber, onTransfer)
-                }
+
+
+
+
+
                 
 
-                if (waitingList.isNotEmpty()) {
-                    item {
-                        Divider(modifier = Modifier.padding(vertical = 16.dp))
-                        Text(text = "Lista de Espera (Falhas)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    items(waitingList) { queued ->
-                        QueuedTransferItem(queued, onRetryQueued, onRemoveQueued)
-                    }
-                }
-            }
-        }
 
-        // Logs Dialog (Moved outside LazyColumn)
-        if (showLogs) {
-            AlertDialog(
-                onDismissRequest = { showLogs = false },
-                title = { Text("Logs do Servidor") },
-                text = {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(300.dp)
-                    ) {
-                        LazyColumn(modifier = Modifier.padding(8.dp).fillMaxSize(), reverseLayout = true) {
-                            items(connectionLogs.reversed()) { log ->
-                                Text(
-                                    text = log,
-                                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
-                                    color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("🟢") || log.contains("✅")) Color.Green else Color.LightGray
-                                )
-                            }
-                        }
-                    }
-                },
-                confirmButton = { Button(onClick = { showLogs = false }) { Text("Fechar") } }
-            )
-        }
-    }
-}
-
-@Composable
-fun QueuedTransferItem(queued: QueuedTransfer, onRetry: (QueuedTransfer) -> Unit, onRemove: (QueuedTransfer) -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("${queued.amount} MB -> ${queued.number}", fontWeight = FontWeight.Bold)
-                Text("Chip: ${queued.carrierName}", style = MaterialTheme.typography.bodySmall)
-            }
-            IconButton(onClick = { onRemove(queued) }) {
-                Icon(Icons.Default.Delete, contentDescription = "Remover", tint = Color.Red)
-            }
-            Button(onClick = { onRetry(queued) }) {
-                Text("Tentar")
-            }
-        }
-    }
-}
-
-@Composable
-fun SimCardItem(info: SubscriptionInfo, amount: String, number: String, onTransfer: (SubscriptionInfo, String, String) -> Unit) {
-    val context = LocalContext.current
-    val isVodacom = info.carrierName.toString().contains("Vodacom", ignoreCase = true) || info.displayName.toString().contains("Vodacom", ignoreCase = true)
-
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Slot: ${info.simSlotIndex + 1} - ${info.displayName}", style = MaterialTheme.typography.titleMedium)
-            // Balance text hidden globally in Phase 5 to avoid confusion.
-            if (isVodacom) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = { 
-                            checkVodacomBalance(context, info.subscriptionId) { result ->
-                                val extracted = extractInternetBalance(result)
-                                 if (extracted != null) MainActivity.lastExtractedBalance.value = extracted
-                            }
-                        }, 
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Saldo") }
-                    Button(onClick = { onTransfer(info, amount, number) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) {
-                        Text("Transferir")
-                    }
-                }
-            }
-        }
-    }
-}
 
 fun parseBalanceToMb(balanceStr: String): Double {
     return try {
