@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.siminfo.app-mergeDebugResources-45:/values-v16/values-v16.xml",
+            "outputFile": "com.example.siminfo.app-mergeDebugResources-47:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\9.0-milestone-1\\transforms\\fa491052a0c4e52c4bc12c333827ee1c\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\TOPOGRAFIA CMCM\\.gradle\\caches\\transforms-3\\da024fe9a862a975dbe894dae3fd994a\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

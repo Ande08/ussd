@@ -4,53 +4,55 @@ ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifes
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-56:12
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-56:12
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-56:12
-MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d39df540993fb005d9cdbb8d6e74194f\transformed\navigation-common-2.7.6\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c16886db4a8b6fa3be35f4795f03e4df\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d66b02ce7d2cbd67cca7fc72d4a51026\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3eb7efe26241c4193b1d5f3f72f3264d\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\1a6bf60a17d3a24625be54b2b7bae414\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.material3:material3:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0556f004262f6c73a8941e13fc846507\transformed\jetified-material3-1.1.1\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f787017578c1e4937d36f1c4cf2169dd\transformed\jetified-activity-1.8.1\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a6b8202d3b4eac8d1fce740a437ccdf8\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.material:material-icons-core-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\96db4a08a0fce69db2e61e30e967fb8c\transformed\jetified-material-icons-core-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.material:material-icons-extended-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0f9ff3f45ff53f61fa023ce8f9938927\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.material:material-ripple-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fc640ecb30e2eee4280dafde239bc5f2\transformed\jetified-material-ripple-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7104170efb0ea074d657069c6ff3ef24\transformed\jetified-foundation-layout-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.foundation:foundation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\6bc23f9f21a0a17fbe84dbdaf163e619\transformed\jetified-foundation-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.animation:animation-core-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dbea8c56b1961a102b98443ec0dca2c5\transformed\jetified-animation-core-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.animation:animation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9b173d264b9b4ca9eb8ad89b1b3c27f1\transformed\jetified-animation-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-geometry-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\89bbef60e1ff9eb4474319f3fdd2c0da\transformed\jetified-ui-geometry-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\008c6806d145ad262309c3186120aecf\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.compose.ui:ui-util-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9ec77f9c52720c0ac2cd8eff370fe164\transformed\jetified-ui-util-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-unit-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dca7c843f6eb3eca26c9d9b169e41f37\transformed\jetified-ui-unit-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-text-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3ec0b39e1683d103e872c54452ac5fac\transformed\jetified-ui-text-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-graphics-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\909c56090d32eac429e9dad266a94906\transformed\jetified-ui-graphics-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.ui:ui-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\74cb5cb1db260a794f608e56cea48e30\transformed\jetified-ui-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7a1193231ca50dd368fe9252651b7c09\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:17:1-35:12
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:17:1-35:12
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2606bc5cd8f40476319f4779c0928118\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\286befd98ebe339e3e053c674e61808a\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9cd3d278f793e71174557aeff230dd78\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e5348c87b6bf5ab6bc55f60570e18161\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a792605482331ff38cded9e55ec4213c\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a017e1d1332126fd442f449d56c7f4a1\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\858e4b4173d95bfa958e938cd451a028\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:17:1-23:12
-MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a9f1d543fb5122647167a2478ac4cbd2\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dd5da972b5782f7d1bec18633b7fe6c1\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:17:1-30:12
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2e23e90847193aacc27d7e5eba0ff03f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e3e309bc307e203e40ca66a652c62d53\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8ea0fd0180787657c62eadf030f7dc4f\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5733a5af7069c85a04f802f085576f92\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.compose.runtime:runtime-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\925ea15bdf50badb5cd016edf878bd13\transformed\jetified-runtime-release\AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d2e000746f0af26c877328d1e2437fb5\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c9731e88264decd125420fbcd5b4d039\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\697f841a85e8602a977d7f3724799a35\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
-MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d7d37687df0033b78a678f862967034b\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:17:1-55:12
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
-MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\43a98697c65445bc58b35db784ccc54e\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b45494ce526120ebb94be8e64eff7d0b\transformed\navigation-common-2.7.6\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\fef45f5bac5b1f7b01591dd3d6b30618\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\21fb5977cca3dc11ba597f799eed670b\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\93185dffaa7e1be8232f2a80f2b782dc\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\4a5668ef8ce59dd6a131a88b6173e520\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material3:material3:1.1.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9b9d34ff2c83fd71904caab0b3540b25\transformed\jetified-material3-1.1.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.animation:animation-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\0642ff5e7155833770511d0bb713c98a\transformed\jetified-animation-core-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1853de8d7b9213eef626e9be5b2d0144\transformed\jetified-material-icons-core-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-extended-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1f77f52ed0a8be05a30b371b7c6e593b\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-ripple-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\154fc532e844e3629454082634f2d080\transformed\jetified-material-ripple-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.animation:animation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d27654f0e901323cb4233266b4715fcf\transformed\jetified-animation-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\70be485e8259475d10f18936b58ac227\transformed\jetified-foundation-layout-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.foundation:foundation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b52e9d6f7e961ad387c1c07d86aa3a8c\transformed\jetified-foundation-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-unit-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\aaa4236774e81ee069553fefb60778fd\transformed\jetified-ui-unit-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-geometry-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d80d6553a74a4b9761c0c934b0dfd4df\transformed\jetified-ui-geometry-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-util-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\13085ea6d68f489e5dea7ae737ee8815\transformed\jetified-ui-util-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-text-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\95a7d61d9898ac13b29bf88bfaa8fc00\transformed\jetified-ui-text-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\60acd88c8028f2d1fcd1919021d34a3c\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.ui:ui-graphics-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f6dade57eb25abcce8dd096fc772ad4c\transformed\jetified-ui-graphics-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e05c5057b696b052cd4e62f57db2a6d6\transformed\jetified-ui-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\04d7b32677789a747a59c2963b1d3177\transformed\jetified-activity-1.8.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\34fe1a19bb4f2581673020ab384cbfcc\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\735b58645ac9a2bd54146a1498261089\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f817ccbddf3b8bb8e5df7316e30c8b5f\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.runtime:runtime-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e5d7c0e28408c502f4a8b94567fca84a\transformed\jetified-runtime-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.runtime:runtime-livedata:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9447227842915020353d9e0853437345\transformed\jetified-runtime-livedata-1.5.4\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\51d32ca2d4ecfc49e868717ff0db0765\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\91a588842cbf38c5517a38f6f200b935\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\481723018f5d242509b673931b009a51\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3f832c97a9100d1402c6e4edf13ac435\transformed\lifecycle-livedata-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\c96e9632609a317317f7c7290fc1fd01\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d306dd1638f9d9fe3c3f6e8d8c8dd9ec\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7607dadead14761bfaeabfb5893736b4\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\394ba2a56b12ba215bcc7b84afb0ceb5\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11ec0508a10b4cbb68ebf03bec2052de\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7f90420b5a2eeda5b9ec3bb47d13aa92\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\ada93e1ee665fd8f9a4646649f0e0c84\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11c6c85922abc7ef17b5f2a9884c1aa4\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3ae92496690829d6f646006e474f9196\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8374e1acdad3f2aa32293b2e3d702981\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8abd2c756c42d6fc3dfcf5a47abf9b93\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\28e8b3dce098c077c7a15387e52d86ef\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\35c24a2db80437d7da92fcfa4f8f41ac\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\6b507aa62c269dd853d49ecca2bfdf26\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:17:1-24:12
 	package
 		INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
 	android:versionName
@@ -98,22 +100,22 @@ ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifes
 application
 ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:15:5-54:19
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:15:5-54:19
-MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
-MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\697f841a85e8602a977d7f3724799a35\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\697f841a85e8602a977d7f3724799a35\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\28e8b3dce098c077c7a15387e52d86ef\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\28e8b3dce098c077c7a15387e52d86ef\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
 	android:extractNativeLibs
 		INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
 		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:18:9-35
 	android:label
@@ -188,191 +190,195 @@ uses-sdk
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
-MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d39df540993fb005d9cdbb8d6e74194f\transformed\navigation-common-2.7.6\AndroidManifest.xml:20:5-44
-MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d39df540993fb005d9cdbb8d6e74194f\transformed\navigation-common-2.7.6\AndroidManifest.xml:20:5-44
-MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c16886db4a8b6fa3be35f4795f03e4df\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:20:5-44
-MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c16886db4a8b6fa3be35f4795f03e4df\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:20:5-44
-MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d66b02ce7d2cbd67cca7fc72d4a51026\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d66b02ce7d2cbd67cca7fc72d4a51026\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3eb7efe26241c4193b1d5f3f72f3264d\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3eb7efe26241c4193b1d5f3f72f3264d\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\1a6bf60a17d3a24625be54b2b7bae414\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\1a6bf60a17d3a24625be54b2b7bae414\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material3:material3:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0556f004262f6c73a8941e13fc846507\transformed\jetified-material3-1.1.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.material3:material3:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0556f004262f6c73a8941e13fc846507\transformed\jetified-material3-1.1.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f787017578c1e4937d36f1c4cf2169dd\transformed\jetified-activity-1.8.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f787017578c1e4937d36f1c4cf2169dd\transformed\jetified-activity-1.8.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a6b8202d3b4eac8d1fce740a437ccdf8\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a6b8202d3b4eac8d1fce740a437ccdf8\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-icons-core-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\96db4a08a0fce69db2e61e30e967fb8c\transformed\jetified-material-icons-core-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-icons-core-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\96db4a08a0fce69db2e61e30e967fb8c\transformed\jetified-material-icons-core-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-icons-extended-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0f9ff3f45ff53f61fa023ce8f9938927\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-icons-extended-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0f9ff3f45ff53f61fa023ce8f9938927\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-ripple-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fc640ecb30e2eee4280dafde239bc5f2\transformed\jetified-material-ripple-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.material:material-ripple-android:1.5.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fc640ecb30e2eee4280dafde239bc5f2\transformed\jetified-material-ripple-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7104170efb0ea074d657069c6ff3ef24\transformed\jetified-foundation-layout-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7104170efb0ea074d657069c6ff3ef24\transformed\jetified-foundation-layout-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\6bc23f9f21a0a17fbe84dbdaf163e619\transformed\jetified-foundation-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.foundation:foundation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\6bc23f9f21a0a17fbe84dbdaf163e619\transformed\jetified-foundation-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-core-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dbea8c56b1961a102b98443ec0dca2c5\transformed\jetified-animation-core-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-core-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dbea8c56b1961a102b98443ec0dca2c5\transformed\jetified-animation-core-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9b173d264b9b4ca9eb8ad89b1b3c27f1\transformed\jetified-animation-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.animation:animation-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9b173d264b9b4ca9eb8ad89b1b3c27f1\transformed\jetified-animation-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-geometry-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\89bbef60e1ff9eb4474319f3fdd2c0da\transformed\jetified-ui-geometry-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-geometry-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\89bbef60e1ff9eb4474319f3fdd2c0da\transformed\jetified-ui-geometry-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\008c6806d145ad262309c3186120aecf\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\008c6806d145ad262309c3186120aecf\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.ui:ui-util-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9ec77f9c52720c0ac2cd8eff370fe164\transformed\jetified-ui-util-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-util-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9ec77f9c52720c0ac2cd8eff370fe164\transformed\jetified-ui-util-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-unit-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dca7c843f6eb3eca26c9d9b169e41f37\transformed\jetified-ui-unit-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-unit-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dca7c843f6eb3eca26c9d9b169e41f37\transformed\jetified-ui-unit-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-text-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3ec0b39e1683d103e872c54452ac5fac\transformed\jetified-ui-text-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-text-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3ec0b39e1683d103e872c54452ac5fac\transformed\jetified-ui-text-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-graphics-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\909c56090d32eac429e9dad266a94906\transformed\jetified-ui-graphics-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-graphics-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\909c56090d32eac429e9dad266a94906\transformed\jetified-ui-graphics-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\74cb5cb1db260a794f608e56cea48e30\transformed\jetified-ui-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.ui:ui-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\74cb5cb1db260a794f608e56cea48e30\transformed\jetified-ui-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7a1193231ca50dd368fe9252651b7c09\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:5:5-44
-MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7a1193231ca50dd368fe9252651b7c09\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:5:5-44
-MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:21:5-44
-MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:21:5-44
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2606bc5cd8f40476319f4779c0928118\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2606bc5cd8f40476319f4779c0928118\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\286befd98ebe339e3e053c674e61808a\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\286befd98ebe339e3e053c674e61808a\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9cd3d278f793e71174557aeff230dd78\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9cd3d278f793e71174557aeff230dd78\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e5348c87b6bf5ab6bc55f60570e18161\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e5348c87b6bf5ab6bc55f60570e18161\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a792605482331ff38cded9e55ec4213c\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a792605482331ff38cded9e55ec4213c\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a017e1d1332126fd442f449d56c7f4a1\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a017e1d1332126fd442f449d56c7f4a1\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\858e4b4173d95bfa958e938cd451a028\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
-MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\858e4b4173d95bfa958e938cd451a028\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
-MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a9f1d543fb5122647167a2478ac4cbd2\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:5:5-44
-MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a9f1d543fb5122647167a2478ac4cbd2\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:5:5-44
-MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dd5da972b5782f7d1bec18633b7fe6c1\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dd5da972b5782f7d1bec18633b7fe6c1\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2e23e90847193aacc27d7e5eba0ff03f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2e23e90847193aacc27d7e5eba0ff03f\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e3e309bc307e203e40ca66a652c62d53\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e3e309bc307e203e40ca66a652c62d53\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8ea0fd0180787657c62eadf030f7dc4f\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8ea0fd0180787657c62eadf030f7dc4f\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5733a5af7069c85a04f802f085576f92\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5733a5af7069c85a04f802f085576f92\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.runtime:runtime-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\925ea15bdf50badb5cd016edf878bd13\transformed\jetified-runtime-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.compose.runtime:runtime-android:1.5.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\925ea15bdf50badb5cd016edf878bd13\transformed\jetified-runtime-release\AndroidManifest.xml:5:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d2e000746f0af26c877328d1e2437fb5\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d2e000746f0af26c877328d1e2437fb5\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c9731e88264decd125420fbcd5b4d039\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c9731e88264decd125420fbcd5b4d039\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\697f841a85e8602a977d7f3724799a35\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\697f841a85e8602a977d7f3724799a35\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d7d37687df0033b78a678f862967034b\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d7d37687df0033b78a678f862967034b\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
-MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\43a98697c65445bc58b35db784ccc54e\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\43a98697c65445bc58b35db784ccc54e\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b45494ce526120ebb94be8e64eff7d0b\transformed\navigation-common-2.7.6\AndroidManifest.xml:20:5-44
+MERGED from [androidx.navigation:navigation-common:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b45494ce526120ebb94be8e64eff7d0b\transformed\navigation-common-2.7.6\AndroidManifest.xml:20:5-44
+MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\fef45f5bac5b1f7b01591dd3d6b30618\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:20:5-44
+MERGED from [androidx.navigation:navigation-runtime:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\fef45f5bac5b1f7b01591dd3d6b30618\transformed\navigation-runtime-2.7.6\AndroidManifest.xml:20:5-44
+MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\21fb5977cca3dc11ba597f799eed670b\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigation:navigation-common-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\21fb5977cca3dc11ba597f799eed670b\transformed\navigation-common-ktx-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\93185dffaa7e1be8232f2a80f2b782dc\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigation:navigation-runtime-ktx:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\93185dffaa7e1be8232f2a80f2b782dc\transformed\navigation-runtime-ktx-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\4a5668ef8ce59dd6a131a88b6173e520\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigation:navigation-compose:2.7.6] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\4a5668ef8ce59dd6a131a88b6173e520\transformed\jetified-navigation-compose-2.7.6\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material3:material3:1.1.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9b9d34ff2c83fd71904caab0b3540b25\transformed\jetified-material3-1.1.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material3:material3:1.1.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9b9d34ff2c83fd71904caab0b3540b25\transformed\jetified-material3-1.1.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.animation:animation-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\0642ff5e7155833770511d0bb713c98a\transformed\jetified-animation-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\0642ff5e7155833770511d0bb713c98a\transformed\jetified-animation-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1853de8d7b9213eef626e9be5b2d0144\transformed\jetified-material-icons-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1853de8d7b9213eef626e9be5b2d0144\transformed\jetified-material-icons-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1f77f52ed0a8be05a30b371b7c6e593b\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1f77f52ed0a8be05a30b371b7c6e593b\transformed\jetified-material-icons-extended-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-ripple-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\154fc532e844e3629454082634f2d080\transformed\jetified-material-ripple-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-ripple-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\154fc532e844e3629454082634f2d080\transformed\jetified-material-ripple-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d27654f0e901323cb4233266b4715fcf\transformed\jetified-animation-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.animation:animation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d27654f0e901323cb4233266b4715fcf\transformed\jetified-animation-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\70be485e8259475d10f18936b58ac227\transformed\jetified-foundation-layout-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-layout-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\70be485e8259475d10f18936b58ac227\transformed\jetified-foundation-layout-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b52e9d6f7e961ad387c1c07d86aa3a8c\transformed\jetified-foundation-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.foundation:foundation-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b52e9d6f7e961ad387c1c07d86aa3a8c\transformed\jetified-foundation-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-unit-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\aaa4236774e81ee069553fefb60778fd\transformed\jetified-ui-unit-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-unit-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\aaa4236774e81ee069553fefb60778fd\transformed\jetified-ui-unit-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-geometry-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d80d6553a74a4b9761c0c934b0dfd4df\transformed\jetified-ui-geometry-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-geometry-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d80d6553a74a4b9761c0c934b0dfd4df\transformed\jetified-ui-geometry-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-util-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\13085ea6d68f489e5dea7ae737ee8815\transformed\jetified-ui-util-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-util-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\13085ea6d68f489e5dea7ae737ee8815\transformed\jetified-ui-util-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-text-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\95a7d61d9898ac13b29bf88bfaa8fc00\transformed\jetified-ui-text-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-text-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\95a7d61d9898ac13b29bf88bfaa8fc00\transformed\jetified-ui-text-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\60acd88c8028f2d1fcd1919021d34a3c\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\60acd88c8028f2d1fcd1919021d34a3c\transformed\jetified-ui-tooling-preview-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.ui:ui-graphics-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f6dade57eb25abcce8dd096fc772ad4c\transformed\jetified-ui-graphics-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-graphics-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f6dade57eb25abcce8dd096fc772ad4c\transformed\jetified-ui-graphics-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e05c5057b696b052cd4e62f57db2a6d6\transformed\jetified-ui-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e05c5057b696b052cd4e62f57db2a6d6\transformed\jetified-ui-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\04d7b32677789a747a59c2963b1d3177\transformed\jetified-activity-1.8.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\04d7b32677789a747a59c2963b1d3177\transformed\jetified-activity-1.8.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\34fe1a19bb4f2581673020ab384cbfcc\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\34fe1a19bb4f2581673020ab384cbfcc\transformed\jetified-activity-ktx-1.8.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\735b58645ac9a2bd54146a1498261089\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\735b58645ac9a2bd54146a1498261089\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f817ccbddf3b8bb8e5df7316e30c8b5f\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-saveable-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f817ccbddf3b8bb8e5df7316e30c8b5f\transformed\jetified-runtime-saveable-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e5d7c0e28408c502f4a8b94567fca84a\transformed\jetified-runtime-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-android:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e5d7c0e28408c502f4a8b94567fca84a\transformed\jetified-runtime-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-livedata:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9447227842915020353d9e0853437345\transformed\jetified-runtime-livedata-1.5.4\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-livedata:1.5.4] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9447227842915020353d9e0853437345\transformed\jetified-runtime-livedata-1.5.4\AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\51d32ca2d4ecfc49e868717ff0db0765\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\51d32ca2d4ecfc49e868717ff0db0765\transformed\lifecycle-livedata-core-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\91a588842cbf38c5517a38f6f200b935\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\91a588842cbf38c5517a38f6f200b935\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\481723018f5d242509b673931b009a51\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\481723018f5d242509b673931b009a51\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3f832c97a9100d1402c6e4edf13ac435\transformed\lifecycle-livedata-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3f832c97a9100d1402c6e4edf13ac435\transformed\lifecycle-livedata-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\c96e9632609a317317f7c7290fc1fd01\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\c96e9632609a317317f7c7290fc1fd01\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d306dd1638f9d9fe3c3f6e8d8c8dd9ec\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d306dd1638f9d9fe3c3f6e8d8c8dd9ec\transformed\lifecycle-viewmodel-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7607dadead14761bfaeabfb5893736b4\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7607dadead14761bfaeabfb5893736b4\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\394ba2a56b12ba215bcc7b84afb0ceb5\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\394ba2a56b12ba215bcc7b84afb0ceb5\transformed\jetified-customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11ec0508a10b4cbb68ebf03bec2052de\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11ec0508a10b4cbb68ebf03bec2052de\transformed\jetified-core-ktx-1.12.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7f90420b5a2eeda5b9ec3bb47d13aa92\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7f90420b5a2eeda5b9ec3bb47d13aa92\transformed\jetified-autofill-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\ada93e1ee665fd8f9a4646649f0e0c84\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\ada93e1ee665fd8f9a4646649f0e0c84\transformed\lifecycle-runtime-2.6.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11c6c85922abc7ef17b5f2a9884c1aa4\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11c6c85922abc7ef17b5f2a9884c1aa4\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3ae92496690829d6f646006e474f9196\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3ae92496690829d6f646006e474f9196\transformed\jetified-lifecycle-runtime-ktx-2.6.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8374e1acdad3f2aa32293b2e3d702981\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8374e1acdad3f2aa32293b2e3d702981\transformed\jetified-annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8abd2c756c42d6fc3dfcf5a47abf9b93\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8abd2c756c42d6fc3dfcf5a47abf9b93\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\28e8b3dce098c077c7a15387e52d86ef\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\28e8b3dce098c077c7a15387e52d86ef\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\35c24a2db80437d7da92fcfa4f8f41ac\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\35c24a2db80437d7da92fcfa4f8f41ac\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\6b507aa62c269dd853d49ecca2bfdf26\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\6b507aa62c269dd853d49ecca2bfdf26\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:20:5-22:41
 	android:targetSdkVersion
 		INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
 		INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
 provider#androidx.startup.InitializationProvider
-ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
-MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
 	tools:node
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:28:13-31
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:28:13-31
 	android:authorities
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:26:13-68
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:26:13-68
 	android:exported
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:27:13-37
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:27:13-37
 	android:name
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:25:13-67
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:25:13-67
 meta-data#androidx.emoji2.text.EmojiCompatInitializer
-ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:31:17-49
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:30:17-75
+		ADDED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:30:17-75
 meta-data#androidx.lifecycle.ProcessLifecycleInitializer
-ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
 permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
 	android:name
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
 permission#com.example.siminfo.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
 	android:name
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
 uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
 	android:name
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 uses-permission#com.example.siminfo.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
 	android:name
-		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+		ADDED from [androidx.core:core:1.12.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 meta-data#androidx.profileinstaller.ProfileInstallerInitializer
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
 receiver#androidx.profileinstaller.ProfileInstallReceiver
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
 	android:enabled
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
 	android:exported
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
 	android:permission
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
 	android:directBootAware
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
 intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
 action#androidx.profileinstaller.action.INSTALL_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
 intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
 action#androidx.profileinstaller.action.SKIP_FILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
 intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
 action#androidx.profileinstaller.action.SAVE_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
 intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
 action#androidx.profileinstaller.action.BENCHMARK_OPERATION
-ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92

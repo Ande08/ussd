@@ -1,0 +1,9 @@
+.gradle/
+.idea/
+build/
+app/build/
+*.apk
+local.properties
+node_modules/
+queue.db
+.env

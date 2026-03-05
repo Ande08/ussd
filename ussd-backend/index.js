@@ -61,7 +61,11 @@ db.serialize(() => {
         )
     `);
 
-    // Auto-migrate to add battery if it doesn't exist
+    // Migrations
+    db.run("ALTER TABLE transfers ADD COLUMN assigned_to TEXT", (err) => {
+        if (!err) console.log("Added assigned_to column to transfers table.");
+    });
+
     db.run("ALTER TABLE devices ADD COLUMN battery INTEGER DEFAULT 100", (err) => {
         if (!err) console.log("Added battery column to devices table.");
     });
@@ -80,11 +84,44 @@ app.post('/api/transfer', async (req, res) => {
     }
 
     try {
+        // --- CENTRALIZED ROUTING LOGIC ---
+        // Find best eligible device: Not paused, online (< 2 min), balance >= amount, not already processing
+        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+
+        const eligibleDevices = await dbAll(`
+            SELECT username, name, balance FROM devices 
+            WHERE paused = 0 AND last_seen > ?
+        `, [twoMinutesAgo]);
+
+        let assignedTo = null;
+        let assignedName = "Fila Geral (Aguardando Dispositivo)";
+
+        if (eligibleDevices.length > 0) {
+            // Further filter by balance and current workload (optional: pick one with least jobs or highest balance)
+            const amountVal = parseFloat(amount);
+            const capableDevices = eligibleDevices.filter(d => parseFloat(d.balance || 0) >= amountVal);
+
+            if (capableDevices.length > 0) {
+                // Sort by balance descending to use the one with most credits first
+                capableDevices.sort((a, b) => parseFloat(b.balance) - parseFloat(a.balance));
+                assignedTo = capableDevices[0].username;
+                assignedName = capableDevices[0].name || assignedTo;
+            }
+        }
+
         const result = await dbRun(
-            `INSERT INTO transfers (number, amount, status) VALUES (?, ?, 'PENDENTE')`,
-            [number, amount]
+            `INSERT INTO transfers (number, amount, status, assigned_to) VALUES (?, ?, 'PENDENTE', ?)`,
+            [number, amount, assignedTo]
         );
-        res.status(201).json({ id: result.lastID, message: 'Pedido adicionado à fila.', number, amount });
+
+        res.status(201).json({
+            id: result.lastID,
+            message: 'Pedido agendado.',
+            assigned_to: assignedTo,
+            assigned_name: assignedName,
+            number,
+            amount
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro ao salvar pedido.' });
@@ -131,19 +168,12 @@ app.post('/api/transfer/pending', async (req, res) => {
     if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
 
     try {
-        // Find device's available balance to filter jobs it can't handle
-        const device = await dbGet(`SELECT balance FROM devices WHERE username = ?`, [username]);
-        if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado.' });
-
-        const deviceBalance = parseFloat(device.balance || 0);
-
-        // Atomic transaction: Find the oldest PENDENTE and lock it immediately for this username
+        // Atomic transaction: Find a job assigned specifically to this user or unassigned (backup)
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
-        // Only pick jobs that the device has enough balance to process
         const pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND CAST(amount AS REAL) <= ? ORDER BY created_at ASC LIMIT 1`,
-            [deviceBalance]
+            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND (assigned_to = ? OR assigned_to IS NULL) ORDER BY created_at ASC LIMIT 1`,
+            [username]
         );
 
         if (!pending) {
@@ -205,24 +235,36 @@ app.get('/api/devices', async (req, res) => {
 // --- BACKGROUND WORKERS ---
 
 // Unlock stalled jobs every 1 minute
+// 1. Unlock stalled jobs (processing for too long)
+// 2. Re-assign jobs from offline devices
 setInterval(async () => {
     try {
-        // Find jobs in PROCESSANDO state whose locked_at time is older than 2 minutes ago
         const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
 
+        // A. Stuck in PROCESSANDO
         const stalledJobs = await dbAll(`SELECT id FROM transfers WHERE status = 'PROCESSANDO' AND locked_at < ?`, [twoMinutesAgo]);
-
-        if (stalledJobs.length > 0) {
-            console.log(`[Auto-Unlock] Encontrados ${stalledJobs.length} pedidos travados. Retornando para a fila.`);
-            for (let job of stalledJobs) {
-                await dbRun(
-                    `UPDATE transfers SET status = 'PENDENTE', locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-                    [job.id]
-                );
-            }
+        for (let job of stalledJobs) {
+            await dbRun(`UPDATE transfers SET status = 'PENDENTE', locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [job.id]);
         }
+
+        // B. Assigned to offline devices (last_seen > 5 min ago)
+        // Find devices that are effectively offline
+        const offlineDevices = await dbAll(`SELECT username FROM devices WHERE last_seen < ?`, [fiveMinutesAgo]);
+        if (offlineDevices.length > 0) {
+            const usernames = offlineDevices.map(d => d.username);
+            const placeholders = usernames.map(() => '?').join(',');
+
+            // Unassign jobs from these devices so someone else can pick them up
+            await dbRun(`
+                UPDATE transfers 
+                SET assigned_to = NULL, updated_at = CURRENT_TIMESTAMP 
+                WHERE status = 'PENDENTE' AND assigned_to IN (${placeholders})
+            `, usernames);
+        }
+
     } catch (err) {
-        console.error("[Auto-Unlock] Erro ao destravar pedidos:", err.message);
+        console.error("[Auto-Unlock] Erro:", err.message);
     }
 }, 60000); // 60 seconds
 

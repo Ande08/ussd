@@ -39,6 +39,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-
+import android.text.TextUtils
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.SharedPreferences
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -77,25 +79,32 @@ data class QueuedTransfer(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+// UI State at file level to be accessible by composables and USSDService
+val ussdBalances = mutableStateMapOf<Int, String>()
+val isBackendPollingEnabled = mutableStateOf(false)
+val deviceList = mutableStateListOf<Device>()
+val waitingList = mutableStateListOf<QueuedTransfer>()
+val isAccessibilityEnabled = mutableStateOf(false)
+var currentUsername: String? = null
+
+// Previously in companion object
+val lastExtractedBalance = mutableStateOf<String?>(null)
+val pendingTransferAmount = mutableStateOf<String?>(null)
+val pendingTransferNumber = mutableStateOf<String?>(null)
+
 class MainActivity : ComponentActivity() {
     
-    private val ussdBalances = mutableStateMapOf<Int, String>()
-    private var isConsultingAll = mutableStateOf(false)
-    private var consultationStatus = mutableStateOf("Consultar Todos")
+    var isConsultingAll = mutableStateOf(false)
+    var consultationStatus = mutableStateOf("Consultar Todos")
     private var pendingSims = mutableListOf<SubscriptionInfo>()
     private var currentSimId: Int? = null
 
     // Backend Job tracking
     private var currentBackendJobId: Int? = null
     private var isPollingPaused = false
-    private val isBackendPollingEnabled = mutableStateOf(false)
     private val connectionLogs = mutableStateListOf<String>()
     
-    // Cloud Fleet State
-    private val deviceList = mutableStateListOf<Device>()
-
     // Transfer Queue State
-    private val waitingList = mutableStateListOf<QueuedTransfer>()
     private var activeTransferInfo: QueuedTransfer? = null
     private var retryCount = 0
     private var transferTimeoutHandler = Handler(Looper.getMainLooper())
@@ -305,330 +314,8 @@ class MainActivity : ComponentActivity() {
         context.startActivity(intent)
     }
 
-    companion object {
-        val lastExtractedBalance = mutableStateOf<String?>(null)
-        val pendingTransferAmount = mutableStateOf<String?>(null)
-        val pendingTransferNumber = mutableStateOf<String?>(null)
-        
-        var currentUsername: String? = null
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        createNotificationChannel()
-        val filter = IntentFilter().apply {
-            addAction("com.example.siminfo.USSD_RESULT")
-            addAction("com.example.siminfo.TRANSFER_STATUS")
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerReceiver(resultReceiver, filter, RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(resultReceiver, filter)
-        }
-
-        startBackendPolling()
-
-        val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
-        currentUsername = prefs.getString("USERNAME", null)
-
-        setContent {
-            MaterialTheme(colorScheme = darkColorScheme()) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    var isLoggedIn by remember { mutableStateOf(currentUsername != null) }
-
-                    if (!isLoggedIn) {
-                        LoginScreen(
-                            onLoginSuccess = { user, pass ->
-                                prefs.edit().putString("USERNAME", user).putString("PASSWORD", pass).apply()
-                                currentUsername = user
-                                isLoggedIn = true
-                            }
-                        )
-                    } else {
-                        MainScreenContainer(
-                            onLogout = {
-                                prefs.edit().clear().apply()
-                                currentUsername = null
-                                isBackendPollingEnabled.value = false
-                                isLoggedIn = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun MainScreenContainer(onLogout: () -> Unit) {
-        val navController = androidx.navigation.compose.rememberNavController()
-        var selectedItem by remember { mutableIntStateOf(0) }
-
-        Scaffold(
-            bottomBar = {
-                NavigationBar(containerColor = Color(0xFF121212)) {
-                    
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text("Home") },
-                        selected = selectedItem == 0,
-                        onClick = {
-                            selectedItem = 0
-                            navController.navigate("dashboard") {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Devices, contentDescription = null) },
-                        label = { Text("Nuvem") },
-                        selected = selectedItem == 1,
-                        onClick = {
-                            selectedItem = 1
-                            navController.navigate("fleet") {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                        label = { Text("Config") },
-                        selected = selectedItem == 2,
-                        onClick = {
-                            selectedItem = 2
-                            navController.navigate("settings") {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
-        ) { padding ->
-            androidx.navigation.compose.NavHost(navController, startDestination = "dashboard", Modifier.padding(padding)) {
-                composable("dashboard") {
-                    DashboardScreen()
-                }
-                composable("fleet") {
-                    FleetManagementScreen()
-                }
-                composable("settings") {
-                    SettingsManagementScreen(onLogout)
-                }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun DashboardScreen() {
-        val context = LocalContext.current
-        var showTransferDialog by remember { mutableStateOf(false) }
-        var transferNumber by remember { mutableStateOf("") }
-        var transferAmount by remember { mutableStateOf("") }
-        var countdownSeconds by remember { mutableIntStateOf(0) }
-
-
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Header
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                // Placeholder for Logo
-                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.White)) {
-                    Text("Q", color = Color.Black, modifier = Modifier.align(Alignment.Center), fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text("Bem-vindo,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Super Net 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { /* Notifications */ }) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = Color.LightGray)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // The Sphere
-            Box(
-                modifier = Modifier
-                    .size(240.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(Color(0xFFff8a65), Color(0xFFba68c8), Color(0xFFe53935)),
-                            tileMode = TileMode.Clamp
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                // Inner glow / stars effect placeholder
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    // Just a subtle effect
-                }
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            // Status Chip
-            Surface(
-                color = Color(0xFF1B3B26),
-                shape = CircleShape,
-                modifier = Modifier.height(32.dp).padding(horizontal = 8.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Serviço Iniciado", color = Color(0xFF4CAF50), style = MaterialTheme.typography.bodySmall)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                "Tá liberado pra Netflix! Eu cuido dos pagamentos 📺",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Action Buttons
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { showTransferDialog = true },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E)),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(Icons.Default.Bolt, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agendar transf...")
-                }
-                Button(
-                    onClick = { /* Show waiting list log or similar */ },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E)),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(Icons.Default.History, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Lista de espera")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Balance Card
-            Card(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text("Saldo Disponível", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    val totalBalanceMb by remember { derivedStateOf { ussdBalances.values.sumOf { parseBalanceToMb(it) } } }
-                    val totalBalanceFormatted = formatBalance(totalBalanceMb)
-                    
-                    Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
-                    
-                    if (ussdBalances.isNotEmpty()) {
-                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
-                        
-                        val sims = remember(context) { getSimInfo(context) }
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            ussdBalances.forEach { (subId, balance) ->
-                                val simName = sims.find { it.subscriptionId == subId }?.displayName ?: "SIM $subId"
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(text = simName.toString(), color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-                                    Text(text = balance, color = Color.LightGray, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Transfer Dialog with Countdown
-        if (showTransferDialog) {
-            AlertDialog(
-                onDismissRequest = { if (countdownSeconds == 0) showTransferDialog = false },
-                title = { Text(if (countdownSeconds > 0) "A Enviar em $countdownSeconds..." else "Agendar Transferência") },
-                text = {
-                    if (countdownSeconds > 0) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                            CircularProgressIndicator(modifier = Modifier.size(64.dp), color = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Pode cancelar agora se quiser.", style = MaterialTheme.typography.bodySmall)
-                        }
-                    } else {
-                        Column {
-                            OutlinedTextField(
-                                value = transferNumber,
-                                onValueChange = { transferNumber = it },
-                                label = { Text("Número") },
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            OutlinedTextField(
-                                value = transferAmount,
-                                onValueChange = { transferAmount = it },
-                                label = { Text("Quantidade (MB)") },
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    if (countdownSeconds == 0) {
-                        Button(onClick = {
-                            if (transferNumber.isNotBlank() && transferAmount.isNotBlank()) {
-                                // Start countdown
-                                countdownSeconds = 3
-                                lifecycleScope.launch {
-                                    while (countdownSeconds > 0) {
-                                        delay(1000)
-                                        countdownSeconds--
-                                    }
-                                    // Submit to Cloud
-                                    submitToCloud(transferNumber, transferAmount)
-                                    showTransferDialog = false
-                                    transferNumber = ""
-                                    transferAmount = ""
-                                }
-                            }
-                        }) { Text("Confirmar") }
-                    } else {
-                        TextButton(onClick = {
-                            countdownSeconds = 0
-                            showTransferDialog = false
-                        }) { Text("CANCELAR", color = Color.Red) }
-                    }
-                }
-            )
-        }
-    }
-
-    private fun submitToCloud(number: String, amount: String) {
+    fun submitToCloud(number: String, amount: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 addLog("📤 Enviando pedido cloud: $amount MB -> $number")
@@ -756,49 +443,498 @@ class MainActivity : ComponentActivity() {
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 
-    @Composable
-    fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var isLoading by remember { mutableStateOf(false) }
-        var errorMessage by remember { mutableStateOf("") }
-        val coroutineScope = rememberCoroutineScope()
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (!allGranted) {
+            Toast.makeText(this, "Algumas permissões não foram concedidas.", Toast.LENGTH_LONG).show()
+        }
+    }
 
-        Scaffold { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Famba Automator", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(32.dp))
+    private fun checkAndRequestPermissions() {
+        val requiredPermissions = mutableListOf(
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.READ_SMS
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requiredPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        val missingPermissions = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missingPermissions.isNotEmpty()) {
+            requestPermissionLauncher.launch(missingPermissions.toTypedArray())
+        }
+    }
 
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Nome do Aparelho (Login)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Senha") },
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                if (errorMessage.isNotEmpty()) {
-                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.height(16.dp))
+    private fun checkAccessibilityService() {
+        var accessibilityEnabled = 0
+        val service = packageName + "/" + USSDService::class.java.canonicalName
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(
+                applicationContext.contentResolver,
+                Settings.Secure.ACCESSIBILITY_ENABLED
+            )
+        } catch (e: Settings.SettingNotFoundException) {}
+        
+        var isEnabled = false
+        if (accessibilityEnabled == 1) {
+            val settingValue = Settings.Secure.getString(
+                applicationContext.contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            )
+            if (settingValue != null) {
+                val splitter = TextUtils.SimpleStringSplitter(':')
+                splitter.setString(settingValue)
+                while (splitter.hasNext()) {
+                    if (splitter.next().equals(service, ignoreCase = true)) {
+                        isEnabled = true
+                        break
+                    }
                 }
+            }
+        }
+        isAccessibilityEnabled.value = isEnabled
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkAccessibilityService()
+    }
+
+    fun startConsultarTodos() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permissão de chamadas negada.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val sims = getSimInfo(this)
+        if (sims.isEmpty()) {
+            Toast.makeText(this, "Nenhum SIM encontrado.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        pendingSims.clear()
+        pendingSims.addAll(sims)
+        isConsultingAll.value = true
+        triggerNextSim(this)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        checkAndRequestPermissions()
+        createNotificationChannel()
+        val filter = IntentFilter().apply {
+            addAction("com.example.siminfo.USSD_RESULT")
+            addAction("com.example.siminfo.TRANSFER_STATUS")
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(resultReceiver, filter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(resultReceiver, filter)
+        }
+
+        startBackendPolling()
+
+        val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
+        currentUsername = prefs.getString("USERNAME", null)
+
+        setContent {
+            MaterialTheme(colorScheme = darkColorScheme()) {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    var isLoggedIn by remember { mutableStateOf(currentUsername != null) }
+
+                    if (!isLoggedIn) {
+                        LoginScreen(
+                            onLoginSuccess = { user, pass ->
+                                prefs.edit().putString("USERNAME", user).putString("PASSWORD", pass).apply()
+                                currentUsername = user
+                                isLoggedIn = true
+                            }
+                        )
+                    } else {
+                        MainScreenContainer(
+                            onLogout = {
+                                prefs.edit().clear().apply()
+                                currentUsername = null
+                                isBackendPollingEnabled.value = false
+                                isLoggedIn = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScreenContainer(onLogout: () -> Unit) {
+    val navController = androidx.navigation.compose.rememberNavController()
+    var selectedItem by remember { mutableIntStateOf(0) }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar(containerColor = Color(0xFF121212)) {
+
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    label = { Text("Home") },
+                    selected = selectedItem == 0,
+                    onClick = {
+                        selectedItem = 0
+                        navController.navigate("dashboard") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Devices, contentDescription = null) },
+                    label = { Text("Frota") },
+                    selected = selectedItem == 1,
+                    onClick = {
+                        selectedItem = 1
+                        navController.navigate("fleet") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    label = { Text("Config") },
+                    selected = selectedItem == 2,
+                    onClick = {
+                        selectedItem = 2
+                        navController.navigate("settings") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    ) { padding ->
+        androidx.navigation.compose.NavHost(navController, startDestination = "dashboard", Modifier.padding(padding)) {
+            composable("dashboard") {
+                val activity = LocalContext.current as MainActivity
+                DashboardScreen(activity::submitToCloud)
+            }
+            composable("fleet") {
+                FleetManagementScreen()
+            }
+            composable("settings") {
+                SettingsManagementScreen(onLogout)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
+    val context = LocalContext.current
+    val lifecycleScope = (context as MainActivity).lifecycleScope // Get lifecycleScope from MainActivity
+    var showTransferDialog by remember { mutableStateOf(false) }
+    var transferNumber by remember { mutableStateOf("") }
+    var transferAmount by remember { mutableStateOf("") }
+    var countdownSeconds by remember { mutableIntStateOf(0) }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.White)) {
+                Text("Q", color = Color.Black, modifier = Modifier.align(Alignment.Center), fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text("Bem-vindo,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text("Super Net 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = { /* Notifications */ }) {
+                Icon(Icons.Default.Info, contentDescription = null, tint = Color.LightGray)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // The Sphere
+        Box(
+            modifier = Modifier
+                .size(240.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(Color(0xFFff8a65), Color(0xFFba68c8), Color(0xFFe53935)),
+                        tileMode = TileMode.Clamp
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) { /* Glow */ }
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        // Status Chip
+        Surface(
+            color = Color(0xFF1B3B26),
+            shape = CircleShape,
+            modifier = Modifier.height(32.dp).padding(horizontal = 8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp)) {
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4CAF50)))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Serviço Iniciado", color = Color(0xFF4CAF50), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        if (!isAccessibilityEnabled.value) {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFB00020)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("⚠️ SERVIÇO DE ACESSIBILIDADE DESATIVADO", fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("A app não conseguirá ler o saldo nem confirmar transferências.", color = Color.White, style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(onClick = {
+                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        context.startActivity(intent)
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
+                        Text("ATIVAR AGORA", color = Color(0xFFB00020), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Text(
+            "Tá liberado pra Netflix! Eu cuido dos pagamentos 📺",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Balance Card
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text("SALDO TOTAL DISPONÍVEL", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                val totalBalanceFormatted = remember(ussdBalances) {
+                    val total = ussdBalances.values.sumOf { parseBalanceToMb(it) }
+                    formatBalance(total)
+                }
+                Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+
+                if (ussdBalances.isNotEmpty()) {
+                    Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
+                    val sims = remember(context) { getSimInfo(context) }
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        ussdBalances.forEach { (subId, balance) ->
+                            val simName = sims.find { it.subscriptionId == subId }?.displayName ?: "SIM $subId"
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(text = simName.toString(), color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                Text(text = balance, color = Color.LightGray, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Action Buttons
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(
+                onClick = { showTransferDialog = true },
+                modifier = Modifier.weight(1f).height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD600)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Bolt, contentDescription = null, tint = Color.Black)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Agendar transf...", color = Color.Black, fontWeight = FontWeight.Bold, maxLines = 1, style = MaterialTheme.typography.labelMedium)
+            }
+
+            var showWaitingListDialog by remember { mutableStateOf(false) }
+            Button(
+                onClick = { showWaitingListDialog = true },
+                modifier = Modifier.weight(1f).height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C1E)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.History, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Trsf. Fila", color = Color.White)
+            }
+            
+            if (showWaitingListDialog) {
+                AlertDialog(
+                    onDismissRequest = { showWaitingListDialog = false },
+                    title = { Text("Lista de Espera") },
+                    text = {
+                        LazyColumn {
+                            items(waitingList, key = { it.timestamp }) { item ->
+                                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                                    Text("${item.amount} MB para ${item.number}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text("SIM: ${item.carrierName}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Divider(color = Color.DarkGray)
+                                }
+                            }
+                            if (waitingList.isEmpty()) {
+                                item { Text("Sem transferências retidas.", color = MaterialTheme.colorScheme.onSurface) }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showWaitingListDialog = false }) { Text("OK", color = Color(0xFFFFD600)) }
+                    }
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Action Buttons Row 2: Consultar Saldo
+        val activity = LocalContext.current as? MainActivity
+        Button(
+            onClick = { activity?.startConsultarTodos() },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
+            shape = RoundedCornerShape(16.dp),
+            enabled = activity?.isConsultingAll?.value != true
+        ) {
+            Icon(Icons.Default.Info, contentDescription = null, tint = Color.White)
+            Spacer(modifier = Modifier.width(8.dp))
+            val btnStatus = activity?.consultationStatus?.value ?: "Consultar Todos"
+            Text(btnStatus, color = Color.White, fontWeight = FontWeight.Bold)
+        }
+    }
+
+    if (showTransferDialog) {
+        AlertDialog(
+            onDismissRequest = { if (countdownSeconds == 0) showTransferDialog = false },
+            title = { Text(if (countdownSeconds > 0) "A Enviar em $countdownSeconds..." else "Agendar Transferência") },
+            text = {
+                if (countdownSeconds > 0) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(modifier = Modifier.size(64.dp), color = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Pode cancelar agora se quiser.", style = MaterialTheme.typography.bodySmall)
+                    }
+                } else {
+                    Column {
+                        OutlinedTextField(
+                            value = transferNumber,
+                            onValueChange = { transferNumber = it },
+                            label = { Text("Número") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = transferAmount,
+                            onValueChange = { transferAmount = it },
+                            label = { Text("Quantidade (MB)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                if (countdownSeconds == 0) {
+                    Button(onClick = {
+                        if (transferNumber.isNotBlank() && transferAmount.isNotBlank()) {
+                            countdownSeconds = 3
+                            lifecycleScope.launch {
+                                while (countdownSeconds > 0) {
+                                    delay(1000)
+                                    countdownSeconds--
+                                }
+                                submitToCloud(transferNumber, transferAmount)
+                                showTransferDialog = false
+                                transferNumber = ""
+                                transferAmount = ""
+                            }
+                        }
+                    }) { Text("Confirmar") }
+                } else {
+                    TextButton(onClick = {
+                        countdownSeconds = 0
+                        showTransferDialog = false
+                    }) { Text("CANCELAR", color = Color.Red) }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
+    Scaffold { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Famba Automator", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Nome do Aparelho (Login)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Senha") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
                 Button(
                     onClick = {
@@ -840,122 +976,108 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun FleetManagementScreen() {
-        // Polling effect for device list
-        LaunchedEffect(Unit) {
-            while (true) {
-                try {
-                    val response = RetrofitClient.api.getDevices()
-                    deviceList.clear()
-                    deviceList.addAll(response.devices)
-                } catch (e: Exception) {
-                    Log.e("MainActivity", "Erro ao buscar aparelhos: ${e.message}")
-                }
-                delay(10000) // Poll every 10 seconds
+@Composable
+fun FleetManagementScreen() {
+    LaunchedEffect(Unit) {
+        while (true) {
+            try {
+                val response = RetrofitClient.api.getDevices()
+                deviceList.clear()
+                deviceList.addAll(response.devices)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Erro ao buscar aparelhos: ${e.message}")
             }
-        }
-
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Text("Gestão da Frota", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Global Sync Button
-            Button(
-                onClick = { isBackendPollingEnabled.value = !isBackendPollingEnabled.value },
-                modifier = Modifier.fillMaxWidth().height(80.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = if (isBackendPollingEnabled.value) "PARAR SINCRONIA" else "INICIAR SINCRONIA",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text("Dispositivos na Conta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(deviceList, key = { it.username }) { device ->
-                    DeviceCard(device)
-                }
-                if (deviceList.isEmpty()) {
-                    item {
-                        Text("Nenhum outro aparelho online", modifier = Modifier.padding(16.dp), color = Color.DarkGray)
-                    }
-                }
-            }
+            delay(10000)
         }
     }
 
-    @Composable
-    fun DeviceCard(device: Device) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Gestão da Frota", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { isBackendPollingEnabled.value = !isBackendPollingEnabled.value },
+            modifier = Modifier.fillMaxWidth().height(80.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                // Online indicator
-                Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if (device.paused) Color.Gray else Color(0xFF4CAF50)))
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(device.name ?: device.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                    Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(device.balance ?: "0 MB", fontWeight = FontWeight.ExtraBold, color = Color.White)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Bolt, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFD600))
-                        Text("${device.battery}%", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    }
-                }
-            }
+            Text(
+                text = if (isBackendPollingEnabled.value) "PARAR SINCRONIA" else "INICIAR SINCRONIA",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
         }
-    }
 
-    @Composable
-    fun SettingsManagementScreen(onLogout: () -> Unit) {
-        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("Definições", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.weight(1f))
-                Text("v1.5.0", color = Color.DarkGray)
-            }
-            Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedButton(
-                onClick = onLogout,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
-            ) {
-                Text("SAIR DA CONTA", fontWeight = FontWeight.Bold)
+        Text("Dispositivos na Conta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(deviceList, key = { it.username }) { device ->
+                DeviceCard(device)
             }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            Text("Aparelho Registado como:", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-            val username = remember { currentUsername ?: "Desconhecido" }
-            Text(username, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (deviceList.isEmpty()) {
+                item {
+                    Text("Nenhum outro aparelho online", modifier = Modifier.padding(16.dp), color = Color.DarkGray)
+                }
+            }
         }
     }
 }
 
+@Composable
+fun DeviceCard(device: Device) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if (device.paused) Color.Gray else Color(0xFF4CAF50)))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(device.name ?: device.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(device.balance ?: "0 MB", fontWeight = FontWeight.ExtraBold, color = Color.White)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Bolt, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFD600))
+                    Text("${device.battery}%", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun SettingsManagementScreen(onLogout: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("Definições", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.weight(1f))
+            Text("v1.5.0", color = Color.DarkGray)
+        }
+        Spacer(modifier = Modifier.height(32.dp))
 
-
-
-
-                
-
-
+        OutlinedButton(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+        ) {
+            Text("SAIR DA CONTA", fontWeight = FontWeight.Bold)
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        Text("Aparelho Registado como:", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+        Text(currentUsername ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+    }
+}
 
 fun parseBalanceToMb(balanceStr: String): Double {
     return try {
@@ -964,7 +1086,7 @@ fun parseBalanceToMb(balanceStr: String): Double {
         when {
             normalized.contains("GB") -> value * 1024.0
             normalized.contains("KB") -> value / 1024.0
-            else -> value // MB or Bytes (treated as MB for simplicity if unit missing)
+            else -> value
         }
     } catch (_: Exception) { 0.0 }
 }
@@ -983,19 +1105,16 @@ fun extractInternetBalance(response: String): String? {
     val mensalRegex = Regex("Mensal:\\s*(\\d+\\s*(?:MB|GB|KB|Bytes))", RegexOption.IGNORE_CASE)
     val mensalMatch = mensalRegex.find(response)
     if (mensalMatch != null) return mensalMatch.groupValues[1]
-    
+
     val internetRegex = Regex("Internet:\\s*(\\d+\\s*(?:MB|GB|KB|Bytes))", RegexOption.IGNORE_CASE)
     val internetMatch = internetRegex.find(response)
     if (internetMatch != null) return internetMatch.groupValues[1]
 
-    // Se a mensagem contém a palavra saldo (é uma resposta de consulta) mas não tem as palavras acima, assumimos 0 MB.
     if (response.contains("saldo", ignoreCase = true) || response.contains("extrato", ignoreCase = true)) {
         return "0 MB"
     }
-
     return null
 }
-
 
 fun checkVodacomBalance(context: Context, subId: Int, onResult: (String) -> Unit) {
     val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager

@@ -66,13 +66,13 @@ class USSDService : AccessibilityService() {
             }
             normalizedText.contains("quantos megas") -> {
                 Log.d("USSDService", "Matching: Amount step. Text: $text")
-                MainActivity.pendingTransferAmount.value?.let { amount ->
+                pendingTransferAmount.value?.let { amount ->
                     findAndInput(nodeInfo, amount)
                 }
             }
             normalizedText.contains("numero do recipiente") || normalizedText.contains("número do recipiente") || normalizedText.contains("digita o numero") -> {
                 Log.d("USSDService", "Matching: Number step. Text: $text")
-                MainActivity.pendingTransferNumber.value?.let { number ->
+                pendingTransferNumber.value?.let { number ->
                     findAndInput(nodeInfo, number)
                 }
             }
@@ -85,13 +85,13 @@ class USSDService : AccessibilityService() {
                 dismissUssd(nodeInfo)
             }
             normalizedText.contains("servicos de internet") || normalizedText.contains("serviços de internet") -> {
-                if (MainActivity.pendingTransferAmount.value != null) {
+                if (pendingTransferAmount.value != null) {
                     Log.d("USSDService", "Matching: Services step. Text: $text")
                     findAndInput(nodeInfo, "8")
                 }
             }
             normalizedText.contains("transferir megas") -> {
-                if (MainActivity.pendingTransferAmount.value != null) {
+                if (pendingTransferAmount.value != null) {
                     Log.d("USSDService", "Matching: Transfer step. Text: $text")
                     findAndInput(nodeInfo, "2")
                 }

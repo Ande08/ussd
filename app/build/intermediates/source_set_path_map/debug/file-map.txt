@@ -1,49 +1,51 @@
-com.example.siminfo.app-jetified-ui-tooling-preview-release-0 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\008c6806d145ad262309c3186120aecf\transformed\jetified-ui-tooling-preview-release\res
-com.example.siminfo.app-jetified-material3-1.1.1-1 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0556f004262f6c73a8941e13fc846507\transformed\jetified-material3-1.1.1\res
-com.example.siminfo.app-jetified-material-icons-extended-release-2 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0f9ff3f45ff53f61fa023ce8f9938927\transformed\jetified-material-icons-extended-release\res
-com.example.siminfo.app-jetified-navigation-compose-2.7.6-3 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\1a6bf60a17d3a24625be54b2b7bae414\transformed\jetified-navigation-compose-2.7.6\res
-com.example.siminfo.app-lifecycle-livedata-core-2.6.2-4 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2606bc5cd8f40476319f4779c0928118\transformed\lifecycle-livedata-core-2.6.2\res
-com.example.siminfo.app-jetified-savedstate-ktx-1.2.1-5 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\286befd98ebe339e3e053c674e61808a\transformed\jetified-savedstate-ktx-1.2.1\res
-com.example.siminfo.app-lifecycle-runtime-2.6.2-6 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2e23e90847193aacc27d7e5eba0ff03f\transformed\lifecycle-runtime-2.6.2\res
-com.example.siminfo.app-jetified-emoji2-1.4.0-7 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\res
-com.example.siminfo.app-navigation-runtime-ktx-2.7.6-8 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3eb7efe26241c4193b1d5f3f72f3264d\transformed\navigation-runtime-ktx-2.7.6\res
-com.example.siminfo.app-jetified-ui-text-release-9 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\3ec0b39e1683d103e872c54452ac5fac\transformed\jetified-ui-text-release\res
-com.example.siminfo.app-jetified-runtime-saveable-release-10 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5733a5af7069c85a04f802f085576f92\transformed\jetified-runtime-saveable-release\res
-com.example.siminfo.app-jetified-lifecycle-process-2.6.2-11 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\res
-com.example.siminfo.app-jetified-foundation-release-12 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\6bc23f9f21a0a17fbe84dbdaf163e619\transformed\jetified-foundation-release\res
-com.example.siminfo.app-jetified-foundation-layout-release-13 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7104170efb0ea074d657069c6ff3ef24\transformed\jetified-foundation-layout-release\res
-com.example.siminfo.app-jetified-ui-release-14 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\74cb5cb1db260a794f608e56cea48e30\transformed\jetified-ui-release\res
-com.example.siminfo.app-jetified-activity-ktx-1.8.1-15 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\7a1193231ca50dd368fe9252651b7c09\transformed\jetified-activity-ktx-1.8.1\res
-com.example.siminfo.app-jetified-customview-poolingcontainer-1.0.0-16 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\858e4b4173d95bfa958e938cd451a028\transformed\jetified-customview-poolingcontainer-1.0.0\res
-com.example.siminfo.app-jetified-ui-geometry-release-17 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\89bbef60e1ff9eb4474319f3fdd2c0da\transformed\jetified-ui-geometry-release\res
-com.example.siminfo.app-jetified-startup-runtime-1.1.1-18 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8c75c14c5695827d609ecd5d2823288e\transformed\jetified-startup-runtime-1.1.1\res
-com.example.siminfo.app-jetified-lifecycle-runtime-ktx-2.6.2-19 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\8ea0fd0180787657c62eadf030f7dc4f\transformed\jetified-lifecycle-runtime-ktx-2.6.2\res
-com.example.siminfo.app-jetified-ui-graphics-release-20 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\909c56090d32eac429e9dad266a94906\transformed\jetified-ui-graphics-release\res
-com.example.siminfo.app-jetified-runtime-release-21 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\925ea15bdf50badb5cd016edf878bd13\transformed\jetified-runtime-release\res
-com.example.siminfo.app-jetified-material-icons-core-release-22 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\96db4a08a0fce69db2e61e30e967fb8c\transformed\jetified-material-icons-core-release\res
-com.example.siminfo.app-jetified-animation-release-23 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9b173d264b9b4ca9eb8ad89b1b3c27f1\transformed\jetified-animation-release\res
-com.example.siminfo.app-jetified-savedstate-1.2.1-24 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9cd3d278f793e71174557aeff230dd78\transformed\jetified-savedstate-1.2.1\res
-com.example.siminfo.app-jetified-ui-util-release-25 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\9ec77f9c52720c0ac2cd8eff370fe164\transformed\jetified-ui-util-release\res
-com.example.siminfo.app-jetified-lifecycle-viewmodel-savedstate-2.6.2-26 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a017e1d1332126fd442f449d56c7f4a1\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\res
-com.example.siminfo.app-jetified-activity-compose-1.8.1-27 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a6b8202d3b4eac8d1fce740a437ccdf8\transformed\jetified-activity-compose-1.8.1\res
-com.example.siminfo.app-lifecycle-viewmodel-2.6.2-28 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a792605482331ff38cded9e55ec4213c\transformed\lifecycle-viewmodel-2.6.2\res
-com.example.siminfo.app-jetified-core-ktx-1.12.0-29 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a9f1d543fb5122647167a2478ac4cbd2\transformed\jetified-core-ktx-1.12.0\res
-com.example.siminfo.app-navigation-runtime-2.7.6-30 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\c16886db4a8b6fa3be35f4795f03e4df\transformed\navigation-runtime-2.7.6\res
-com.example.siminfo.app-jetified-annotation-experimental-1.3.0-31 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d2e000746f0af26c877328d1e2437fb5\transformed\jetified-annotation-experimental-1.3.0\res
-com.example.siminfo.app-navigation-common-2.7.6-32 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d39df540993fb005d9cdbb8d6e74194f\transformed\navigation-common-2.7.6\res
-com.example.siminfo.app-navigation-common-ktx-2.7.6-33 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d66b02ce7d2cbd67cca7fc72d4a51026\transformed\navigation-common-ktx-2.7.6\res
-com.example.siminfo.app-core-runtime-2.2.0-34 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\d7d37687df0033b78a678f862967034b\transformed\core-runtime-2.2.0\res
-com.example.siminfo.app-jetified-animation-core-release-35 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dbea8c56b1961a102b98443ec0dca2c5\transformed\jetified-animation-core-release\res
-com.example.siminfo.app-jetified-ui-unit-release-36 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\dca7c843f6eb3eca26c9d9b169e41f37\transformed\jetified-ui-unit-release\res
-com.example.siminfo.app-jetified-lifecycle-viewmodel-compose-2.6.2-37 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e3e309bc307e203e40ca66a652c62d53\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\res
-com.example.siminfo.app-jetified-lifecycle-viewmodel-ktx-2.6.2-38 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\e5348c87b6bf5ab6bc55f60570e18161\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\res
-com.example.siminfo.app-jetified-activity-1.8.1-39 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f787017578c1e4937d36f1c4cf2169dd\transformed\jetified-activity-1.8.1\res
-com.example.siminfo.app-jetified-profileinstaller-1.3.0-40 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f9953b3adf2f840cbb4137f28a684aab\transformed\jetified-profileinstaller-1.3.0\res
-com.example.siminfo.app-core-1.12.0-41 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fa491052a0c4e52c4bc12c333827ee1c\transformed\core-1.12.0\res
-com.example.siminfo.app-jetified-material-ripple-release-42 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\fc640ecb30e2eee4280dafde239bc5f2\transformed\jetified-material-ripple-release\res
-com.example.siminfo.app-resValues-43 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\generated\res\resValues\debug
-com.example.siminfo.app-packageDebugResources-44 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.siminfo.app-packageDebugResources-45 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.siminfo.app-merged_res-46 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\merged_res\debug
-com.example.siminfo.app-debug-47 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\debug\res
-com.example.siminfo.app-main-48 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\res
+com.example.siminfo.app-jetified-activity-1.8.1-0 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\04d7b32677789a747a59c2963b1d3177\transformed\jetified-activity-1.8.1\res
+com.example.siminfo.app-jetified-animation-core-release-1 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\0642ff5e7155833770511d0bb713c98a\transformed\jetified-animation-core-release\res
+com.example.siminfo.app-jetified-lifecycle-viewmodel-compose-2.6.2-2 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11c6c85922abc7ef17b5f2a9884c1aa4\transformed\jetified-lifecycle-viewmodel-compose-2.6.2\res
+com.example.siminfo.app-jetified-core-ktx-1.12.0-3 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\11ec0508a10b4cbb68ebf03bec2052de\transformed\jetified-core-ktx-1.12.0\res
+com.example.siminfo.app-jetified-ui-util-release-4 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\13085ea6d68f489e5dea7ae737ee8815\transformed\jetified-ui-util-release\res
+com.example.siminfo.app-jetified-material-ripple-release-5 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\154fc532e844e3629454082634f2d080\transformed\jetified-material-ripple-release\res
+com.example.siminfo.app-jetified-lifecycle-process-2.6.2-6 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1822c45ab88fcd8aff402d4d3ab7f47e\transformed\jetified-lifecycle-process-2.6.2\res
+com.example.siminfo.app-jetified-material-icons-core-release-7 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1853de8d7b9213eef626e9be5b2d0144\transformed\jetified-material-icons-core-release\res
+com.example.siminfo.app-jetified-material-icons-extended-release-8 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\1f77f52ed0a8be05a30b371b7c6e593b\transformed\jetified-material-icons-extended-release\res
+com.example.siminfo.app-navigation-common-ktx-2.7.6-9 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\21fb5977cca3dc11ba597f799eed670b\transformed\navigation-common-ktx-2.7.6\res
+com.example.siminfo.app-jetified-activity-ktx-1.8.1-10 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\34fe1a19bb4f2581673020ab384cbfcc\transformed\jetified-activity-ktx-1.8.1\res
+com.example.siminfo.app-core-runtime-2.2.0-11 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\35c24a2db80437d7da92fcfa4f8f41ac\transformed\core-runtime-2.2.0\res
+com.example.siminfo.app-jetified-customview-poolingcontainer-1.0.0-12 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\394ba2a56b12ba215bcc7b84afb0ceb5\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.example.siminfo.app-jetified-lifecycle-runtime-ktx-2.6.2-13 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3ae92496690829d6f646006e474f9196\transformed\jetified-lifecycle-runtime-ktx-2.6.2\res
+com.example.siminfo.app-lifecycle-livedata-2.6.2-14 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\3f832c97a9100d1402c6e4edf13ac435\transformed\lifecycle-livedata-2.6.2\res
+com.example.siminfo.app-jetified-savedstate-1.2.1-15 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\481723018f5d242509b673931b009a51\transformed\jetified-savedstate-1.2.1\res
+com.example.siminfo.app-jetified-navigation-compose-2.7.6-16 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\4a5668ef8ce59dd6a131a88b6173e520\transformed\jetified-navigation-compose-2.7.6\res
+com.example.siminfo.app-lifecycle-livedata-core-2.6.2-17 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\51d32ca2d4ecfc49e868717ff0db0765\transformed\lifecycle-livedata-core-2.6.2\res
+com.example.siminfo.app-jetified-ui-tooling-preview-release-18 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\60acd88c8028f2d1fcd1919021d34a3c\transformed\jetified-ui-tooling-preview-release\res
+com.example.siminfo.app-jetified-emoji2-1.4.0-19 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\68a6f717a68f154b18b554f7158cbdb7\transformed\jetified-emoji2-1.4.0\res
+com.example.siminfo.app-jetified-foundation-layout-release-20 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\70be485e8259475d10f18936b58ac227\transformed\jetified-foundation-layout-release\res
+com.example.siminfo.app-jetified-activity-compose-1.8.1-21 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\735b58645ac9a2bd54146a1498261089\transformed\jetified-activity-compose-1.8.1\res
+com.example.siminfo.app-jetified-lifecycle-viewmodel-savedstate-2.6.2-22 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\7607dadead14761bfaeabfb5893736b4\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\res
+com.example.siminfo.app-jetified-annotation-experimental-1.3.0-23 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\8374e1acdad3f2aa32293b2e3d702981\transformed\jetified-annotation-experimental-1.3.0\res
+com.example.siminfo.app-jetified-savedstate-ktx-1.2.1-24 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\91a588842cbf38c5517a38f6f200b935\transformed\jetified-savedstate-ktx-1.2.1\res
+com.example.siminfo.app-navigation-runtime-ktx-2.7.6-25 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\93185dffaa7e1be8232f2a80f2b782dc\transformed\navigation-runtime-ktx-2.7.6\res
+com.example.siminfo.app-jetified-runtime-livedata-1.5.4-26 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9447227842915020353d9e0853437345\transformed\jetified-runtime-livedata-1.5.4\res
+com.example.siminfo.app-jetified-ui-text-release-27 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\95a7d61d9898ac13b29bf88bfaa8fc00\transformed\jetified-ui-text-release\res
+com.example.siminfo.app-jetified-material3-1.1.2-28 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\9b9d34ff2c83fd71904caab0b3540b25\transformed\jetified-material3-1.1.2\res
+com.example.siminfo.app-jetified-ui-unit-release-29 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\aaa4236774e81ee069553fefb60778fd\transformed\jetified-ui-unit-release\res
+com.example.siminfo.app-jetified-startup-runtime-1.1.1-30 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\abe195036d108d0b06686be6ebcfb33d\transformed\jetified-startup-runtime-1.1.1\res
+com.example.siminfo.app-lifecycle-runtime-2.6.2-31 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\ada93e1ee665fd8f9a4646649f0e0c84\transformed\lifecycle-runtime-2.6.2\res
+com.example.siminfo.app-navigation-common-2.7.6-32 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b45494ce526120ebb94be8e64eff7d0b\transformed\navigation-common-2.7.6\res
+com.example.siminfo.app-jetified-foundation-release-33 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\b52e9d6f7e961ad387c1c07d86aa3a8c\transformed\jetified-foundation-release\res
+com.example.siminfo.app-jetified-profileinstaller-1.3.0-34 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\beeb8f7a83a2cbbc96d2fce667ee1cbb\transformed\jetified-profileinstaller-1.3.0\res
+com.example.siminfo.app-jetified-lifecycle-viewmodel-ktx-2.6.2-35 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\c96e9632609a317317f7c7290fc1fd01\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\res
+com.example.siminfo.app-jetified-animation-release-36 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d27654f0e901323cb4233266b4715fcf\transformed\jetified-animation-release\res
+com.example.siminfo.app-lifecycle-viewmodel-2.6.2-37 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d306dd1638f9d9fe3c3f6e8d8c8dd9ec\transformed\lifecycle-viewmodel-2.6.2\res
+com.example.siminfo.app-jetified-ui-geometry-release-38 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\d80d6553a74a4b9761c0c934b0dfd4df\transformed\jetified-ui-geometry-release\res
+com.example.siminfo.app-core-1.12.0-39 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\da024fe9a862a975dbe894dae3fd994a\transformed\core-1.12.0\res
+com.example.siminfo.app-jetified-ui-release-40 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e05c5057b696b052cd4e62f57db2a6d6\transformed\jetified-ui-release\res
+com.example.siminfo.app-jetified-runtime-release-41 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\e5d7c0e28408c502f4a8b94567fca84a\transformed\jetified-runtime-release\res
+com.example.siminfo.app-jetified-ui-graphics-release-42 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f6dade57eb25abcce8dd096fc772ad4c\transformed\jetified-ui-graphics-release\res
+com.example.siminfo.app-jetified-runtime-saveable-release-43 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\f817ccbddf3b8bb8e5df7316e30c8b5f\transformed\jetified-runtime-saveable-release\res
+com.example.siminfo.app-navigation-runtime-2.7.6-44 C:\Users\TOPOGRAFIA CMCM\.gradle\caches\transforms-3\fef45f5bac5b1f7b01591dd3d6b30618\transformed\navigation-runtime-2.7.6\res
+com.example.siminfo.app-resValues-45 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\generated\res\resValues\debug
+com.example.siminfo.app-packageDebugResources-46 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.siminfo.app-packageDebugResources-47 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.siminfo.app-merged_res-48 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\build\intermediates\merged_res\debug
+com.example.siminfo.app-debug-49 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\debug\res
+com.example.siminfo.app-main-50 C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\res
