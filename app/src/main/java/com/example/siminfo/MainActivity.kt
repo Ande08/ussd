@@ -9,9 +9,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.PowerManager
 import android.os.Looper
 import android.provider.Settings
 import android.telecom.PhoneAccountHandle
@@ -94,20 +96,18 @@ val lastExtractedBalance = mutableStateOf<String?>(null)
 val pendingTransferAmount = mutableStateOf<String?>(null)
 val pendingTransferNumber = mutableStateOf<String?>(null)
 
+// Backend Job tracking (Shared with Service)
+var currentBackendJobId: Int? = null
+var isPollingPaused = false
+var activeTransferInfo: QueuedTransfer? = null
 class MainActivity : ComponentActivity() {
+    
     
     var isConsultingAll = mutableStateOf(false)
     var consultationStatus = mutableStateOf("Consultar Todos")
     private var pendingSims = mutableListOf<SubscriptionInfo>()
     private var currentSimId: Int? = null
 
-    // Backend Job tracking
-    private var currentBackendJobId: Int? = null
-    private var isPollingPaused = false
-    
-    
-    // Transfer Queue State
-    private var activeTransferInfo: QueuedTransfer? = null
     private var retryCount = 0
     private var transferTimeoutHandler = Handler(Looper.getMainLooper())
     private var transferTimeoutRunnable: Runnable? = null
@@ -369,42 +369,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startBackendPolling() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            addLog("A aguardar início automático do Servidor...")
-            while (true) {
-                if (!isBackendPollingEnabled.value || currentUsername == null) {
-                    delay(3000)
-                    continue
-                }
-
-                // Heartbeat: Send current device status
-                try {
-                    val totalBalanceStr = ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString()
-                    val currentBattery = getBatteryPercentage()
-                    RetrofitClient.api.updateDeviceStatus(DeviceStatusRequest(currentUsername!!, totalBalanceStr, !isBackendPollingEnabled.value, currentBattery))
-                } catch (e: Exception) {
-                    Log.e("MainActivity", "Erro no Heartbeat: ${e.message}")
-                }
-
-                // Polling pending jobs
-                if (!isPollingPaused && activeTransferInfo == null && currentBackendJobId == null) {
-                    try {
-                        val response = RetrofitClient.api.getPendingTransfer(PendingRequest(currentUsername!!))
-                        if (response.job != null) {
-                            val job = response.job
-                            addLog("🟢 Pedido #${job.id} Recebido: ${job.amount}MB p/ ${job.number}")
-                            withContext(Dispatchers.Main) {
-                                isPollingPaused = true
-                                currentBackendJobId = job.id
-                                // Start smart transfer automatically
-                                startSmartTransfer(this@MainActivity, job.amount, job.number)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        addLog("🔴 Erro de Conexão: ${e.message}")
-                    }
-                }
-                delay(7000) // Poll every 7 seconds
+        if (isBackendPollingEnabled.value && currentUsername != null) {
+            val intent = Intent(this, PollService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
             }
         }
     }
@@ -531,6 +501,32 @@ class MainActivity : ComponentActivity() {
         triggerNextSim(this)
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val jobId = intent?.getIntExtra("JOB_ID", -1) ?: -1
+        if (jobId != -1) {
+            val amount = intent?.getStringExtra("JOB_AMOUNT") ?: ""
+            val number = intent?.getStringExtra("JOB_NUMBER") ?: ""
+            currentBackendJobId = jobId
+            isPollingPaused = true
+            addLog("🟢 Executando Pedido #${jobId}")
+            startSmartTransfer(this, amount, number)
+        }
+    }
+
+    private fun requestIgnoreBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val packageName = packageName
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -547,6 +543,7 @@ class MainActivity : ComponentActivity() {
         }
 
         startBackendPolling()
+        requestIgnoreBatteryOptimizations()
 
         val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
         currentUsername = prefs.getString("USERNAME", null)?.trim()
@@ -1266,19 +1263,6 @@ fun SettingsManagementScreen(onLogout: () -> Unit) {
         Text(currentUsername ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
     }
 }
-
-fun parseBalanceToMb(balanceStr: String): Double {
-    return try {
-        val normalized = balanceStr.uppercase().replace(",", ".")
-        val value = normalized.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: 0.0
-        when {
-            normalized.contains("GB") -> value * 1024.0
-            normalized.contains("KB") -> value / 1024.0
-            else -> value
-        }
-    } catch (_: Exception) { 0.0 }
-}
-
 fun formatBalance(mbValue: Double): String {
     return if (mbValue >= 1024.0) {
         String.format(Locale.US, "%.2f GB", mbValue / 1024.0)

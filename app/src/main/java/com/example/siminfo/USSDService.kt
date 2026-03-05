@@ -133,7 +133,7 @@ class USSDService : AccessibilityService() {
         sendBroadcast(intent)
     }
 
-    private fun findAndInput(node: AccessibilityNodeInfo, text: String) {
+    private fun findAndInput(node: AccessibilityNodeInfo, text: String, attempt: Int = 1) {
         val editTexts = mutableListOf<AccessibilityNodeInfo>()
         findNodesByClassName(node, "android.widget.EditText", editTexts)
         
@@ -151,11 +151,23 @@ class USSDService : AccessibilityService() {
             val editText = editTexts[0]
             val arguments = Bundle()
             arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
-            editText.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
+            val success = editText.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
 
+            if (success) {
+                handler.postDelayed({
+                    sendButton?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }, 400)
+            } else if (attempt < 3) {
+                handler.postDelayed({ findAndInput(node, text, attempt + 1) }, 500)
+            }
+        } else if (attempt < 3) {
+            Log.d("USSDService", "EditText not found, retry attempt $attempt...")
             handler.postDelayed({
-                sendButton?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            }, 300)
+                val newNode = rootInActiveWindow ?: node
+                findAndInput(newNode, text, attempt + 1)
+            }, 600)
+        } else {
+            Log.e("USSDService", "Failed to find EditText after 3 attempts")
         }
     }
 

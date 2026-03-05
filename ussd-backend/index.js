@@ -50,14 +50,23 @@ db.serialize(() => {
     `);
 
     db.run(`
+        CREATE TABLE IF NOT EXISTS accounts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            password TEXT NOT NULL
+        )
+    `);
+
+    db.run(`
         CREATE TABLE IF NOT EXISTS devices (
             username TEXT PRIMARY KEY,
-            password TEXT NOT NULL,
+            account_id INTEGER,
             name TEXT,
             balance TEXT,
             paused BOOLEAN DEFAULT 0,
             battery INTEGER DEFAULT 100,
-            last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
+            last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
         )
     `);
 
@@ -76,8 +85,24 @@ db.serialize(() => {
         if (!err) console.log("Added account column to devices table.");
     });
 
+    // Migration: Populate accounts from old devices data if needed
+    db.run(`
+        INSERT INTO accounts (name, password)
+        SELECT DISTINCT account, password FROM devices 
+        WHERE account IS NOT NULL AND password IS NOT NULL
+        AND account NOT IN (SELECT name FROM accounts)
+    `, (err) => {
+        if (!err) {
+            db.run(`
+                UPDATE devices 
+                SET account_id = (SELECT id FROM accounts WHERE accounts.name = devices.account)
+                WHERE account_id IS NULL AND account IS NOT NULL
+            `);
+        }
+    });
+
     // Insert a default admin device for immediate testing if it doesn't exist
-    db.run(`INSERT OR IGNORE INTO devices (username, password, name) VALUES ('admin', 'admin123', 'Celular Principal')`);
+    db.run(`INSERT OR IGNORE INTO accounts (name, password) VALUES ('admin_acc', 'admin123')`);
 
     // One-time cleanup for existing data (Trim whitespace)
     db.run(`UPDATE devices SET account = TRIM(account), password = TRIM(password), username = TRIM(username) WHERE account IS NOT NULL`);
@@ -87,45 +112,45 @@ db.serialize(() => {
 
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
-    const { number, amount, username } = req.body; // username is the requester
-    if (!number || !amount) {
-        return res.status(400).json({ error: 'Número e Quantidade são obrigatórios.' });
+    let { number, amount, account } = req.body;
+    account = account?.trim();
+
+    if (!number || !amount || !account) {
+        return res.status(400).json({ error: 'Número, Quantidade e Conta são obrigatórios.' });
     }
 
     try {
-        // Find the requester's account
-        let ownerAccount = null;
-        if (username) {
-            const requester = await dbGet(`SELECT account FROM devices WHERE username = ?`, [username]);
-            ownerAccount = requester ? requester.account : null;
-        }
+        const accRow = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
+        if (!accRow) return res.status(404).json({ error: 'Conta não encontrada.' });
 
-        // --- CENTRALIZED ROUTING LOGIC (Account Aware) ---
-        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+        const ownerAccountId = accRow.id;
 
-        // Find eligible devices in the SAME account (or unassigned account if fallback needed)
+        // --- INDUSTRIAL ROUTING LOGIC (Query Mestra) ---
+        const activeThreshold = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+
+        // Find eligible devices in the SAME account, prioritize by balance
         const eligibleDevices = await dbAll(`
             SELECT username, name, balance FROM devices 
-            WHERE paused = 0 AND last_seen > ? AND (account = ? OR account IS NULL)
-        `, [twoMinutesAgo, ownerAccount]);
+            WHERE account_id = ? AND paused = 0 AND last_seen > ?
+            ORDER BY CAST(REPLACE(balance, ' MB', '') AS FLOAT) DESC
+        `, [ownerAccountId, activeThreshold]);
 
         let assignedTo = null;
         let assignedName = "Fila Geral (Aguardando Dispositivo)";
 
         if (eligibleDevices.length > 0) {
             const amountVal = parseFloat(amount);
-            const capableDevices = eligibleDevices.filter(d => parseFloat(d.balance || 0) >= amountVal);
-
-            if (capableDevices.length > 0) {
-                capableDevices.sort((a, b) => parseFloat(b.balance) - parseFloat(a.balance));
-                assignedTo = capableDevices[0].username;
-                assignedName = capableDevices[0].name || assignedTo;
+            // Check if any has enough balance
+            const capable = eligibleDevices.find(d => parseFloat(d.balance || 0) >= amountVal);
+            if (capable) {
+                assignedTo = capable.username;
+                assignedName = capable.name || assignedTo;
             }
         }
 
         const result = await dbRun(
             `INSERT INTO transfers (number, amount, status, assigned_to, owner_account) VALUES (?, ?, 'PENDENTE', ?, ?)`,
-            [number, amount, assignedTo, ownerAccount]
+            [number, amount, assignedTo, account]
         );
 
         res.status(201).json({
@@ -138,7 +163,7 @@ app.post('/api/transfer', async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Erro ao salvar pedido.' });
+        res.status(500).json({ error: 'Erro ao agendar pedido.' });
     }
 });
 
@@ -157,35 +182,28 @@ app.post('/api/device/login', async (req, res) => {
     }
 
     try {
-        console.log(`[Login Attempt] UI: ${username}, Account: ${account}`);
+        console.log(`[Login Attempt] Device: ${username}, Account: ${account}`);
 
-        // Authenticate by checking if ANY device already exists with this account/password combination
-        const accountValid = await dbGet(`SELECT username FROM devices WHERE account = ? AND password = ? LIMIT 1`, [account, password]);
+        // 1. Authenticate Account
+        const accRow = await dbGet(`SELECT id FROM accounts WHERE name = ? AND password = ?`, [account, password]);
 
-        if (accountValid) {
-            console.log(`[Login Success] Validating device UID: ${username}`);
-            // Find if THIS specific device exists
-            const device = await dbGet(`SELECT username FROM devices WHERE username = ?`, [username]);
+        if (accRow) {
+            console.log(`[Login Success] Account Auth OK. Syncing device: ${username}`);
+            const accountId = accRow.id;
 
-            if (device) {
-                // Update existing device to join this account (allows switching accounts)
-                await dbRun(
-                    `UPDATE devices SET account = ?, password = ?, name = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
-                    [account, password, name || device.name, username]
-                );
-            } else {
-                // Auto-register new device into this existing account
-                await dbRun(
-                    `INSERT INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
-                    [username, password, name || username, account]
-                );
-            }
+            // 2. Manage Device Association
+            await dbRun(
+                `INSERT INTO devices (username, account_id, name, balance, paused) 
+                 VALUES (?, ?, ?, '0 MB', 0)
+                 ON CONFLICT(username) DO UPDATE SET account_id = ?, name = EXCLUDED.name`,
+                [username, accountId, name || username, accountId]
+            );
+
             res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
         } else {
-            console.log(`[Login Fail] Unauthorized or wrong password for account: ${account}`);
-            // Check if account exists but password is wrong
-            const accountExists = await dbGet(`SELECT username FROM devices WHERE account = ? LIMIT 1`, [account]);
-            if (accountExists) {
+            console.log(`[Login Fail] Invalid credentials for account: ${account}`);
+            const accExists = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
+            if (accExists) {
                 res.status(401).json({ success: false, error: 'Senha da conta incorreta' });
             } else {
                 res.status(404).json({ success: false, error: 'Conta não encontrada. Use "Criar Conta" primeiro.' });
@@ -211,20 +229,29 @@ app.post('/api/device/register', async (req, res) => {
     }
 
     try {
-        const accountExists = await dbGet(`SELECT username FROM devices WHERE account = ? LIMIT 1`, [account]);
-        if (accountExists) {
+        const accExists = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
+        if (accExists) {
             return res.status(400).json({ error: 'Esta conta já existe. Use o Login.' });
         }
 
-        // Create the account by inserting the first device
-        await dbRun(
-            `INSERT OR REPLACE INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
-            [username, password, name || username, account]
+        // Create the account
+        const accResult = await dbRun(
+            `INSERT INTO accounts (name, password) VALUES (?, ?)`,
+            [account, password]
         );
+        const accountId = accResult.lastID;
+
+        // Associate the first device
+        await dbRun(
+            `INSERT INTO devices (username, account_id, name, balance, paused) 
+             VALUES (?, ?, ?, '0 MB', 0)`,
+            [username, accountId, name || username]
+        );
+
         res.status(201).json({ success: true, message: 'Conta criada e aparelho associado.' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Erro ao registar aparelho.' });
+        res.status(500).json({ error: 'Erro ao registar conta.' });
     }
 });
 
@@ -250,16 +277,21 @@ app.post('/api/transfer/pending', async (req, res) => {
     if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
 
     try {
-        // Find device's account
-        const device = await dbGet(`SELECT account FROM devices WHERE username = ?`, [username]);
-        if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado.' });
+        // Find device's account name
+        const device = await dbGet(`
+            SELECT a.name as account_name FROM devices d
+            JOIN accounts a ON d.account_id = a.id
+            WHERE d.username = ?
+        `, [username]);
+
+        if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado ou não associado a uma conta.' });
 
         // Atomic transaction: Find a job assigned specifically to this user or unassigned belonging to this account
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
         const pending = await dbGet(
             `SELECT * FROM transfers WHERE status = 'PENDENTE' AND (assigned_to = ? OR (assigned_to IS NULL AND (owner_account = ? OR owner_account IS NULL))) ORDER BY created_at ASC LIMIT 1`,
-            [username, device.account]
+            [username, device.account_name]
         );
 
         if (!pending) {
@@ -323,12 +355,16 @@ app.post('/api/device/pause', async (req, res) => {
 
 // 6. Dashboard Endpoint: View all devices in an account
 app.get('/api/devices', async (req, res) => {
-    const { account } = req.query;
+    const { account } = req.query; // Account name
     try {
-        let query = `SELECT username, name, balance, paused, battery, last_seen FROM devices`;
+        let query = `
+            SELECT d.username, d.name, d.balance, d.paused, d.battery, d.last_seen 
+            FROM devices d
+            JOIN accounts a ON d.account_id = a.id
+        `;
         let params = [];
         if (account) {
-            query += ` WHERE account = ?`;
+            query += ` WHERE a.name = ?`;
             params.push(account);
         }
         const devices = await dbAll(query, params);
