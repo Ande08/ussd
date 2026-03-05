@@ -354,11 +354,11 @@ class MainActivity : ComponentActivity() {
         return bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY).let { if (it < 0) 100 else it }
     }
 
-    private fun getDeviceId(): String {
+    fun obtainUniqueDeviceId(): String {
         return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
     }
 
-    private fun getDeviceName(): String {
+    fun obtainDeviceModel(): String {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         return if (model.startsWith(manufacturer)) {
@@ -974,6 +974,8 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = context as? MainActivity
 
     Scaffold { padding ->
         Column(
@@ -1019,9 +1021,8 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                         }
                         isLoading = true
                         errorMessage = ""
-                        val activity = LocalContext.current as? MainActivity
-                        val deviceId = activity?.getDeviceId() ?: "unknown"
-                        val deviceName = activity?.getDeviceName() ?: "Unknown Device"
+                        val deviceId = activity?.obtainUniqueDeviceId() ?: "unknown"
+                        val deviceName = activity?.obtainDeviceModel() ?: "Unknown Device"
                         
                         coroutineScope.launch(Dispatchers.IO) {
                             try {
@@ -1060,11 +1061,8 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                 }
 
                 if (showRegisterDialog) {
-                    val activity = LocalContext.current as? MainActivity
-                    var regUser by remember { mutableStateOf(activity?.getDeviceId() ?: "") }
                     var regPass by remember { mutableStateOf("") }
                     var regAcc by remember { mutableStateOf("") }
-                    var regName by remember { mutableStateOf(activity?.getDeviceName() ?: "") }
                     var isRegLoading by remember { mutableStateOf(false) }
                     var regError by remember { mutableStateOf("") }
 
@@ -1073,7 +1071,7 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                         title = { Text("Definir Nova Conta") },
                         text = {
                             Column {
-                                Text("Aparelho identificado: ${activity?.getDeviceName()}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                Text("Aparelho identificado: ${activity?.obtainDeviceModel()}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                                 Spacer(modifier = Modifier.height(12.dp))
                                 OutlinedTextField(value = regAcc, onValueChange = { regAcc = it }, label = { Text("Nome da Conta (Ex: FambaSales)") }, modifier = Modifier.fillMaxWidth())
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -1092,8 +1090,8 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                                         return@Button
                                     }
                                     isRegLoading = true
-                                    val deviceId = activity?.getDeviceId() ?: "unknown"
-                                    val deviceName = activity?.getDeviceName() ?: "Unknown Device"
+                                    val deviceId = activity?.obtainUniqueDeviceId() ?: "unknown"
+                                    val deviceName = activity?.obtainDeviceModel() ?: "Unknown Device"
                                     
                                     coroutineScope.launch(Dispatchers.IO) {
                                         try {
