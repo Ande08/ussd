@@ -160,6 +160,30 @@ app.post('/api/device/login', async (req, res) => {
     }
 });
 
+// 2b. App Endpoint: Device Registration
+app.post('/api/device/register', async (req, res) => {
+    const { username, password, name, account } = req.body;
+    if (!username || !password || !account) {
+        return res.status(400).json({ error: 'ID, Senha e Conta são obrigatórios.' });
+    }
+
+    try {
+        const existing = await dbGet(`SELECT username FROM devices WHERE username = ?`, [username]);
+        if (existing) {
+            return res.status(400).json({ error: 'Este ID de Aparelho já existe.' });
+        }
+
+        await dbRun(
+            `INSERT INTO devices (username, password, name, account, balance, paused) VALUES (?, ?, ?, ?, '0 MB', 0)`,
+            [username, password, name || username, account]
+        );
+        res.status(201).json({ success: true, message: 'Aparelho registado com sucesso.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao registar aparelho.' });
+    }
+});
+
 // 3. App Endpoint: Status Heartbeat
 app.post('/api/device/status', async (req, res) => {
     const { username, balance, paused, battery } = req.body;
@@ -240,10 +264,30 @@ app.post('/api/transfer/update', async (req, res) => {
     }
 });
 
-// 6. Dashboard Endpoint: View all devices
-app.get('/api/devices', async (req, res) => {
+// 5b. App Endpoint: Toggle device pause status
+app.post('/api/device/pause', async (req, res) => {
+    const { username, paused } = req.body;
+    if (!username) return res.status(400).json({ error: 'ID do dispositivo é obrigatório.' });
+
     try {
-        const devices = await dbAll(`SELECT username, name, balance, paused, battery, last_seen FROM devices`);
+        await dbRun(`UPDATE devices SET paused = ? WHERE username = ?`, [paused ? 1 : 0, username]);
+        res.json({ success: true, message: `Dispositivo ${paused ? 'pausado' : 'retomado'}.` });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao alternar pausa.' });
+    }
+});
+
+// 6. Dashboard Endpoint: View all devices in an account
+app.get('/api/devices', async (req, res) => {
+    const { account } = req.query;
+    try {
+        let query = `SELECT username, name, balance, paused, battery, last_seen FROM devices`;
+        let params = [];
+        if (account) {
+            query += ` WHERE account = ?`;
+            params.push(account);
+        }
+        const devices = await dbAll(query, params);
         res.json({ devices });
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar dispositivos.' });

@@ -992,6 +992,74 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
                         Text("ENTRAR", style = MaterialTheme.typography.titleMedium)
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                var showRegisterDialog by remember { mutableStateOf(false) }
+                TextButton(onClick = { showRegisterDialog = true }) {
+                    Text("NÃO TEM CONTA? CRIAR AGORA", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+
+                if (showRegisterDialog) {
+                    var regUser by remember { mutableStateOf("") }
+                    var regPass by remember { mutableStateOf("") }
+                    var regAcc by remember { mutableStateOf("") }
+                    var regName by remember { mutableStateOf("") }
+                    var isRegLoading by remember { mutableStateOf(false) }
+                    var regError by remember { mutableStateOf("") }
+
+                    AlertDialog(
+                        onDismissRequest = { if (!isRegLoading) showRegisterDialog = false },
+                        title = { Text("Criar Nova Conta / Registro") },
+                        text = {
+                            Column {
+                                OutlinedTextField(value = regAcc, onValueChange = { regAcc = it }, label = { Text("Conta (Ex: FambaSales)") }, modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(value = regUser, onValueChange = { regUser = it }, label = { Text("ID do Aparelho (Ex: Celular1)") }, modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(value = regName, onValueChange = { regName = it }, label = { Text("Nome (Ex: Samsung S21)") }, modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(value = regPass, onValueChange = { regPass = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation())
+                                if (regError.isNotEmpty()) {
+                                    Text(regError, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                enabled = !isRegLoading,
+                                onClick = {
+                                    if (regUser.isBlank() || regPass.isBlank() || regAcc.isBlank()) {
+                                        regError = "Preencha os campos obrigatórios"
+                                        return@Button
+                                    }
+                                    isRegLoading = true
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        try {
+                                            val resp = RetrofitClient.api.registerDevice(RegisterRequest(regUser, regPass, regName, regAcc))
+                                            withContext(Dispatchers.Main) {
+                                                isRegLoading = false
+                                                if (resp.success) {
+                                                    showRegisterDialog = false
+                                                    // Auto-fill login
+                                                    username = regUser
+                                                    account = regAcc
+                                                } else {
+                                                    regError = resp.error ?: "Erro no registro"
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            withContext(Dispatchers.Main) { isRegLoading = false; regError = e.message ?: "Erro" }
+                                        }
+                                    }
+                                }
+                            ) { Text("REGISTAR") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showRegisterDialog = false }, enabled = !isRegLoading) { Text("CANCELAR") }
+                        }
+                    )
+                }
             }
         }
     }
@@ -1001,7 +1069,7 @@ fun FleetManagementScreen() {
     LaunchedEffect(Unit) {
         while (true) {
             try {
-                val response = RetrofitClient.api.getDevices()
+                val response = RetrofitClient.api.getDevices(currentAccount)
                 deviceList.clear()
                 deviceList.addAll(response.devices)
             } catch (e: Exception) {
@@ -1016,7 +1084,18 @@ fun FleetManagementScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { isBackendPollingEnabled.value = !isBackendPollingEnabled.value },
+            onClick = { 
+                val newState = !isBackendPollingEnabled.value
+                isBackendPollingEnabled.value = newState 
+                // Explicitly sync pause state with server
+                (context as? MainActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+                    try {
+                        RetrofitClient.api.togglePause(PauseRequest(currentUsername ?: "", !newState))
+                    } catch (e: Exception) {
+                         Log.e("MainActivity", "Erro sync pause: ${e.message}")
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(80.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
@@ -1062,6 +1141,31 @@ fun DeviceCard(device: Device) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(device.name ?: device.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                
+                // --- PAUSE/RESUME BUTTON ---
+                val context = LocalContext.current
+                val scope = rememberCoroutineScope()
+                TextButton(
+                    onClick = {
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                RetrofitClient.api.togglePause(PauseRequest(device.username, !device.paused))
+                                withContext(Dispatchers.Main) {
+                                    // Local optimistic update
+                                    val idx = deviceList.indexOfFirst { it.username == device.username }
+                                    if (idx != -1) {
+                                        deviceList[idx] = deviceList[idx].copy(paused = !device.paused)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("MainActivity", "Erro ao pausar: ${e.message}")
+                            }
+                        }
+                    },
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(if (device.paused) "RETOMAR" else "PAUSAR", color = if (device.paused) Color(0xFF4CAF50) else Color.Red, style = MaterialTheme.typography.labelSmall)
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(device.balance ?: "0 MB", fontWeight = FontWeight.ExtraBold, color = Color.White)

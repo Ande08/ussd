@@ -47,6 +47,18 @@ data class LoginResponse(
     val name: String?
 )
 
+data class RegisterRequest(
+    val username: String,
+    val password: String,
+    val name: String,
+    val account: String
+)
+
+data class PauseRequest(
+    val username: String,
+    val paused: Boolean
+)
+
 data class DeviceStatusRequest(
     val username: String,
     val balance: String,
@@ -99,10 +111,16 @@ interface BackendApi {
     suspend fun updateTransferStatus(@Body request: UpdateStatusRequest): UpdateResponse
     
     @GET("api/devices")
-    suspend fun getDevices(): DeviceListResponse
+    suspend fun getDevices(@retrofit2.http.Query("account") account: String?): DeviceListResponse
 
     @POST("api/transfer")
     suspend fun scheduleTransfer(@Body request: ScheduleTransferRequest): ScheduleTransferResponse
+
+    @POST("api/device/register")
+    suspend fun registerDevice(@Body request: RegisterRequest): SimpleResponse
+
+    @POST("api/device/pause")
+    suspend fun togglePause(@Body request: PauseRequest): SimpleResponse
 }
 
 // Retrofit Object
