@@ -1144,7 +1144,6 @@ fun DeviceCard(device: Device) {
                 Text(if (device.paused) "Pausado" else "Online", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 
                 // --- PAUSE/RESUME BUTTON ---
-                val context = LocalContext.current
                 val scope = rememberCoroutineScope()
                 TextButton(
                     onClick = {
