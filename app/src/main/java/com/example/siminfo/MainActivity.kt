@@ -1,5 +1,7 @@
 package com.example.siminfo
 
+import java.util.Locale
+
 import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -431,7 +433,6 @@ class MainActivity : ComponentActivity() {
         var transferNumber by remember { mutableStateOf("") }
         var transferAmount by remember { mutableStateOf("") }
         var countdownSeconds by remember { mutableIntStateOf(0) }
-        var isSubmitting by remember { mutableStateOf(false) }
 
 
         Column(
@@ -602,7 +603,6 @@ class MainActivity : ComponentActivity() {
                         Button(onClick = {
                             if (transferNumber.isNotBlank() && transferAmount.isNotBlank()) {
                                 // Start countdown
-                                isSubmitting = true
                                 countdownSeconds = 3
                                 lifecycleScope.launch {
                                     while (countdownSeconds > 0) {
@@ -971,9 +971,9 @@ fun parseBalanceToMb(balanceStr: String): Double {
 
 fun formatBalance(mbValue: Double): String {
     return if (mbValue >= 1024.0) {
-        String.format("%.2f GB", mbValue / 1024.0)
+        String.format(Locale.US, "%.2f GB", mbValue / 1024.0)
     } else if (mbValue > 0) {
-        String.format("%.0f MB", mbValue)
+        String.format(Locale.US, "%.0f MB", mbValue)
     } else {
         "0 MB"
     }
@@ -996,11 +996,6 @@ fun extractInternetBalance(response: String): String? {
     return null
 }
 
-fun isAccessibilityServiceEnabled(context: Context): Boolean {
-    val service = context.packageName + "/" + USSDService::class.java.canonicalName
-    val enabledServices = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-    return enabledServices?.contains(service) == true
-}
 
 fun checkVodacomBalance(context: Context, subId: Int, onResult: (String) -> Unit) {
     val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
