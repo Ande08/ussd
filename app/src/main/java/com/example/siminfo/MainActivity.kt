@@ -322,7 +322,7 @@ class MainActivity : ComponentActivity() {
             try {
                 addLog("📤 Enviando pedido cloud: $amount MB -> $number")
                 val response = RetrofitClient.api.scheduleTransfer(
-                    ScheduleTransferRequest(number, amount, currentUsername) // Pass requester ID
+                    ScheduleTransferRequest(number, amount, currentAccount ?: "") // Pass account name
                 )
                 withContext(Dispatchers.Main) {
                     if (response.id != null) {

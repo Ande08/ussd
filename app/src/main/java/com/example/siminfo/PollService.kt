@@ -33,6 +33,13 @@ class PollService : Service() {
         pollJob?.cancel()
         pollJob = serviceScope.launch {
             while (isActive) {
+                // Ensure session is loaded (especially if started by BootReceiver)
+                if (currentUsername == null || currentAccount == null) {
+                    val prefs = applicationContext.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
+                    currentUsername = prefs.getString("USERNAME", null)
+                    currentAccount = prefs.getString("ACCOUNT", null)
+                }
+
                 if (!isBackendPollingEnabled.value || currentUsername == null) {
                     delay(3000)
                     continue

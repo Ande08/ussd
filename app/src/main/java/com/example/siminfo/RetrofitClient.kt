@@ -88,7 +88,7 @@ data class SimpleResponse(
 data class ScheduleTransferRequest(
     val number: String,
     val amount: String,
-    val username: String? // New field: ID of the device requesting the transfer
+    val account: String // Renamed from username to match backend
 )
 
 data class ScheduleTransferResponse(

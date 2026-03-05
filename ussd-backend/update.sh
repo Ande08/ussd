@@ -2,21 +2,21 @@
 
 echo "🔄 Atualizando USSD Backend..."
 
-# 1. Backup da base de dados local para não perder dados reais
+# 1. Backup da base de dados local para /tmp (fora do alcance do git clean)
 if [ -f "queue.db" ]; then
-    cp queue.db queue.db.tmp
-    echo "💾 Backup temporário da DB criado."
+    cp queue.db /tmp/queue.db.tmp
+    echo "💾 Backup de segurança criado em /tmp."
 fi
 
-# 2. Forçar a limpeza e reset do repositório para ignorar conflitos locais
+# 2. Forçar a limpeza e reset do repositório
 git fetch --all
 git reset --hard origin/main
 git clean -fd
 
-# 3. Restaurar a base de dados
-if [ -f "queue.db.tmp" ]; then
-    mv queue.db.tmp queue.db
-    echo "📦 Base de dados restaurada."
+# 3. Restaurar a base de dados de /tmp
+if [ -f "/tmp/queue.db.tmp" ]; then
+    mv /tmp/queue.db.tmp queue.db
+    echo "📦 Base de dados restaurada com sucesso."
 fi
 
 # 4. Atualizar dependências
