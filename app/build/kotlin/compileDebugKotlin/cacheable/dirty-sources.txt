@@ -1,4 +1,0 @@
-C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\java\com\example\siminfo\SmsReceiver.kt
-C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\java\com\example\siminfo\MainActivity.kt
-C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\java\com\example\siminfo\USSDService.kt
-C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\java\com\example\siminfo\RetrofitClient.kt

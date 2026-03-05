@@ -19,6 +19,7 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -49,6 +50,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 
+import android.content.SharedPreferences
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+
 data class QueuedTransfer(
     val simId: Int,
     val carrierName: String,
@@ -68,6 +72,7 @@ class MainActivity : ComponentActivity() {
     // Backend Job tracking
     private var currentBackendJobId: Int? = null
     private var isPollingPaused = false
+    private var isBackendPollingEnabled = mutableStateOf(false)
     private val connectionLogs = mutableStateListOf<String>()
     
     // Transfer Queue State
@@ -301,10 +306,13 @@ class MainActivity : ComponentActivity() {
         val lastExtractedBalance = mutableStateOf<String?>(null)
         val pendingTransferAmount = mutableStateOf<String?>(null)
         val pendingTransferNumber = mutableStateOf<String?>(null)
+        
+        var currentUsername: String? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         createNotificationChannel()
         val filter = IntentFilter().apply {
             addAction("com.example.siminfo.USSD_RESULT")
@@ -318,26 +326,48 @@ class MainActivity : ComponentActivity() {
 
         startBackendPolling()
 
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    SimInfoScreen(
-                        isConsultingAll = isConsultingAll.value,
-                        consultationText = consultationStatus.value,
-                        waitingList = waitingList,
-                        onConsultAll = { sims -> startUniversalConsultation(this, sims) },
-                        onTransfer = { info, amount, num -> startDataTransfer(this, info, amount, num) },
-                        onSmartTransfer = { amount, num -> startSmartTransfer(this, amount, num) },
-                        ussdBalancesMap = ussdBalances,
-                        connectionLogs = connectionLogs,
+        val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
+        currentUsername = prefs.getString("USERNAME", null)
 
-                        onRetryQueued = { q -> 
-                            val sim = getSimInfo(this).find { it.subscriptionId == q.simId }
-                            if (sim != null) startDataTransfer(this, sim, q.amount, q.number)
-                            waitingList.remove(q) 
-                        },
-                        onRemoveQueued = { waitingList.remove(it) }
-                    )
+        setContent {
+            MaterialTheme(colorScheme = darkColorScheme()) {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    var isLoggedIn by remember { mutableStateOf(currentUsername != null) }
+
+                    if (!isLoggedIn) {
+                        LoginScreen(
+                            onLoginSuccess = { user, pass ->
+                                prefs.edit().putString("USERNAME", user).putString("PASSWORD", pass).apply()
+                                currentUsername = user
+                                isLoggedIn = true
+                            }
+                        )
+                    } else {
+                        SimInfoScreen(
+                            isConsultingAll = isConsultingAll.value,
+                            consultationText = consultationStatus.value,
+                            waitingList = waitingList,
+                            onConsultAll = { sims -> startUniversalConsultation(this, sims) },
+                            onTransfer = { info, amount, num -> startDataTransfer(this, info, amount, num) },
+                            onSmartTransfer = { amount, num -> startSmartTransfer(this, amount, num) },
+                            ussdBalancesMap = ussdBalances,
+                            connectionLogs = connectionLogs,
+                            isBackendPollingEnabled = isBackendPollingEnabled,
+    
+                            onRetryQueued = { q -> 
+                                val sim = getSimInfo(this).find { it.subscriptionId == q.simId }
+                                if (sim != null) startDataTransfer(this, sim, q.amount, q.number)
+                                waitingList.remove(q) 
+                            },
+                            onRemoveQueued = { waitingList.remove(it) },
+                            onLogout = {
+                                prefs.edit().clear().apply()
+                                currentUsername = null
+                                isBackendPollingEnabled.value = false
+                                isLoggedIn = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -360,11 +390,25 @@ class MainActivity : ComponentActivity() {
 
     private fun startBackendPolling() {
         lifecycleScope.launch(Dispatchers.IO) {
-            addLog("Iniciando conexão com o Servidor...")
+            addLog("A aguardar início automático do Servidor...")
             while (true) {
+                if (!isBackendPollingEnabled.value || currentUsername == null) {
+                    delay(3000)
+                    continue
+                }
+
+                // Heartbeat: Send current device status
+                try {
+                    val totalBalanceStr = ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString()
+                    RetrofitClient.api.updateDeviceStatus(DeviceStatusRequest(currentUsername!!, totalBalanceStr, !isBackendPollingEnabled.value))
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Erro no Heartbeat: ${e.message}")
+                }
+
+                // Polling pending jobs
                 if (!isPollingPaused && activeTransferInfo == null && currentBackendJobId == null) {
                     try {
-                        val response = RetrofitClient.api.getPendingTransfer()
+                        val response = RetrofitClient.api.getPendingTransfer(PendingRequest(currentUsername!!))
                         if (response.job != null) {
                             val job = response.job
                             addLog("🟢 Pedido #${job.id} Recebido: ${job.amount}MB p/ ${job.number}")
@@ -374,8 +418,6 @@ class MainActivity : ComponentActivity() {
                                 // Start smart transfer automatically
                                 startSmartTransfer(this@MainActivity, job.amount, job.number)
                             }
-                        } else {
-                            // Only log heartbeat occasionally or don't log empty queues to avoid spam
                         }
                     } catch (e: Exception) {
                         addLog("🔴 Erro de Conexão: ${e.message}")
@@ -388,10 +430,11 @@ class MainActivity : ComponentActivity() {
 
     private fun reportJobStatus(status: String) {
         val jobId = currentBackendJobId ?: return
+        val user = currentUsername ?: return
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 addLog("Enviando status pro Servidor: $status")
-                val response = RetrofitClient.api.updateTransferStatus(UpdateStatusRequest(jobId, status))
+                val response = RetrofitClient.api.updateTransferStatus(UpdateStatusRequest(jobId, status, user))
                 addLog("✅ Servidor confirmou: ${response.message}")
             } catch (e: Exception) {
                 addLog("⚠️ Erro ao atualizar status: ${e.message}")
@@ -431,6 +474,90 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
+    Scaffold { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Famba Automator", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Nome do Aparelho (Login)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Senha") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Button(
+                onClick = {
+                    if (username.isBlank() || password.isBlank()) {
+                        errorMessage = "Preencha todos os campos"
+                        return@Button
+                    }
+                    isLoading = true
+                    errorMessage = ""
+                    coroutineScope.launch(Dispatchers.IO) {
+                        try {
+                            val response = RetrofitClient.api.loginDevice(LoginRequest(username, password))
+                            withContext(Dispatchers.Main) {
+                                isLoading = false
+                                if (response.success) {
+                                    onLoginSuccess(username, password)
+                                } else {
+                                    errorMessage = response.error ?: "Senha Incorreta"
+                                }
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                isLoading = false
+                                errorMessage = "Erro de conexão: ${e.message}"
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("ENTRAR", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun SimInfoScreen(
     isConsultingAll: Boolean,
     consultationText: String,
@@ -440,14 +567,20 @@ fun SimInfoScreen(
     onSmartTransfer: (String, String) -> Unit,
     ussdBalancesMap: Map<Int, String>,
     connectionLogs: List<String>,
+    isBackendPollingEnabled: MutableState<Boolean>,
     onRetryQueued: (QueuedTransfer) -> Unit,
-    onRemoveQueued: (QueuedTransfer) -> Unit
+    onRemoveQueued: (QueuedTransfer) -> Unit,
+    onLogout: () -> Unit
 ) {
     val context = LocalContext.current
     var simList by remember { mutableStateOf<List<SubscriptionInfo>>(emptyList()) }
     var transferAmount by remember { mutableStateOf("") }
     var transferNumber by remember { mutableStateOf("") }
+    var showLogs by remember { mutableStateOf(false) }
     val isAccessibilityEnabled = isAccessibilityServiceEnabled(context)
+    
+    val totalBalanceMb = ussdBalancesMap.values.sumOf { parseBalanceToMb(it) }
+    val totalBalanceFormatted = formatBalance(totalBalanceMb)
 
     val permissions = mutableListOf(
         Manifest.permission.READ_PHONE_STATE, 
@@ -464,6 +597,7 @@ fun SimInfoScreen(
     LaunchedEffect(Unit) {
         if (permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) {
             simList = getSimInfo(context)
+            onConsultAll(simList)
         } else {
             launcher.launch(permissions.toTypedArray())
         }
@@ -471,9 +605,47 @@ fun SimInfoScreen(
 
     Scaffold { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            Text(text = "SIM Info & Transfer", style = MaterialTheme.typography.headlineMedium)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "🏠 ${MainActivity.currentUsername}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                IconButton(onClick = onLogout) {
+                    Text("🚪Sair", style = MaterialTheme.typography.labelLarge)
+                }
+            }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SALDO TOTAL DA MÁQUINA", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(text = totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Central Server Button
+            Button(
+                onClick = { isBackendPollingEnabled.value = !isBackendPollingEnabled.value },
+                modifier = Modifier.fillMaxWidth().height(80.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isBackendPollingEnabled.value) Color(0xFF4CAF50) else Color(0xFFF44336)
+                )
+            ) {
+                Text(
+                    text = if (isBackendPollingEnabled.value) "SERVIDOR LIGADO" else "LIGAR SERVIDOR (AUTO)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(onClick = { showLogs = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("Ver Logs do Servidor")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             if (!isAccessibilityEnabled) {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), modifier = Modifier.padding(bottom = 16.dp)) {
@@ -545,26 +717,6 @@ fun SimInfoScreen(
                     SimCardItem(info, balance, transferAmount, transferNumber, onTransfer)
                 }
                 
-                // Connection Logs Section
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "Logs do Servidor (Auto-Queue)", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.Black),
-                        modifier = Modifier.fillMaxWidth().height(150.dp)
-                    ) {
-                        LazyColumn(modifier = Modifier.padding(8.dp).fillMaxSize(), reverseLayout = true) {
-                            items(connectionLogs.reversed()) { log ->
-                                Text(
-                                    text = log,
-                                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
-                                    color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("🟢") || log.contains("✅")) Color.Green else Color.LightGray
-                                )
-                            }
-                        }
-                    }
-                }
 
                 if (waitingList.isNotEmpty()) {
                     item {
@@ -577,6 +729,31 @@ fun SimInfoScreen(
                     }
                 }
             }
+        }
+
+        // Logs Dialog (Moved outside LazyColumn)
+        if (showLogs) {
+            AlertDialog(
+                onDismissRequest = { showLogs = false },
+                title = { Text("Logs do Servidor") },
+                text = {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color.Black),
+                        modifier = Modifier.fillMaxWidth().height(300.dp)
+                    ) {
+                        LazyColumn(modifier = Modifier.padding(8.dp).fillMaxSize(), reverseLayout = true) {
+                            items(connectionLogs.reversed()) { log ->
+                                Text(
+                                    text = log,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                                    color = if (log.contains("🔴") || log.contains("⚠️")) Color.Red else if (log.contains("🟢") || log.contains("✅")) Color.Green else Color.LightGray
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = { Button(onClick = { showLogs = false }) { Text("Fechar") } }
+            )
         }
     }
 }
@@ -610,9 +787,7 @@ fun SimCardItem(info: SubscriptionInfo, balance: String?, amount: String, number
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "Slot: ${info.simSlotIndex + 1} - ${info.displayName}", style = MaterialTheme.typography.titleMedium)
-            if (balance != null) {
-                Text(text = "Saldo: $balance", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-            }
+            // Balance text hidden globally in Phase 5 to avoid confusion.
             if (isVodacom) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -660,9 +835,16 @@ fun extractInternetBalance(response: String): String? {
     val mensalRegex = Regex("Mensal:\\s*(\\d+\\s*(?:MB|GB|KB|Bytes))", RegexOption.IGNORE_CASE)
     val mensalMatch = mensalRegex.find(response)
     if (mensalMatch != null) return mensalMatch.groupValues[1]
+    
     val internetRegex = Regex("Internet:\\s*(\\d+\\s*(?:MB|GB|KB|Bytes))", RegexOption.IGNORE_CASE)
     val internetMatch = internetRegex.find(response)
     if (internetMatch != null) return internetMatch.groupValues[1]
+
+    // Se a mensagem contém a palavra saldo (é uma resposta de consulta) mas não tem as palavras acima, assumimos 0 MB.
+    if (response.contains("saldo", ignoreCase = true) || response.contains("extrato", ignoreCase = true)) {
+        return "0 MB"
+    }
+
     return null
 }
 

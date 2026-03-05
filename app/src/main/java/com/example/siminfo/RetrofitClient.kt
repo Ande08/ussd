@@ -19,9 +19,14 @@ data class PendingResponse(
     val job: TransferJob?
 )
 
+data class PendingRequest(
+    val username: String
+)
+
 data class UpdateStatusRequest(
     val id: Int,
-    val status: String
+    val status: String,
+    val username: String
 )
 
 data class UpdateResponse(
@@ -29,10 +34,39 @@ data class UpdateResponse(
     val error: String?
 )
 
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
+data class LoginResponse(
+    val success: Boolean,
+    val message: String?,
+    val error: String?,
+    val name: String?
+)
+
+data class DeviceStatusRequest(
+    val username: String,
+    val balance: String,
+    val paused: Boolean
+)
+
+data class SimpleResponse(
+    val success: Boolean,
+    val error: String?
+)
+
 // API Interface
 interface BackendApi {
-    @GET("api/transfer/pending")
-    suspend fun getPendingTransfer(): PendingResponse
+    @POST("api/device/login")
+    suspend fun loginDevice(@Body request: LoginRequest): LoginResponse
+
+    @POST("api/device/status")
+    suspend fun updateDeviceStatus(@Body request: DeviceStatusRequest): SimpleResponse
+
+    @POST("api/transfer/pending")
+    suspend fun getPendingTransfer(@Body request: PendingRequest): PendingResponse
 
     @POST("api/transfer/update")
     suspend fun updateTransferStatus(@Body request: UpdateStatusRequest): UpdateResponse

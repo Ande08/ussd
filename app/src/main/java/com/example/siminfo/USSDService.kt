@@ -62,7 +62,7 @@ class USSDService : AccessibilityService() {
                 intent.putExtra("status", "SUCCESS")
                 intent.putExtra("message", text)
                 sendBroadcast(intent)
-                dismissUssd(nodeInfo)
+                handler.postDelayed({ dismissUssd(nodeInfo) }, 1000) // 1s delay to ensure button is clickable
             }
             normalizedText.contains("quantos megas") -> {
                 Log.d("USSDService", "Matching: Amount step. Text: $text")
@@ -180,7 +180,7 @@ class USSDService : AccessibilityService() {
         }
 
         // Strategy 2: Common labels (check node and parent)
-        val dismissLabels = listOf("OK", "Cancelar", "Cancel", "Rejeitar", "Sair", "Submeter", "Concluir")
+        val dismissLabels = listOf("OK", "Cancelar", "Cancel", "Rejeitar", "Sair", "Submeter", "Concluir", "Aceitar", "Accept", "Sim")
         for (label in dismissLabels) {
             val list = node.findAccessibilityNodeInfosByText(label)
             for (dismissNode in list) {
