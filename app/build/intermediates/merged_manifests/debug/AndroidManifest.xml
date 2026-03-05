@@ -32,7 +32,8 @@
         android:extractNativeLibs="false"
         android:label="SIM Info"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar" >
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        android:usesCleartextTraffic="true" >
         <activity
             android:name="com.example.siminfo.MainActivity"
             android:exported="true"

@@ -1,4 +1,0 @@
-#Thu Mar 05 01:42:29 CAT 2026
-base.0=C\:\\Users\\TOPOGRAFIA CMCM\\Desktop\\ussd app\\app\\build\\intermediates\\dex\\debugAndroidTest\\mergeProjectDexDebugAndroidTest\\0\\classes.dex
-path.0=0/classes.dex
-renamed.0=classes.dex

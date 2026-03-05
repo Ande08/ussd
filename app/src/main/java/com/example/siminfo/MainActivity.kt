@@ -135,21 +135,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun reportJobStatus(status: String) {
-        val jobId = currentBackendJobId ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val response = RetrofitClient.api.updateTransferStatus(UpdateStatusRequest(jobId, status))
-                Log.d("MainActivity", "Backend notified: Job $jobId is $status. Server msg: ${response.message}")
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Failed to update backend for job $jobId: ${e.message}")
-            } finally {
-                currentBackendJobId = null
-                isPollingPaused = false // Resume polling
-            }
-        }
-    }
-
     private fun attemptRetry(info: QueuedTransfer) {
         retryCount++
         if (retryCount < 2) {
@@ -393,7 +378,7 @@ class MainActivity : ComponentActivity() {
                             // Only log heartbeat occasionally or don't log empty queues to avoid spam
                         }
                     } catch (e: Exception) {
-                        addLog("🔴 Erro de Conexão: Servidor Offline ou IP Incorreto.")
+                        addLog("🔴 Erro de Conexão: ${e.message}")
                     }
                 }
                 delay(7000) // Poll every 7 seconds
@@ -409,7 +394,7 @@ class MainActivity : ComponentActivity() {
                 val response = RetrofitClient.api.updateTransferStatus(UpdateStatusRequest(jobId, status))
                 addLog("✅ Servidor confirmou: ${response.message}")
             } catch (e: Exception) {
-                addLog("⚠️ Erro ao atualizar status: Servidor inatingível.")
+                addLog("⚠️ Erro ao atualizar status: ${e.message}")
             } finally {
                 currentBackendJobId = null
                 isPollingPaused = false // Resume polling

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-54:12
-INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-54:12
-INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-54:12
-INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-54:12
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-55:12
+INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-55:12
+INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-55:12
+INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:2:1-55:12
 MERGED from [androidx.compose.material3:material3:1.1.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\0556f004262f6c73a8941e13fc846507\transformed\jetified-material3-1.1.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.activity:activity:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\f787017578c1e4937d36f1c4cf2169dd\transformed\jetified-activity-1.8.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.activity:activity-compose:1.8.1] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\a6b8202d3b4eac8d1fce740a437ccdf8\transformed\jetified-activity-compose-1.8.1\AndroidManifest.xml:2:1-7:12
@@ -86,8 +86,8 @@ ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifes
 	android:name
 		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:12:19-60
 application
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:14:5-52:19
-INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:14:5-52:19
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:14:5-53:19
+INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:14:5-53:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\2fc8f12f4cd9c22bfc72e3302f01753b\transformed\jetified-emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\TOPOGRAFIA CMCM\.gradle\caches\9.0-milestone-1\transforms\5b197e7078a63fe1ae4f3efb5cf35767\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:23:5-33:19
@@ -109,69 +109,71 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\TOPOGRAFIA CMCM\.g
 	android:label
 		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:16:9-33
 	tools:ignore
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:19:9-46
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:20:9-46
 	android:allowBackup
 		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:15:9-35
 	android:theme
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:18:9-72
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:19:9-72
+	android:usesCleartextTraffic
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:18:9-44
 activity#com.example.siminfo.MainActivity
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:20:9-28:20
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:21:9-29:20
 	android:exported
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:22:13-36
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:23:13-36
 	android:theme
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:23:13-76
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:24:13-76
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:21:13-41
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:22:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:24:13-27:29
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:25:13-28:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:25:17-69
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:26:17-69
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:25:25-66
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:26:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:26:17-77
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:27:17-77
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:26:27-74
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:27:27-74
 service#com.example.siminfo.USSDService
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:30:9-42:19
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:31:9-43:19
 	android:label
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:34:13-44
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:35:13-44
 	android:exported
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:32:13-37
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:33:13-37
 	tools:ignore
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:35:13-48
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:36:13-48
 	android:permission
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:33:13-79
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:34:13-79
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:31:13-40
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:32:13-40
 intent-filter#action:name:android.accessibilityservice.AccessibilityService
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:36:13-38:29
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:37:13-39:29
 action#android.accessibilityservice.AccessibilityService
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:37:17-92
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:38:17-92
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:37:25-89
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:38:25-89
 meta-data#android.accessibilityservice
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:39:13-41:72
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:40:13-42:72
 	android:resource
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:41:17-69
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:42:17-69
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:40:17-60
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:41:17-60
 receiver#com.example.siminfo.SmsReceiver
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:44:9-51:20
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:45:9-52:20
 	android:enabled
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:46:13-35
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:47:13-35
 	android:exported
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:47:13-36
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:48:13-36
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:45:13-40
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:46:13-40
 intent-filter#action:name:android.provider.Telephony.SMS_RECEIVED
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:48:13-50:29
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:49:13-51:29
 	android:priority
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:48:28-50
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:49:28-50
 action#android.provider.Telephony.SMS_RECEIVED
-ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:49:17-82
+ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:50:17-82
 	android:name
-		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:49:25-79
+		ADDED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml:50:25-79
 uses-sdk
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\TOPOGRAFIA CMCM\Desktop\ussd app\app\src\main\AndroidManifest.xml
