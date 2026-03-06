@@ -56,8 +56,10 @@ class PollService : Service() {
                     RetrofitClient.api.updateDeviceStatus(
                         DeviceStatusRequest(username, totalBalanceStr, !AppState.isBackendPollingEnabled.value, currentBattery)
                     )
+                    AppState.addLog("💖 Pulso automático OK ($currentBattery% | $totalBalanceStr)")
                 } catch (e: Exception) {
                     Log.e("PollService", "Erro Heartbeat: ${e.message}")
+                    AppState.addLog("⚠️ Falha no Pulso automático: ${e.message}")
                 }
 
                 // --- Settings Sync (Pause state) ---

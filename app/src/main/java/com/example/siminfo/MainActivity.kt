@@ -869,15 +869,53 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
         
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Get activity context safely
+        val activity = LocalContext.current as MainActivity
+
+        // Action Buttons Row: Manual Heartbeat
+        Button(
+            onClick = {
+                val user = sessionManager.username ?: return@Button
+                val acc = sessionManager.account ?: return@Button
+                activity.lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        AppState.addLog("⚡ Forçando Heartbeat manual...")
+                        val battery = (activity.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
+                            .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                        val balance = AppState.ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString() + " MB"
+                        
+                        RetrofitClient.api.updateDeviceStatus(
+                            DeviceStatusRequest(user, balance, !AppState.isBackendPollingEnabled.value, battery)
+                        )
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(activity, "Pulso enviado com sucesso!", Toast.LENGTH_SHORT).show()
+                            AppState.addLog("💖 Pulso manual OK")
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(activity, "Erro ao enviar pulso", Toast.LENGTH_SHORT).show()
+                            AppState.addLog("⚠️ Erro no pulso manual: ${e.message}")
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text("💖 Forçar Pulso (Heartbeat)", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+
         // Action Buttons Row 2: Manual Sync
-        val activity = LocalContext.current as? MainActivity
         OutlinedButton(
-            onClick = { activity?.startConsultarTodos() },
+            onClick = { activity.startConsultarTodos() },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(16.dp),
-            enabled = activity?.isConsultingAll?.value != true
+            enabled = activity.isConsultingAll.value != true
         ) {
-            val btnStatus = activity?.consultationStatus?.value ?: "Sincronizar Saldos Agora"
+            val btnStatus = activity.consultationStatus.value ?: "Sincronizar Saldos Agora"
             Text(btnStatus, fontWeight = FontWeight.Bold)
         }
 
