@@ -120,7 +120,8 @@ class MainActivity : ComponentActivity() {
         if (status == "SUCCESS") {
             Log.d("MainActivity", "SUCCESS detected. Recipient: ${info.number}, Amount: ${info.amount}")
             Toast.makeText(this, "Transferência Concluída!", Toast.LENGTH_LONG).show()
-            showTransferNotification(info.number, info.amount)
+            val deviceModel = obtainDeviceModel()
+            showTransferNotification(info.number, info.amount, deviceModel)
 
             // Deduct balance locally
             val currentStr = AppState.ussdBalances[info.simId]
@@ -128,7 +129,9 @@ class MainActivity : ComponentActivity() {
                 val valMb = parseBalanceToMb(currentStr)
                 val deductMb = parseBalanceToMb(info.amount)
                 val newBal = (valMb - deductMb).coerceAtLeast(0.0)
-                AppState.ussdBalances[info.simId] = String.format(Locale.US, "%.1f MB", newBal)
+                val newBalStr = String.format(Locale.US, "%.1f MB", newBal)
+                AppState.ussdBalances[info.simId] = newBalStr
+                AppState.addLog("💰 Saldo debitado: -${info.amount}. Novo saldo: $newBalStr")
             }
 
             // Sincronizar balance atualizado com o servidor imediatamente
@@ -407,12 +410,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun showTransferNotification(number: String, amount: String) {
+    private fun showTransferNotification(number: String, amount: String, deviceName: String) {
         val builder = NotificationCompat.Builder(this, "transfer_channel")
             .setSmallIcon(android.R.drawable.stat_sys_upload_done)
             .setContentTitle("Transferência Realizada")
-            .setContentText("Enviado com sucesso: $amount MB para $number")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentText("📱 $deviceName enviou: $amount MB para $number")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("📱 Dispositivo: $deviceName\n📶 Quantidade: $amount MB\n🎯 Destino: $number"))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
         val notificationManager: NotificationManager =
@@ -674,8 +678,9 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text("Bem-vindo,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                Text("Super Net 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Bem-vindo a FambaNet,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                val deviceName = (context as? MainActivity)?.obtainDeviceModel() ?: "Super Net"
+                Text("$deviceName 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { /* Notifications */ }) {

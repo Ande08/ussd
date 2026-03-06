@@ -19,8 +19,11 @@ class USSDService : AccessibilityService() {
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        // Filter specifically for the phone package as requested
-        if (event.packageName?.toString() != "com.android.phone") return
+        // Broaden the filter to capture System Alert Windows (MMI Errors, General Android Alerts) and USSD Dialogs
+        val pkg = event.packageName?.toString() ?: return
+        if (pkg != "com.android.phone" && pkg != "com.android.systemui" && pkg != "android") {
+            return
+        }
 
         acquireWakeLock()
         val currentTime = System.currentTimeMillis()
@@ -43,7 +46,7 @@ class USSDService : AccessibilityService() {
                 lastEventTime = System.currentTimeMillis()
                 Log.d("USSDService", "Captured Text: \n$fullText | Interactive: $hasInput")
 
-                processUssdLogic(nodeInfo, fullText, hasInput)
+                processUssdLogic(nodeInfo, fullText, hasInput, pkg)
             }, 500)
         }
     }
@@ -74,7 +77,7 @@ class USSDService : AccessibilityService() {
         return interactive
     }
 
-    private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String, isInteractive: Boolean) {
+    private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String, isInteractive: Boolean, packageName: String) {
         val normalizedText = text.lowercase()
 
         // 1. Success Patterns — only on non-interactive (final result) screens
@@ -84,10 +87,11 @@ class USSDService : AccessibilityService() {
             "transferencia efectuada", "transferencia realizada",
             "transferido com sucesso", "transferencia de dados",
             "dados transferidos", "foi transferido", "foi enviado",
-            "operacao concluida", "operação concluida"
+            "operacao concluida", "operação concluida", "transferiu",
+            "transferiste", "transferiste com sucesso", "validos por 24h", "para o numero"
         )
         val isSuccess = successPatterns.any { normalizedText.contains(it) }
-        if (isSuccess && !isInteractive) {
+        if (isSuccess) {
             Log.d("USSDService", "!!! SUCCESS DETECTED !!! (text: $text)")
             broadcastStatus("SUCCESS", text)
             autoDismiss(nodeInfo)
@@ -109,6 +113,22 @@ class USSDService : AccessibilityService() {
             broadcastStatus("FAILURE", text)
             autoDismiss(nodeInfo)
             return
+        }
+
+        // 2.b MMI Errors and Generic System UI Alerts (Anti-Lock Mechanism)
+        val genericSystemAlerts = listOf(
+            "problema de conexao ou codigo mmi invalido", "mmi",
+            "connection problem or invalid mmi code", "invalid mmi",
+            "rede movel nao disponivel", "mobile network not available",
+            "emergencia apenas", "emergency calls only",
+            "erro de rede", "network error", "limite alcançado", "tentativas excedidas"
+        )
+        val isSystemAlert = genericSystemAlerts.any { normalizedText.contains(it) }
+        if (isSystemAlert) {
+             Log.w("USSDService", "!!! ANTI-LOCK DEPLOYED: SYSTEM ALERT DETECTED !!! (text: $text)")
+             broadcastStatus("FAILURE", "Alerta de Sistema: $text")
+             autoDismiss(nodeInfo)
+             return
         }
 
         // 3. Intermediate Steps (Only if interactive)
