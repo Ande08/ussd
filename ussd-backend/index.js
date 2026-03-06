@@ -8,6 +8,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Global unhandled rejection logger for production stability
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[CRITICAL] Unhandled Rejection:', reason);
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Socket.io Setup
@@ -115,10 +120,10 @@ db.serialize(() => {
 
         if (hasAccount && hasPassword) {
             db.run(`
-                INSERT INTO accounts (name, password)
+                INSERT OR IGNORE INTO accounts (name, password)
                 SELECT DISTINCT account, password FROM devices 
                 WHERE account IS NOT NULL AND password IS NOT NULL
-                AND account NOT IN (SELECT name FROM accounts)
+                AND LOWER(account) NOT IN (SELECT LOWER(name) FROM accounts)
             `, (err) => {
                 if (!err) {
                     db.run(`
@@ -155,7 +160,8 @@ db.serialize(() => {
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
     let { number, amount, account, targetDevice } = req.body;
-    account = account?.trim();
+    account = account?.trim()?.toLowerCase();
+    targetDevice = targetDevice?.trim()?.toLowerCase();
 
     if (!number || !amount || !account) {
         return res.status(400).json({ error: 'Número, Quantidade e Conta são obrigatórios.' });
@@ -163,8 +169,12 @@ app.post('/api/transfer', async (req, res) => {
 
     try {
         console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${targetDevice || 'AUTO'})`);
-        const accRow = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
-        if (!accRow) return res.status(404).json({ error: 'Conta não encontrada.' });
+        // Case-Insensitive account lookup
+        const accRow = await dbGet(`SELECT id FROM accounts WHERE LOWER(name) = LOWER(?)`, [account]);
+        if (!accRow) {
+            console.log(`[Job Fail] Account not found: ${account}`);
+            return res.status(404).json({ error: 'Conta não encontrada.' });
+        }
 
         const ownerAccountId = accRow.id;
 
@@ -222,9 +232,9 @@ app.post('/api/device/login', async (req, res) => {
     let { username, password, account, name } = req.body;
 
     // Trim and normalize
-    username = username?.trim();
+    username = username?.trim()?.toLowerCase();
     password = password?.trim();
-    account = account?.trim();
+    account = account?.trim()?.toLowerCase();
     name = name?.trim();
 
     if (!account || !password || !username) {
@@ -273,9 +283,9 @@ app.post('/api/device/login', async (req, res) => {
 app.post('/api/device/register', async (req, res) => {
     let { username, password, name, account } = req.body;
 
-    username = username?.trim();
+    username = username?.trim()?.toLowerCase();
     password = password?.trim();
-    account = account?.trim();
+    account = account?.trim()?.toLowerCase();
     name = name?.trim();
 
     if (!username || !password || !account) {
@@ -327,6 +337,7 @@ app.post('/api/device/status', async (req, res) => {
         );
         res.json({ success: true });
     } catch (err) {
+        console.error(`[Heartbeat Error] Device ${username}:`, err);
         res.status(500).json({ error: 'Erro ao atualizar status do dispositivo.' });
     }
 });
@@ -435,7 +446,8 @@ app.post('/api/transfer/pending', async (req, res) => {
 
 // 5. App Endpoint: Report status (SUCCESS/FAILURE)
 app.post('/api/transfer/update', async (req, res) => {
-    const { id, status, username } = req.body; // status: 'SUCESSO', 'FALHA'
+    let { id, status, username } = req.body;
+    username = username?.trim()?.toLowerCase();
     if (!id || !status || !username) {
         return res.status(400).json({ error: 'ID, Status e Username são obrigatórios.' });
     }
@@ -555,7 +567,7 @@ setInterval(async () => {
         }
 
     } catch (err) {
-        console.error("[Auto-Unlock] Erro:", err.message);
+        console.error("[Auto-Unlock] Erro Crítico:", err);
     }
 }, 30000); // Run every 30 seconds
 
