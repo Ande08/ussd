@@ -67,6 +67,8 @@ object SocketManager {
                     // Disparar o processamento imediatamente
                     val intent = Intent(context, MainActivity::class.java).apply {
                         putExtra("JOB_ID", jobId)
+                        putExtra("JOB_AMOUNT", amount)
+                        putExtra("JOB_NUMBER", number)
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
                     context.startActivity(intent)
