@@ -26,9 +26,14 @@ io.on('connection', (socket) => {
 
     socket.on('register_device', (data) => {
         if (data && data.username) {
-            const room = data.username.toLowerCase().trim();
-            socket.join(room);
-            console.log(`[Socket] Dispositivo ${room} registrado para PUSH.`);
+            const userRoom = data.username.toLowerCase().trim();
+            socket.join(userRoom);
+            console.log(`[Socket] Dispositivo ${userRoom} registrado para PUSH direto.`);
+        }
+        if (data && data.account) {
+            const accRoom = `acc_${data.account.toLowerCase().trim()}`;
+            socket.join(accRoom);
+            console.log(`[Socket] Dispositivo entrou na sala da conta: ${accRoom}`);
         }
     });
 
@@ -202,15 +207,21 @@ app.post('/api/transfer', async (req, res) => {
         console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${normalizedTarget})`);
 
         // --- REAL-TIME PUSH ---
+        const jobPayload = {
+            id: result.lastID,
+            number,
+            amount,
+            account
+        };
+
         if (assignedTo) {
             const room = assignedTo.toLowerCase().trim();
-            io.to(room).emit('new_job', {
-                id: result.lastID,
-                number,
-                amount,
-                account
-            });
-            console.log(`[Push] Evento enviado para sala: ${room}`);
+            io.to(room).emit('new_job', jobPayload);
+            console.log(`[Push] Evento DIRETO enviado para sala: ${room}`);
+        } else {
+            const room = `acc_${account.toLowerCase().trim()}`;
+            io.to(room).emit('new_job', jobPayload);
+            console.log(`[Push] Evento GERAL enviado para sala da conta: ${room}`);
         }
 
         res.status(201).json({
@@ -388,7 +399,7 @@ app.post('/api/transfer/pending', async (req, res) => {
             );
 
             if (unassigned.length > 0) {
-                console.log(`[Poll] ${username} found ${unassigned.length} unassigned jobs for account ${device.account_name}`);
+                console.log(`[Poll] Device ${username}: Found ${unassigned.length} unassigned jobs. Checking balances...`);
             }
 
             // Find the first unassigned job this device can afford

@@ -30,9 +30,17 @@ object SocketManager {
             socket?.on(Socket.EVENT_CONNECT) {
                 Log.d(TAG, "Conectado ao WebSocket")
                 AppState.addLog("🔌 WebSocket Conectado")
-                // Registrar dispositivo na sala privada
+                // Registrar dispositivo na sala privada e sala da conta
                 val data = JSONObject()
                 data.put("username", username)
+                
+                // Pegar a conta do SessionManager
+                val sessionManager = SessionManager.getInstance(context)
+                val account = sessionManager.account
+                if (!account.isNullOrBlank()) {
+                    data.put("account", account)
+                }
+                
                 socket?.emit("register_device", data)
             }
 
