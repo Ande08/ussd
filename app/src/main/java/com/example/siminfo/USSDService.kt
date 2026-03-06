@@ -8,13 +8,15 @@ import android.util.Log
 import android.os.Handler
 import android.os.Looper
 import android.os.Bundle
+import android.os.PowerManager
+import android.content.Context
 
 class USSDService : AccessibilityService() {
     
     private var lastProcessedText = ""
     private var lastEventTime = 0L
     private val handler = Handler(Looper.getMainLooper())
-    private var wakeLock: android.os.PowerManager.WakeLock? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // Filter specifically for the phone package as requested
@@ -142,8 +144,8 @@ class USSDService : AccessibilityService() {
     private fun acquireWakeLock() {
         try {
             if (wakeLock == null) {
-                val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
-                wakeLock = pm.newWakeLock(android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK or android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP, "SIMInfo::USSDWakeLock")
+                val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+                wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, "SIMInfo::USSDWakeLock")
             }
             if (wakeLock?.isHeld == false) {
                 wakeLock?.acquire(2 * 60 * 1000L /* 2 minutes timeout */)
