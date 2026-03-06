@@ -229,6 +229,36 @@ app.post('/api/confirmations/register', async (req, res) => {
     }
 });
 
+// 0d. Bot Endpoint: Validate a confirmation code before asking the user for a phone number
+app.post('/api/confirmations/validate', async (req, res) => {
+    const { paymentCode, secret } = req.body;
+
+    // Permitir o Bot consultar sem a restrição de admin desde que mande o código, ou requerir o secret
+    if (secret !== (process.env.ADMIN_SECRET || 'famba-admin')) {
+        return res.status(403).json({ error: 'Acesso negado. Secret Inválido.' });
+    }
+
+    if (!paymentCode) {
+        return res.status(400).json({ error: 'Código de pagamento não fornecido.' });
+    }
+
+    try {
+        const confExists = await dbGet(`SELECT * FROM confirmations WHERE code = ?`, [paymentCode]);
+        if (!confExists) {
+            return res.status(400).json({ error: 'O código de pagamento não existe ou ainda não foi processado pelo aplicativo.' });
+        }
+        if (confExists.used) {
+            return res.status(400).json({ error: 'Este código de pagamento já foi utilizado em outra recarga.' });
+        }
+
+        // Code is valid and unused
+        return res.status(200).json({ success: true, message: 'Código válido e disponível.' });
+    } catch (e) {
+        console.error(`[Validate Error] ${e.message}`);
+        return res.status(500).json({ error: 'Erro interno ao validar pagamento.' });
+    }
+});
+
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
     let { number, amount, account, targetDevice, paymentCode, secret } = req.body;
