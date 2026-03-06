@@ -847,6 +847,7 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                     title = { Text("Lista de Espera") },
                     text = {
                         LazyColumn {
+                            items(AppState.waitingList, key = { it.timestamp }) { item ->
                                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                     Text("${item.amount} MB para ${item.number}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Text("SIM: ${item.carrierName}" + (if (item.backendJobId != null) " | Job #${item.backendJobId}" else ""), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
@@ -876,6 +877,7 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Divider(color = Color.DarkGray)
                                 }
+                            }
                             if (AppState.waitingList.isEmpty()) {
                                 item { Text("Sem transferências retidas.", color = MaterialTheme.colorScheme.onSurface) }
                             }
