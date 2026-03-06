@@ -12,7 +12,8 @@ data class QueuedTransfer(
     val carrierName: String,
     val amount: String,
     val number: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val backendJobId: Int? = null
 )
 
 /**

@@ -159,7 +159,9 @@ class MainActivity : ComponentActivity() {
         } else {
             Log.d("MainActivity", "Fail limit reached. Adding to Waiting List.")
             Toast.makeText(this, "Falhou 2x. Adicionado à Lista de Espera.", Toast.LENGTH_LONG).show()
-            AppState.waitingList.add(info)
+            // Preserve the backendJobId when adding to waiting list
+            val infoWithId = info.copy(backendJobId = AppState.currentBackendJobId)
+            AppState.waitingList.add(infoWithId)
             AppState.activeTransferInfo = null
             retryCount = 0
             AppState.pendingTransferAmount.value = null
@@ -234,7 +236,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    fun startSmartTransfer(context: Context, amount: String, number: String) {
+    fun startSmartTransfer(context: Context, amount: String, number: String, backendJobId: Int? = null) {
         val amountMb = amount.toDoubleOrNull() ?: 0.0
         if (amountMb <= 0 || number.isBlank()) {
             Toast.makeText(context, "Preencha número e quantidade válida.", Toast.LENGTH_SHORT).show()
@@ -244,20 +246,21 @@ class MainActivity : ComponentActivity() {
         val bestSim = findBestSimForTransfer(amountMb)
         if (bestSim != null) {
             Toast.makeText(context, "Chip selecionado: ${bestSim.displayName}", Toast.LENGTH_SHORT).show()
-            startDataTransfer(context, bestSim, amount, number)
+            startDataTransfer(context, bestSim, amount, number, backendJobId)
         } else {
             Toast.makeText(context, "Nenhum chip com saldo suficiente (${amount} MB).", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun startDataTransfer(context: Context, info: SubscriptionInfo, amount: String, number: String) {
+    fun startDataTransfer(context: Context, info: SubscriptionInfo, amount: String, number: String, backendJobId: Int? = null) {
         if (amount.isBlank() || number.isBlank()) {
             Toast.makeText(context, "Preencha número e quantidade.", Toast.LENGTH_SHORT).show()
             return
         }
-        Log.d("MainActivity", "Starting Data Transfer: $amount MB to $number from SIM ${info.subscriptionId}")
-        val transferInfo = QueuedTransfer(info.subscriptionId, info.displayName.toString(), amount, number)
+        Log.d("MainActivity", "Starting Data Transfer: $amount MB to $number from SIM ${info.subscriptionId} (Job: $backendJobId)")
+        val transferInfo = QueuedTransfer(info.subscriptionId, info.displayName.toString(), amount, number, backendJobId = backendJobId)
         AppState.activeTransferInfo = transferInfo
+        AppState.currentBackendJobId = backendJobId
 
         retryCount = 0
         startTransferInternal(transferInfo)
@@ -513,10 +516,9 @@ class MainActivity : ComponentActivity() {
         if (jobId != -1) {
             val amount = intent?.getStringExtra("JOB_AMOUNT") ?: ""
             val number = intent?.getStringExtra("JOB_NUMBER") ?: ""
-            AppState.currentBackendJobId = jobId
             AppState.isPollingPaused = true
             AppState.addLog("🟢 Executando Pedido #${jobId}")
-            startSmartTransfer(this, amount, number)
+            startSmartTransfer(this, amount, number, jobId)
         }
     }
 
@@ -845,13 +847,35 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                     title = { Text("Lista de Espera") },
                     text = {
                         LazyColumn {
-                            items(AppState.waitingList, key = { it.timestamp }) { item ->
-                                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                     Text("${item.amount} MB para ${item.number}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                                    Text("SIM: ${item.carrierName}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Text("SIM: ${item.carrierName}" + (if (item.backendJobId != null) " | Job #${item.backendJobId}" else ""), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                                        Button(
+                                            onClick = {
+                                                AppState.waitingList.remove(item)
+                                                (context as? MainActivity)?.startSmartTransfer(context, item.amount, item.number, item.backendJobId)
+                                                showWaitingListDialog = false
+                                            },
+                                            modifier = Modifier.weight(1f).height(36.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Text("Tentar de Novo", fontSize = MaterialTheme.typography.labelSmall.fontSize, fontWeight = FontWeight.Bold)
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(
+                                            onClick = { AppState.waitingList.remove(item) },
+                                            modifier = Modifier.weight(1f).height(36.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020)),
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Text("Excluir", fontSize = MaterialTheme.typography.labelSmall.fontSize, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Divider(color = Color.DarkGray)
                                 }
-                            }
                             if (AppState.waitingList.isEmpty()) {
                                 item { Text("Sem transferências retidas.", color = MaterialTheme.colorScheme.onSurface) }
                             }

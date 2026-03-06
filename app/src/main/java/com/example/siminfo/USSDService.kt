@@ -90,9 +90,14 @@ class USSDService : AccessibilityService() {
             "operacao concluida", "operação concluida", "transferiu",
             "transferiste", "transferiste com sucesso", "validos por 24h", "para o numero"
         )
-        val isSuccess = successPatterns.any { normalizedText.contains(it) }
-        if (isSuccess) {
-            Log.d("USSDService", "!!! SUCCESS DETECTED !!! (text: $text)")
+        
+        // Priority check: If we have a pending number, see if it's in the text along with a success keyword
+        val pendingNum = AppState.pendingTransferNumber.value
+        val containsPendingNum = pendingNum?.let { normalizedText.contains(it) } ?: false
+        val isSuccessKeyword = successPatterns.any { normalizedText.contains(it) }
+
+        if (isSuccessKeyword || (containsPendingNum && normalizedText.contains("transferiste"))) {
+            Log.d("USSDService", "!!! SUCCESS DETECTED !!! (text: $text, matchedNum: $containsPendingNum)")
             broadcastStatus("SUCCESS", text)
             autoDismiss(nodeInfo)
             return
