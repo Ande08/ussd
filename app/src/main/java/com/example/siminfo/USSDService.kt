@@ -84,27 +84,26 @@ class USSDService : AccessibilityService() {
         if (!isInteractive) {
             val pendingNum = AppState.pendingTransferNumber.value
             val isTransferActive = AppState.activeTransferInfo != null
-            val isSuccessKeyword = listOf(
-                "transferiste com sucesso", "enviado com sucesso", 
-                "transferido com sucesso", "realizada com sucesso",
-                "transferencia efectuada", "transferencia realizada",
-                "operacao concluida", "operação concluida",
-                "validos por 24h", "para o numero"
-            ).any { normalizedText.contains(it) }
+            
+            // Very specific markers for success
+            val hasSuccessMarker = normalizedText.contains("transferiste com sucesso") || 
+                                 normalizedText.contains("transferido com sucesso") ||
+                                 normalizedText.contains("enviado com sucesso") ||
+                                 normalizedText.contains("operacao concluida") ||
+                                 normalizedText.contains("operação concluida")
 
             var finalSuccess = false
 
             if (isTransferActive && pendingNum != null) {
-                // Durante transferência: EXIGIR o número do recipiente no texto
+                // Durante transferência: EXIGIR o número do recipiente E um marcador de sucesso real
                 val matchedNum = normalizedText.contains(pendingNum)
-                if (matchedNum && (isSuccessKeyword || normalizedText.contains("sucesso") || normalizedText.contains("transferiste"))) {
+                if (matchedNum && hasSuccessMarker) {
                     Log.d("USSDService", "!!! TRANSFER SUCCESS CONFIRMED !!! (text: $text, matchedNum: $pendingNum)")
                     finalSuccess = true
                 }
             } else {
-                // Apenas palavras-chave muito específicas se não houver transferência ativa (ex: consulta de saldo)
-                // Evitamos "sucesso" sozinho aqui para não dar falso positivo em menus
-                if (isSuccessKeyword) {
+                // Se não houver transferência ativa, aceitamos marcadores genéricos (ex: consulta de saldo)
+                if (hasSuccessMarker || normalizedText.contains("saldo actual") || normalizedText.contains("mb validos")) {
                     Log.d("USSDService", "!!! GENERIC SUCCESS DETECTED !!! (text: $text)")
                     finalSuccess = true
                 }
@@ -119,12 +118,10 @@ class USSDService : AccessibilityService() {
 
         // 2. Failure Patterns
         val failurePatterns = listOf(
-            "insuficiente", "saldo insuficiente", "invalido", "inválido",
-            "falha", "erro", "nao foi possivel", "não foi possivel",
-            "lamentamos", "indisponivel", "indisponível",
-            "tente novamente", "incorrecto", "incorreto",
-            "nao tem", "não tem", "nao possui", "não possui",
-            "numero invalido", "numero incorreto", "servico indisponivel"
+            "insuficiente", "invalido", "inválido", "falha", "erro", 
+            "nao foi possivel", "não foi possivel", "lamentamos", 
+            "indisponivel", "indisponível", "tente novamente", "incorrecto", 
+            "incorreto", "nao tem", "não tem", "servico indisponivel"
         )
         val isFailure = failurePatterns.any { normalizedText.contains(it) }
         if (isFailure) {
@@ -134,17 +131,14 @@ class USSDService : AccessibilityService() {
             return
         }
 
-        // 2.b MMI Errors and Generic System UI Alerts (Anti-Lock Mechanism)
+        // 2.b MMI Errors and Generic System UI Alerts
         val genericSystemAlerts = listOf(
-            "problema de conexao ou codigo mmi invalido", "mmi",
-            "connection problem or invalid mmi code", "invalid mmi",
-            "rede movel nao disponivel", "mobile network not available",
-            "emergencia apenas", "emergency calls only",
-            "erro de rede", "network error", "limite alcançado", "tentativas excedidas"
+            "problema de conexao", "codigo mmi invalido", "mmi",
+            "rede movel nao disponivel", "emergencia apenas", "erro de rede"
         )
         val isSystemAlert = genericSystemAlerts.any { normalizedText.contains(it) }
         if (isSystemAlert) {
-             Log.w("USSDService", "!!! ANTI-LOCK DEPLOYED: SYSTEM ALERT DETECTED !!! (text: $text)")
+             Log.w("USSDService", "!!! SYSTEM ALERT DETECTED !!! (text: $text)")
              broadcastStatus("FAILURE", "Alerta de Sistema: $text")
              autoDismiss(nodeInfo)
              return
@@ -153,8 +147,13 @@ class USSDService : AccessibilityService() {
         // 3. Intermediate Steps (Only if interactive)
         if (isInteractive) {
             when {
-                normalizedText.contains("numero do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") -> {
-                    AppState.pendingTransferNumber.value?.let { findAndInput(nodeInfo, it) }
+                normalizedText.contains("numero do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") || normalizedText.contains("para o numero") -> {
+                    // Evitar digitar se já estiver na tela de confirmação (que contém "para o numero" mas pede 1 pra confirmar)
+                    if (normalizedText.contains("confirma") || normalizedText.contains("sim") || normalizedText.contains("1.")) {
+                        findAndInput(nodeInfo, "1")
+                    } else {
+                        AppState.pendingTransferNumber.value?.let { findAndInput(nodeInfo, it) }
+                    }
                 }
                 normalizedText.contains("quantos megas") || normalizedText.contains("quantidade") || normalizedText.contains("introduza o valor") -> {
                     AppState.pendingTransferAmount.value?.let { findAndInput(nodeInfo, it) }
@@ -165,10 +164,12 @@ class USSDService : AccessibilityService() {
                 normalizedText.contains("transferir megas") -> {
                     if (AppState.pendingTransferAmount.value != null) findAndInput(nodeInfo, "2")
                 }
+                normalizedText.contains("confirma") || normalizedText.contains("aceitar") || normalizedText.contains("responder com 1") -> {
+                    findAndInput(nodeInfo, "1")
+                }
             }
         } else {
             // Final response message but no specific success/error caught yet?
-            // Broadcast as generic result for logs
             broadcastResult(text)
             autoDismiss(nodeInfo)
         }

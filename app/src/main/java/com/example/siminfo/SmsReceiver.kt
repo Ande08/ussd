@@ -32,11 +32,21 @@ class SmsReceiver : BroadcastReceiver() {
             val text = fullMessage.toString()
             Log.d("SmsReceiver", "Message content: $text")
 
-            // Check if it's a balance message (Carrier usually uses short numbers or specific keywords)
-            if (text.contains("Mensal:", ignoreCase = true) || text.contains("Saldo", ignoreCase = true)) {
-                val resultIntent = Intent("com.example.siminfo.USSD_RESULT")
-                resultIntent.putExtra("ussd_text", text)
-                // Pass subId so MainActivity knows which chip this belongs to
+            val isBalance = text.contains("Mensal:", ignoreCase = true) || text.contains("Saldo", ignoreCase = true)
+            val isTransferSuccess = text.contains("transferiste com sucesso", ignoreCase = true) || 
+                                    text.contains("recebeu", ignoreCase = true) && text.contains("megas", ignoreCase = true)
+
+            if (isBalance || isTransferSuccess) {
+                val action = if (isTransferSuccess) "com.example.siminfo.TRANSFER_STATUS" else "com.example.siminfo.USSD_RESULT"
+                val resultIntent = Intent(action)
+                
+                if (isTransferSuccess) {
+                    resultIntent.putExtra("status", "SUCCESS")
+                    resultIntent.putExtra("message", text)
+                } else {
+                    resultIntent.putExtra("ussd_text", text)
+                }
+
                 if (subId != -1) {
                     resultIntent.putExtra("subscription_id", subId)
                 }
