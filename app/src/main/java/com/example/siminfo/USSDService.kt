@@ -80,27 +80,41 @@ class USSDService : AccessibilityService() {
     private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String, isInteractive: Boolean, packageName: String) {
         val normalizedText = text.lowercase()
 
-        // 1. Success Patterns — only on non-interactive (final result) screens
-        val successPatterns = listOf(
-            "sucesso", "concluido", "concluida", "enviado com sucesso",
-            "realizada com sucesso", "effectuada", "efectuada",
-            "transferencia efectuada", "transferencia realizada",
-            "transferido com sucesso", "transferencia de dados",
-            "dados transferidos", "foi transferido", "foi enviado",
-            "operacao concluida", "operação concluida", "transferiu",
-            "transferiste", "transferiste com sucesso", "validos por 24h", "para o numero"
-        )
-        
-        // Priority check: If we have a pending number, see if it's in the text along with a success keyword
-        val pendingNum = AppState.pendingTransferNumber.value
-        val containsPendingNum = pendingNum?.let { normalizedText.contains(it) } ?: false
-        val isSuccessKeyword = successPatterns.any { normalizedText.contains(it) }
+        // 1. Success Detection — Only on non-interactive (final result) screens
+        if (!isInteractive) {
+            val pendingNum = AppState.pendingTransferNumber.value
+            val isTransferActive = AppState.activeTransferInfo != null
+            val isSuccessKeyword = listOf(
+                "transferiste com sucesso", "enviado com sucesso", 
+                "transferido com sucesso", "realizada com sucesso",
+                "transferencia efectuada", "transferencia realizada",
+                "operacao concluida", "operação concluida",
+                "validos por 24h", "para o numero"
+            ).any { normalizedText.contains(it) }
 
-        if (isSuccessKeyword || (containsPendingNum && normalizedText.contains("transferiste"))) {
-            Log.d("USSDService", "!!! SUCCESS DETECTED !!! (text: $text, matchedNum: $containsPendingNum)")
-            broadcastStatus("SUCCESS", text)
-            autoDismiss(nodeInfo)
-            return
+            var finalSuccess = false
+
+            if (isTransferActive && pendingNum != null) {
+                // Durante transferência: EXIGIR o número do recipiente no texto
+                val matchedNum = normalizedText.contains(pendingNum)
+                if (matchedNum && (isSuccessKeyword || normalizedText.contains("sucesso") || normalizedText.contains("transferiste"))) {
+                    Log.d("USSDService", "!!! TRANSFER SUCCESS CONFIRMED !!! (text: $text, matchedNum: $pendingNum)")
+                    finalSuccess = true
+                }
+            } else {
+                // Apenas palavras-chave muito específicas se não houver transferência ativa (ex: consulta de saldo)
+                // Evitamos "sucesso" sozinho aqui para não dar falso positivo em menus
+                if (isSuccessKeyword) {
+                    Log.d("USSDService", "!!! GENERIC SUCCESS DETECTED !!! (text: $text)")
+                    finalSuccess = true
+                }
+            }
+
+            if (finalSuccess) {
+                broadcastStatus("SUCCESS", text)
+                autoDismiss(nodeInfo)
+                return
+            }
         }
 
         // 2. Failure Patterns
