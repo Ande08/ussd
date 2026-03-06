@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import android.content.ClipboardManager
 import android.text.TextUtils
 import androidx.activity.result.contract.ActivityResultContracts
 import android.content.SharedPreferences
@@ -991,7 +992,16 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                             onValueChange = { transferNumber = it },
                             label = { Text("Número") },
                             modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val pasted = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                                    if (pasted.isNotBlank()) transferNumber = pasted.trim()
+                                }) {
+                                    Icon(Icons.Default.Notifications, contentDescription = "Colar", tint = Color(0xFFFFD600))
+                                }
+                            }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         OutlinedTextField(

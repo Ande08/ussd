@@ -77,31 +77,35 @@ class USSDService : AccessibilityService() {
     private fun processUssdLogic(nodeInfo: AccessibilityNodeInfo, text: String, isInteractive: Boolean) {
         val normalizedText = text.lowercase()
 
-        // 1. Success Patterns
-        if (normalizedText.contains("sucesso") || normalizedText.contains("concluido") || 
-            normalizedText.contains("concluida") || normalizedText.contains("enviado") || 
-            normalizedText.contains("realizada") || normalizedText.contains("confirmado") ||
-            normalizedText.contains("efectuada") || normalizedText.contains("transferido") ||
-            normalizedText.contains("transferencia de")) {
-            
-            // Safety check: ensure it's not just the menu option
-            if (!isInteractive || (!normalizedText.contains("transferir") && !normalizedText.contains("megas"))) {
-                Log.d("USSDService", "!!! SUCCESS DETECTED !!!")
-                broadcastStatus("SUCCESS", text)
-                autoDismiss(nodeInfo)
-                return
-            }
+        // 1. Success Patterns — only on non-interactive (final result) screens
+        val successPatterns = listOf(
+            "sucesso", "concluido", "concluida", "enviado com sucesso",
+            "realizada com sucesso", "effectuada", "efectuada",
+            "transferencia efectuada", "transferencia realizada",
+            "transferido com sucesso", "transferencia de dados",
+            "dados transferidos", "foi transferido", "foi enviado",
+            "operacao concluida", "operação concluida"
+        )
+        val isSuccess = successPatterns.any { normalizedText.contains(it) }
+        if (isSuccess && !isInteractive) {
+            Log.d("USSDService", "!!! SUCCESS DETECTED !!! (text: $text)")
+            broadcastStatus("SUCCESS", text)
+            autoDismiss(nodeInfo)
+            return
         }
 
-        // 2. Error Patterns
-        if (normalizedText.contains("insuficiente") || normalizedText.contains("invalido") || 
-            normalizedText.contains("falha") || normalizedText.contains("erro") ||
-            normalizedText.contains("nao foi possivel") || normalizedText.contains("não foi possivel") ||
-            normalizedText.contains("lamentamos") || normalizedText.contains("indisponivel") ||
-            normalizedText.contains("tente novamente") || normalizedText.contains("incorrecto") ||
-            normalizedText.contains("incorreto") || normalizedText.contains("nao tem") ||
-            normalizedText.contains("não tem") || normalizedText.contains("nao possui") || normalizedText.contains("não possui")) {
-            Log.d("USSDService", "!!! FAILURE DETECTED !!!")
+        // 2. Failure Patterns
+        val failurePatterns = listOf(
+            "insuficiente", "saldo insuficiente", "invalido", "inválido",
+            "falha", "erro", "nao foi possivel", "não foi possivel",
+            "lamentamos", "indisponivel", "indisponível",
+            "tente novamente", "incorrecto", "incorreto",
+            "nao tem", "não tem", "nao possui", "não possui",
+            "numero invalido", "numero incorreto", "servico indisponivel"
+        )
+        val isFailure = failurePatterns.any { normalizedText.contains(it) }
+        if (isFailure) {
+            Log.d("USSDService", "!!! FAILURE DETECTED !!! (text: $text)")
             broadcastStatus("FAILURE", text)
             autoDismiss(nodeInfo)
             return

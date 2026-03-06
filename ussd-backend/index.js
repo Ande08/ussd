@@ -162,6 +162,40 @@ db.serialize(() => {
 
 // --- API ROUTES ---
 
+// 0. Admin: Clear all completed transfers
+app.delete('/api/admin/clear-transfers', async (req, res) => {
+    const { secret } = req.body;
+    if (secret !== (process.env.ADMIN_SECRET || 'famba-admin')) {
+        return res.status(403).json({ error: 'Acesso negado.' });
+    }
+    try {
+        await dbRun(`DELETE FROM transfers WHERE status IN ('SUCESSO', 'FALHA')`);
+        await dbRun(`DELETE FROM transfer_logs`);
+        console.log('[Admin] Pedidos concluídos e logs limpos.');
+        res.json({ message: 'Histórico de pedidos limpo com sucesso.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 0b. Admin: Reset everything (transfers + accounts + devices)
+app.delete('/api/admin/reset-all', async (req, res) => {
+    const { secret } = req.body;
+    if (secret !== (process.env.ADMIN_SECRET || 'famba-admin')) {
+        return res.status(403).json({ error: 'Acesso negado.' });
+    }
+    try {
+        await dbRun(`DELETE FROM transfers`);
+        await dbRun(`DELETE FROM transfer_logs`);
+        await dbRun(`DELETE FROM devices`);
+        await dbRun(`DELETE FROM accounts`);
+        console.log('[Admin] Base de dados completamente resetada.');
+        res.json({ message: 'Base de dados resetada. Todos os dados foram apagados.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
     let { number, amount, account, targetDevice } = req.body;
@@ -182,14 +216,26 @@ app.post('/api/transfer', async (req, res) => {
 
         const ownerAccountId = accRow.id;
 
+        // --- DEDUPLICATION: Block same number+amount+account within 5 minutes ---
+        const duplicate = await dbGet(`
+            SELECT id FROM transfers 
+            WHERE number = ? AND amount = ? AND LOWER(owner_account) = LOWER(?)
+              AND status IN ('PENDENTE', 'PROCESSANDO')
+              AND created_at >= datetime('now', '-5 minutes')
+            LIMIT 1
+        `, [number, amount, account]);
+        if (duplicate) {
+            console.log(`[Duplicate] Blocked repeat job: ${amount} MB to ${number} (existing ID ${duplicate.id})`);
+            return res.status(409).json({ error: 'Pedido duplicado. Mesmo número+valor já está na fila.', existingId: duplicate.id });
+        }
+
         let assignedTo = null;
         let assignedName = "Fila Geral (Aguardando Dispositivo)";
 
         if (targetDevice && targetDevice !== "auto") {
             const specificDev = await dbGet(`SELECT name FROM devices WHERE username = ? AND account_id = ?`, [targetDevice, ownerAccountId]);
             if (specificDev) {
-                assignedTo = targetDevice;
-                assignedTo = targetDevice.toLowerCase(); // Normalize targetDevice
+                assignedTo = targetDevice.toLowerCase();
                 assignedName = specificDev.name || targetDevice;
             } else {
                 return res.status(404).json({ error: 'Dispositivo alvo não encontrado na conta.' });
