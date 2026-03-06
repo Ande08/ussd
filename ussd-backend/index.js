@@ -128,6 +128,7 @@ app.post('/api/transfer', async (req, res) => {
     }
 
     try {
+        console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${targetDevice || 'AUTO'})`);
         const accRow = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
         if (!accRow) return res.status(404).json({ error: 'Conta não encontrada.' });
 
@@ -326,8 +327,12 @@ app.post('/api/transfer/pending', async (req, res) => {
 
         if (!pending) {
             await dbRun("COMMIT");
+            // Silently return for non-jobs to avoid log spam, or keep it for deep debugging
+            // console.log(`[Poll] ${username} -> No work found.`);
             return res.json({ message: 'Nenhum pedido pendente.', job: null });
         }
+
+        console.log(`[Job Dispatched] ID ${pending.id} assigned to ${username}`);
 
         // Lock it
         await dbRun(
@@ -340,7 +345,7 @@ app.post('/api/transfer/pending', async (req, res) => {
         res.json({ job: pending });
     } catch (err) {
         await dbRun("ROLLBACK").catch(() => { });
-        console.error("Lock error:", err);
+        console.error("Lock error for user " + username + ":", err);
         res.status(500).json({ error: 'Erro ao buscar pedidos.' });
     }
 });
