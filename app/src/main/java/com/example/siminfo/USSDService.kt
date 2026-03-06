@@ -14,11 +14,13 @@ class USSDService : AccessibilityService() {
     private var lastProcessedText = ""
     private var lastEventTime = 0L
     private val handler = Handler(Looper.getMainLooper())
+    private var wakeLock: android.os.PowerManager.WakeLock? = null
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // Filter specifically for the phone package as requested
         if (event.packageName?.toString() != "com.android.phone") return
 
+        acquireWakeLock()
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastEventTime < 800) return // Debounce fast events
         
@@ -132,6 +134,40 @@ class USSDService : AccessibilityService() {
         intent.putExtra("status", status)
         intent.putExtra("message", message)
         sendBroadcast(intent)
+        
+        // After reporting status, we may release the lock soon
+        handler.postDelayed({ releaseWakeLock() }, 3000)
+    }
+
+    private fun acquireWakeLock() {
+        try {
+            if (wakeLock == null) {
+                val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+                wakeLock = pm.newWakeLock(android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK or android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP, "SIMInfo::USSDWakeLock")
+            }
+            if (wakeLock?.isHeld == false) {
+                wakeLock?.acquire(2 * 60 * 1000L /* 2 minutes timeout */)
+                Log.d("USSDService", "WakeLock Acquired for USSD session")
+            }
+        } catch (e: Exception) {
+            Log.e("USSDService", "Error acquiring WakeLock: ${e.message}")
+        }
+    }
+
+    private fun releaseWakeLock() {
+        try {
+            if (wakeLock?.isHeld == true) {
+                wakeLock?.release()
+                Log.d("USSDService", "WakeLock Released")
+            }
+        } catch (e: Exception) {
+            Log.e("USSDService", "Error releasing WakeLock: ${e.message}")
+        }
+    }
+
+    override fun onDestroy() {
+        releaseWakeLock()
+        super.onDestroy()
     }
 
     private fun broadcastResult(text: String) {

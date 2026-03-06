@@ -428,39 +428,45 @@ app.get('/api/devices', async (req, res) => {
 
 // --- BACKGROUND WORKERS ---
 
-// Unlock stalled jobs every 1 minute
-// 1. Unlock stalled jobs (processing for too long)
-// 2. Re-assign jobs from offline devices
+// Aggressive job unlocking and re-assignment
+// 1. Unlock jobs stuck in 'PROCESSANDO' (1 minute timeout)
+// 2. Unassign 'PENDENTE' jobs from offline devices (60 seconds timeout)
 setInterval(async () => {
     try {
-        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+        const now = Date.now();
+        const oneMinuteAgo = new Date(now - 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
+        const sixtySecondsAgo = new Date(now - 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
 
         // A. Stuck in PROCESSANDO
-        const stalledJobs = await dbAll(`SELECT id FROM transfers WHERE status = 'PROCESSANDO' AND locked_at < ?`, [twoMinutesAgo]);
+        const stalledJobs = await dbAll(`SELECT id, locked_by FROM transfers WHERE status = 'PROCESSANDO' AND locked_at < ?`, [oneMinuteAgo]);
         for (let job of stalledJobs) {
+            console.log(`[Auto-Unlock] Unlocking job ${job.id} from ${job.locked_by} due to timeout.`);
             await dbRun(`UPDATE transfers SET status = 'PENDENTE', locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [job.id]);
         }
 
-        // B. Assigned to offline devices (last_seen > 5 min ago)
-        // Find devices that are effectively offline
-        const offlineDevices = await dbAll(`SELECT username FROM devices WHERE last_seen < ?`, [fiveMinutesAgo]);
+        // B. Assigned to offline devices
+        // Find devices that are effectively offline (last_seen > 1 min ago)
+        const offlineDevices = await dbAll(`SELECT username FROM devices WHERE last_seen < ?`, [sixtySecondsAgo]);
         if (offlineDevices.length > 0) {
             const usernames = offlineDevices.map(d => d.username);
             const placeholders = usernames.map(() => '?').join(',');
 
             // Unassign jobs from these devices so someone else can pick them up
-            await dbRun(`
-                UPDATE transfers 
-                SET assigned_to = NULL, updated_at = CURRENT_TIMESTAMP 
-                WHERE status = 'PENDENTE' AND assigned_to IN (${placeholders})
-            `, usernames);
+            const affectedJobs = await dbAll(`SELECT id FROM transfers WHERE status = 'PENDENTE' AND assigned_to IN (${placeholders})`, usernames);
+            if (affectedJobs.length > 0) {
+                console.log(`[Auto-Reassign] Unassigning ${affectedJobs.length} jobs from offline devices: ${usernames.join(',')}`);
+                await dbRun(`
+                    UPDATE transfers 
+                    SET assigned_to = NULL, updated_at = CURRENT_TIMESTAMP 
+                    WHERE status = 'PENDENTE' AND assigned_to IN (${placeholders})
+                `, usernames);
+            }
         }
 
     } catch (err) {
         console.error("[Auto-Unlock] Erro:", err.message);
     }
-}, 60000); // 60 seconds
+}, 30000); // Run every 30 seconds
 
 // Start Server
 app.listen(PORT, () => {

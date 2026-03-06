@@ -13,6 +13,7 @@ import kotlinx.coroutines.*
 class PollService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var pollJob: Job? = null
+    private var wakeLock: android.os.PowerManager.WakeLock? = null
     private lateinit var sessionManager: SessionManager
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -88,6 +89,8 @@ class PollService : Service() {
                                 putExtra("JOB_AMOUNT", job.amount)
                                 putExtra("JOB_NUMBER", job.number)
                             }
+                            
+                            acquireWakeLock()
                             startActivity(intent)
                         }
                     } catch (e: Exception) {
@@ -100,9 +103,35 @@ class PollService : Service() {
         }
     }
 
+    private fun acquireWakeLock() {
+        try {
+            if (wakeLock == null) {
+                val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMInfo::PollWakeLock")
+            }
+            if (wakeLock?.isHeld == false) {
+                wakeLock?.acquire(10 * 60 * 1000L /*10 minutes*/)
+                Log.d("PollService", "WakeLock Acquired")
+            }
+        } catch (e: Exception) {
+            Log.e("PollService", "Error acquiring WakeLock: ${e.message}")
+        }
+    }
+
+    private fun releaseWakeLock() {
+        try {
+            if (wakeLock?.isHeld == true) {
+                wakeLock?.release()
+                Log.d("PollService", "WakeLock Released")
+            }
+        } catch (e: Exception) {
+            Log.e("PollService", "Error releasing WakeLock: ${e.message}")
+        }
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel("poll_channel", "Sync Service", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel("poll_channel", "Sync Service", NotificationManager.IMPORTANCE_HIGH)
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
@@ -111,6 +140,7 @@ class PollService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        releaseWakeLock()
         serviceScope.cancel()
         super.onDestroy()
     }

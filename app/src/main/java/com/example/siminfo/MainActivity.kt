@@ -479,6 +479,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        handleJobIntent(intent)
+    }
+
+    private fun handleJobIntent(intent: Intent?) {
         val jobId = intent?.getIntExtra("JOB_ID", -1) ?: -1
         if (jobId != -1) {
             val amount = intent?.getStringExtra("JOB_AMOUNT") ?: ""
@@ -526,6 +530,7 @@ class MainActivity : ComponentActivity() {
 
         startBackendPolling()
         requestIgnoreBatteryOptimizations()
+        handleJobIntent(intent)
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
