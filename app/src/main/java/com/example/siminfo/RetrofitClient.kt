@@ -20,7 +20,8 @@ data class PendingResponse(
 )
 
 data class PendingRequest(
-    val username: String
+    val username: String,
+    val jobId: Int? = null
 )
 
 data class UpdateStatusRequest(

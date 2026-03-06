@@ -173,7 +173,6 @@ app.post('/api/transfer', async (req, res) => {
     }
 
     try {
-        console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${targetDevice || 'AUTO'})`);
         // Case-Insensitive account lookup
         const accRow = await dbGet(`SELECT id FROM accounts WHERE LOWER(name) = LOWER(?)`, [account]);
         if (!accRow) {
@@ -368,27 +367,45 @@ app.get('/api/health', (req, res) => {
 
 // 4. App Endpoint: Fetch next pending request (Concurreny Safe)
 app.post('/api/transfer/pending', async (req, res) => {
-    const { username } = req.body;
-    if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
+    let { username, jobId } = req.body;
+    username = username?.trim()?.toLowerCase();
+
+    if (!username) return res.status(400).json({ error: 'Username é obrigatório.' });
 
     try {
-        // Find device's account name (Case-Insensitive)
-        const device = await dbGet(`
-            SELECT d.*, a.name as account_name FROM devices d
-            JOIN accounts a ON d.account_id = a.id
-            WHERE LOWER(d.username) = LOWER(?)
-        `, [username]);
+        const device = await dbGet(
+            `SELECT d.*, a.name as account_name FROM devices d 
+             JOIN accounts a ON d.account_id = a.id 
+             WHERE d.username = ?`,
+            [username]
+        );
 
         if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado ou não associado a uma conta.' });
 
-        // Atomic transaction: Find a job assigned specifically to this user or unassigned belonging to this account
+        // Atomic transaction: Find a job
         await dbRun("BEGIN EXCLUSIVE TRANSACTION");
 
-        // First, check if there's a job explicitly assigned to this device
-        let pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND LOWER(assigned_to) = LOWER(?) ORDER BY created_at ASC LIMIT 1`,
-            [username]
-        );
+        let pending = null;
+
+        // --- Targeted Claim (WebSocket Flow) ---
+        if (jobId) {
+            pending = await dbGet(
+                `SELECT * FROM transfers WHERE id = ? AND status = 'PENDENTE' AND (assigned_to IS NULL OR LOWER(assigned_to) = LOWER(?))`,
+                [jobId, username]
+            );
+            if (pending) {
+                console.log(`[Claim] Device ${username} is claiming specific job ${jobId}`);
+            }
+        }
+
+        // --- Standard Dispatch (Polling Flow) ---
+        if (!pending) {
+            // First, check if there's a job explicitly assigned to this device
+            pending = await dbGet(
+                `SELECT * FROM transfers WHERE status = 'PENDENTE' AND LOWER(assigned_to) = LOWER(?) ORDER BY created_at ASC LIMIT 1`,
+                [username]
+            );
+        }
 
         // If no explicit job, look for unassigned jobs for this account, but ONLY if the device is not paused
         if (!pending && device.paused === 0) {

@@ -7,6 +7,10 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 import java.net.URISyntaxException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object SocketManager {
     private const val TAG = "SocketManager"
@@ -64,14 +68,39 @@ object SocketManager {
                     Log.d(TAG, "Novo Job recebido via PUSH: $jobId")
                     AppState.addLog("⚡ PUSH: Novo pedido $jobId ($amount para $number)")
 
-                    // Disparar o processamento imediatamente
-                    val intent = Intent(context, MainActivity::class.java).apply {
-                        putExtra("JOB_ID", jobId)
-                        putExtra("JOB_AMOUNT", amount)
-                        putExtra("JOB_NUMBER", number)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    // Tentar "agarrar" o pedido no banco de dados antes de abrir a UI
+                    val sessionManager = SessionManager.getInstance(context)
+                    val loginUser = sessionManager.username ?: return@on
+                    
+                    val scope = CoroutineScope(Dispatchers.IO)
+                    scope.launch {
+                        try {
+                            val response = RetrofitClient.api.getPendingTransfer(PendingRequest(loginUser, jobId))
+                            val claimedJob = response.job
+                            
+                            if (claimedJob != null && claimedJob.id == jobId) {
+                                // Conseguimos o pedido! Abrir a UI imediatamente
+                                Log.i(TAG, "Sucesso ao agarrar pedido $jobId via PUSH.")
+                                AppState.currentBackendJobId = jobId
+                                AppState.isPollingPaused = true
+                                
+                                withContext(Dispatchers.Main) {
+                                    val intent = Intent(context, MainActivity::class.java).apply {
+                                        putExtra("JOB_ID", jobId)
+                                        putExtra("JOB_AMOUNT", amount)
+                                        putExtra("JOB_NUMBER", number)
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                    }
+                                    context.startActivity(intent)
+                                }
+                            } else {
+                                Log.w(TAG, "PUSH: Pedido $jobId já foi pego por outro ou saldo insuficiente.")
+                                AppState.addLog("⚡ PUSH: Pedido $jobId ignorado (já pego ou sem saldo)")
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Erro ao agarrar pedido via PUSH: ${e.message}")
+                        }
                     }
-                    context.startActivity(intent)
                 } catch (e: Exception) {
                     Log.e(TAG, "Erro ao processar PUSH job: ${e.message}")
                 }
