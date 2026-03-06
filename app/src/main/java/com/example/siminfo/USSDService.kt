@@ -76,7 +76,9 @@ class USSDService : AccessibilityService() {
         // 1. Success Patterns
         if (normalizedText.contains("sucesso") || normalizedText.contains("concluido") || 
             normalizedText.contains("concluida") || normalizedText.contains("enviado") || 
-            normalizedText.contains("realizada") || normalizedText.contains("confirmado")) {
+            normalizedText.contains("realizada") || normalizedText.contains("confirmado") ||
+            normalizedText.contains("efectuada") || normalizedText.contains("transferido") ||
+            normalizedText.contains("transferencia de")) {
             
             // Safety check: ensure it's not just the menu option
             if (!isInteractive || (!normalizedText.contains("transferir") && !normalizedText.contains("megas"))) {
@@ -89,7 +91,12 @@ class USSDService : AccessibilityService() {
 
         // 2. Error Patterns
         if (normalizedText.contains("insuficiente") || normalizedText.contains("invalido") || 
-            normalizedText.contains("falha") || normalizedText.contains("erro")) {
+            normalizedText.contains("falha") || normalizedText.contains("erro") ||
+            normalizedText.contains("nao foi possivel") || normalizedText.contains("não foi possivel") ||
+            normalizedText.contains("lamentamos") || normalizedText.contains("indisponivel") ||
+            normalizedText.contains("tente novamente") || normalizedText.contains("incorrecto") ||
+            normalizedText.contains("incorreto") || normalizedText.contains("nao tem") ||
+            normalizedText.contains("não tem") || normalizedText.contains("nao possui") || normalizedText.contains("não possui")) {
             Log.d("USSDService", "!!! FAILURE DETECTED !!!")
             broadcastStatus("FAILURE", text)
             autoDismiss(nodeInfo)
@@ -181,9 +188,24 @@ class USSDService : AccessibilityService() {
     private fun autoDismiss(node: AccessibilityNodeInfo) {
         Log.d("USSDService", "Auto-dismissing dialog...")
         handler.postDelayed({
-            val dismissLabels = listOf("OK", "Fechar", "Aceitar", "Accept", "Concluir", "Sair", "Cancel")
+            // Target the absolute root to ensure dialog buttons aren't outside the current node scope
+            val rootNode = rootInActiveWindow ?: node
+
+            // 1. Prioritize standard Android system buttons first
+            val standardButtons = listOf("android:id/button1", "android:id/button2", "android:id/button3")
+            for (btnId in standardButtons) {
+                rootNode.findAccessibilityNodeInfosByViewId(btnId)?.firstOrNull()?.let {
+                    if (it.isClickable) {
+                        it.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        return@postDelayed
+                    }
+                }
+            }
+
+            // 2. Fallback to localized text labels
+            val dismissLabels = listOf("OK", "Ok", "ok", "Fechar", "Aceitar", "Accept", "Concluir", "Sair", "Cancel", "Cancelar")
             for (label in dismissLabels) {
-                val list = node.findAccessibilityNodeInfosByText(label)
+                val list = rootNode.findAccessibilityNodeInfosByText(label)
                 for (dismissNode in list) {
                     if (dismissNode.isClickable) {
                         dismissNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
@@ -194,9 +216,10 @@ class USSDService : AccessibilityService() {
                     }
                 }
             }
-            // ID fallback
+            
+            // 3. Last resort fallback to original node just in case
             node.findAccessibilityNodeInfosByViewId("android:id/button1")?.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        }, 600) // Fast dismissal (< 1s total)
+        }, 1000) // Slightly increased to ensure dialog is completely drawn by OS before clicking
     }
 
     override fun onInterrupt() {}
