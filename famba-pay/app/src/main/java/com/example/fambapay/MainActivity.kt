@@ -21,18 +21,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         requestPermissions()
+        createNotificationChannel()
 
         setContent {
             FambaPayTheme {
                 MainScreen()
             }
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "FambaPay Notifications"
+            val descriptionText = "Channel for payment confirmations"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("famba_pay_channel", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -48,17 +66,40 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sharedPrefs = context.getSharedPreferences("FambaPayPrefs", Context.MODE_PRIVATE)
+
     var isServiceRunning by remember { mutableStateOf(false) }
     val logs = remember { mutableStateListOf<String>("App Iniciado. Aguardando mensagens...") }
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val targetAmounts = remember { 
+        mutableStateListOf(*sharedPrefs.getStringSet("target_amounts", emptySet())?.toTypedArray() ?: emptyArray()) 
+    }
+    var newAmount by remember { mutableStateOf("") }
+
+    // Broadcast Receiver for Logs
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                intent?.getStringExtra("log_msg")?.let { msg ->
+                    logs.add(msg)
+                }
+            }
+        }
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, IntentFilter("FAMBA_PAY_LOGS"))
+        
+        onDispose {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
+        }
+    }
 
     Scaffold(
         topBar = {
-            SmallTopAppBar(
-                title = { Text("FambaPay - M-Pesa & e-Mola Listener") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            TopAppBar(
+                title = { Text("FambaPay - M-Pesa & e-Mola") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             )
         }
     ) { padding ->
@@ -90,6 +131,41 @@ fun MainScreen() {
                         Icon(if (isServiceRunning) Icons.Default.Settings else Icons.Default.PlayArrow, null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(if (isServiceRunning) "PARAR MONITORAMENTO" else "INICIAR MONITORAMENTO")
+                    }
+                }
+            }
+
+            Text("Valores a Monitorar (MT)", fontWeight = FontWeight.Bold)
+            Row(modifier = Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = newAmount,
+                    onValueChange = { newAmount = it },
+                    label = { Text("Novo Valor (ex: 200.00)") },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    if (newAmount.isNotBlank() && !targetAmounts.contains(newAmount)) {
+                        targetAmounts.add(newAmount)
+                        sharedPrefs.edit().putStringSet("target_amounts", targetAmounts.toSet()).apply()
+                        newAmount = ""
+                    }
+                }) {
+                    Text("Adicionar")
+                }
+            }
+            
+            // List of amounts
+            LazyColumn(modifier = Modifier.heightIn(max = 120.dp).fillMaxWidth().padding(bottom = 8.dp)) {
+                items(targetAmounts) { amount ->
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("- $amount MT")
+                        TextButton(onClick = { 
+                            targetAmounts.remove(amount)
+                            sharedPrefs.edit().putStringSet("target_amounts", targetAmounts.toSet()).apply()
+                        }) {
+                            Text("Remover", color = Color.Red)
+                        }
                     }
                 }
             }

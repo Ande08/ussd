@@ -16,6 +16,7 @@
         android:label="FambaPay"
         android:roundIcon="@android:mipmap/sym_def_app_icon"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar">
 
         <activity

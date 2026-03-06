@@ -18,7 +18,7 @@ interface FambaPayApi {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:3003" // Change to your VPS IP in production
+    private const val BASE_URL = "http://144.91.121.85:3003"
 
     val api: FambaPayApi by lazy {
         Retrofit.Builder()
