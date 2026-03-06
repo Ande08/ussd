@@ -155,9 +155,11 @@ class MainActivity : ComponentActivity() {
     private fun attemptRetry(info: QueuedTransfer) {
         retryCount++
         if (retryCount < 2) {
-            Log.d("MainActivity", "Retrying transfer (Attempt $retryCount)")
-            Toast.makeText(this, "Falhou. Tentando novamente...", Toast.LENGTH_SHORT).show()
-            startTransferInternal(info)
+            Log.d("MainActivity", "Retrying transfer in 3s (Attempt $retryCount)")
+            Toast.makeText(this, "Falhou. Tentando novamente em 3s...", Toast.LENGTH_SHORT).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                startTransferInternal(info)
+            }, 3000)
         } else {
             Log.d("MainActivity", "Fail limit reached. Adding to Waiting List.")
             Toast.makeText(this, "Falhou 2x. Adicionado à Lista de Espera.", Toast.LENGTH_LONG).show()
@@ -193,7 +195,7 @@ class MainActivity : ComponentActivity() {
             currentSimId = null
             AppState.ussdBalances[subId] = extracted
             if (isConsultingAll.value) {
-                Handler(Looper.getMainLooper()).postDelayed({ triggerNextSim(this) }, 7000) 
+                Handler(Looper.getMainLooper()).postDelayed({ triggerNextSim(this) }, 3000) 
             }
         } else {
             AppState.ussdBalances[subId] = extracted
@@ -265,7 +267,10 @@ class MainActivity : ComponentActivity() {
         AppState.currentBackendJobId = backendJobId
 
         retryCount = 0
-        startTransferInternal(transferInfo)
+        Log.d("MainActivity", "Stability delay (1s) before first attempt...")
+        Handler(Looper.getMainLooper()).postDelayed({
+            startTransferInternal(transferInfo)
+        }, 1000)
     }
 
     private fun startTransferInternal(info: QueuedTransfer) {
