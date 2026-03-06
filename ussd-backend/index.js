@@ -245,10 +245,14 @@ app.post('/api/transfer', async (req, res) => {
     // Verification of payment if code is provided
     if (paymentCode) {
         try {
-            const conf = await dbGet(`SELECT * FROM confirmations WHERE code = ? AND used = 0`, [paymentCode]);
-            if (!conf) {
-                return res.status(400).json({ error: 'Código de pagamento inválido ou já utilizado.' });
+            const confExists = await dbGet(`SELECT * FROM confirmations WHERE code = ?`, [paymentCode]);
+            if (!confExists) {
+                return res.status(400).json({ error: 'O código de pagamento não existe ou ainda não foi processado pelo aplicativo.' });
             }
+            if (confExists.used) {
+                return res.status(400).json({ error: 'Este código de pagamento já foi utilizado em outra recarga.' });
+            }
+            const conf = confExists;
             // Mark as used immediately to prevent double spending
             await dbRun(`UPDATE confirmations SET used = 1 WHERE id = ?`, [conf.id]);
             console.log(`[Anti-Fraud] Código ${paymentCode} validado e consumido.`);
