@@ -169,10 +169,10 @@ app.delete('/api/admin/clear-transfers', async (req, res) => {
         return res.status(403).json({ error: 'Acesso negado.' });
     }
     try {
-        await dbRun(`DELETE FROM transfers WHERE status IN ('SUCESSO', 'FALHA')`);
+        await dbRun(`DELETE FROM transfers`);
         await dbRun(`DELETE FROM transfer_logs`);
-        console.log('[Admin] Pedidos concluídos e logs limpos.');
-        res.json({ message: 'Histórico de pedidos limpo com sucesso.' });
+        console.log('[Admin] Todos os pedidos e logs apagados.');
+        res.json({ message: 'Todos os pedidos (incluindo pendentes) foram apagados.' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
