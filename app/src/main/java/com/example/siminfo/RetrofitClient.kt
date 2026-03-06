@@ -92,7 +92,8 @@ data class ScheduleTransferRequest(
     val number: String,
     val amount: String,
     val account: String, // Renamed from username to match backend
-    val targetDevice: String? = null
+    val targetDevice: String? = null,
+    val secret: String? = "famba-admin"
 )
 
 data class RetryFailedRequest(

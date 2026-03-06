@@ -231,11 +231,18 @@ app.post('/api/confirmations/register', async (req, res) => {
 
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
-    let { number, amount, account, targetDevice, paymentCode } = req.body;
+    let { number, amount, account, targetDevice, paymentCode, secret } = req.body;
     account = account?.trim()?.toLowerCase();
     targetDevice = targetDevice?.trim()?.toLowerCase();
 
-    // Optional: Verification of payment if code is provided
+    const isAdmin = secret === (process.env.ADMIN_SECRET || 'famba-admin');
+
+    // Bot requests (no secret) MUST have a payment code
+    if (!isAdmin && !paymentCode) {
+        return res.status(403).json({ error: 'Acesso negado: Pedidos via bot exigem um código de pagamento.' });
+    }
+
+    // Verification of payment if code is provided
     if (paymentCode) {
         try {
             const conf = await dbGet(`SELECT * FROM confirmations WHERE code = ? AND used = 0`, [paymentCode]);
@@ -247,6 +254,7 @@ app.post('/api/transfer', async (req, res) => {
             console.log(`[Anti-Fraud] Código ${paymentCode} validado e consumido.`);
         } catch (e) {
             console.error(`[Anti-Fraud Error] ${e.message}`);
+            return res.status(500).json({ error: 'Erro interno ao validar pagamento.' });
         }
     }
 
