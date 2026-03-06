@@ -11,12 +11,10 @@ class BootReceiver : BroadcastReceiver() {
             intent?.action == "android.intent.action.QUICKBOOT_POWERON" ||
             intent?.action == "com.htc.intent.action.QUICKBOOT_POWERON") {
             
-            val prefs = context.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
-            val username = prefs.getString("USERNAME", null)
-            val isEnabled = prefs.getBoolean("POLLING_ENABLED", false)
+            val sessionManager = SessionManager.getInstance(context)
             
             // Only start if user was logged in and polling is enabled
-            if (username != null && isEnabled) {
+            if (sessionManager.isLoggedIn() && sessionManager.isPollingEnabled) {
                 val serviceIntent = Intent(context, PollService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(serviceIntent)

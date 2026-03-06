@@ -73,35 +73,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.text.style.TextAlign
 
-data class QueuedTransfer(
-    val simId: Int,
-    val carrierName: String,
-    val amount: String,
-    val number: String,
-    val timestamp: Long = System.currentTimeMillis()
-)
-
-// UI State at file level to be accessible by composables and USSDService
-val ussdBalances = mutableStateMapOf<Int, String>()
-val isBackendPollingEnabled = mutableStateOf(false)
-val deviceList = mutableStateListOf<Device>()
-val waitingList = mutableStateListOf<QueuedTransfer>()
-val isAccessibilityEnabled = mutableStateOf(false)
-var currentUsername: String? = null
-var currentAccount: String? = null // New: Owner of this device group
-val connectionLogs = mutableStateListOf<String>() // Global logs
-
-// Previously in companion object
-val lastExtractedBalance = mutableStateOf<String?>(null)
-val pendingTransferAmount = mutableStateOf<String?>(null)
-val pendingTransferNumber = mutableStateOf<String?>(null)
-
-// Backend Job tracking (Shared with Service)
-var currentBackendJobId: Int? = null
-var isPollingPaused = false
-var activeTransferInfo: QueuedTransfer? = null
 class MainActivity : ComponentActivity() {
-    
+    private lateinit var sessionManager: SessionManager
     
     var isConsultingAll = mutableStateOf(false)
     var consultationStatus = mutableStateOf("Consultar Todos")
@@ -111,6 +84,7 @@ class MainActivity : ComponentActivity() {
     private var retryCount = 0
     private var transferTimeoutHandler = Handler(Looper.getMainLooper())
     private var transferTimeoutRunnable: Runnable? = null
+
 
     private val resultReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -136,10 +110,11 @@ class MainActivity : ComponentActivity() {
     private fun handleTransferStatus(status: String?, message: String) {
         cancelTransferTimeout()
         Log.d("MainActivity", "handleTransferStatus: StatusReceived=$status, Msg=$message")
-        val info = activeTransferInfo ?: run {
+        val info = AppState.activeTransferInfo ?: run {
             Log.e("MainActivity", "handleTransferStatus: No activeTransferInfo found!")
             return
         }
+
 
         if (status == "SUCCESS") {
             Log.d("MainActivity", "SUCCESS detected. Recipient: ${info.number}, Amount: ${info.amount}")
@@ -147,28 +122,27 @@ class MainActivity : ComponentActivity() {
             showTransferNotification(info.number, info.amount)
 
             // Deduct balance locally
-            val currentStr = ussdBalances[info.simId]
+            val currentStr = AppState.ussdBalances[info.simId]
             if (currentStr != null) {
-                val currentMB = parseBalanceToMb(currentStr)
-                val transferredMB = info.amount.toDoubleOrNull() ?: 0.0
-                val newMB = (currentMB - transferredMB).coerceAtLeast(0.0)
-                val formatted = formatBalance(newMB)
-                ussdBalances[info.simId] = formatted // State update
-                Log.d("MainActivity", "Local balance updated: $currentStr -> $formatted")
+                val valMb = parseBalanceToMb(currentStr)
+                val deductMb = parseBalanceToMb(info.amount)
+                val newBal = (valMb - deductMb).coerceAtLeast(0.0)
+                AppState.ussdBalances[info.simId] = String.format(Locale.US, "%.1f MB", newBal)
             }
 
             reportJobStatus("SUCESSO")
 
-            activeTransferInfo = null
             retryCount = 0
-            pendingTransferAmount.value = null
-            pendingTransferNumber.value = null
+            AppState.pendingTransferAmount.value = null
+            AppState.pendingTransferNumber.value = null
+            AppState.activeTransferInfo = null
         } else {
             Log.w("MainActivity", "FAILURE reported. Msg: $message")
             reportJobStatus("FALHA")
             attemptRetry(info)
         }
     }
+
 
     private fun attemptRetry(info: QueuedTransfer) {
         retryCount++
@@ -179,22 +153,25 @@ class MainActivity : ComponentActivity() {
         } else {
             Log.d("MainActivity", "Fail limit reached. Adding to Waiting List.")
             Toast.makeText(this, "Falhou 2x. Adicionado à Lista de Espera.", Toast.LENGTH_LONG).show()
-            waitingList.add(info)
-            activeTransferInfo = null
+            AppState.waitingList.add(info)
+            AppState.activeTransferInfo = null
             retryCount = 0
-            pendingTransferAmount.value = null
-            pendingTransferNumber.value = null
+            AppState.pendingTransferAmount.value = null
+            AppState.pendingTransferNumber.value = null
+            AppState.currentBackendJobId = null
         }
     }
+
 
     private fun startTransferTimeout() {
         cancelTransferTimeout()
         transferTimeoutRunnable = Runnable {
             Log.w("MainActivity", "Transfer Timeout. No success message detected.")
-            activeTransferInfo?.let { attemptRetry(it) }
+            AppState.activeTransferInfo?.let { attemptRetry(it) }
         }
         transferTimeoutHandler.postDelayed(transferTimeoutRunnable!!, 45000) // 45s for multi-step
     }
+
 
     private fun cancelTransferTimeout() {
         transferTimeoutRunnable?.let { transferTimeoutHandler.removeCallbacks(it) }
@@ -204,14 +181,15 @@ class MainActivity : ComponentActivity() {
     private fun processResult(subId: Int, extracted: String) {
         if (subId == currentSimId) {
             currentSimId = null
-            ussdBalances[subId] = extracted
+            AppState.ussdBalances[subId] = extracted
             if (isConsultingAll.value) {
                 Handler(Looper.getMainLooper()).postDelayed({ triggerNextSim(this) }, 7000) 
             }
         } else {
-            ussdBalances[subId] = extracted
-            lastExtractedBalance.value = extracted
+            AppState.ussdBalances[subId] = extracted
+            AppState.lastExtractedBalance.value = extracted
         }
+
     }
 
     private fun triggerNextSim(context: Context) {
@@ -240,7 +218,7 @@ class MainActivity : ComponentActivity() {
         
         // Sort sims by balance descends, pick the first one >= amount
         return sims.mapNotNull { sim ->
-            val balanceStr = ussdBalances[sim.subscriptionId]
+            val balanceStr = AppState.ussdBalances[sim.subscriptionId]
             if (balanceStr != null) {
                 val mb = parseBalanceToMb(balanceStr)
                 sim to mb
@@ -248,6 +226,7 @@ class MainActivity : ComponentActivity() {
         }.filter { it.second >= amountMb }
          .maxByOrNull { it.second }?.first
     }
+
 
     fun startSmartTransfer(context: Context, amount: String, number: String) {
         val amountMb = amount.toDoubleOrNull() ?: 0.0
@@ -272,14 +251,17 @@ class MainActivity : ComponentActivity() {
         }
         Log.d("MainActivity", "Starting Data Transfer: $amount MB to $number from SIM ${info.subscriptionId}")
         val transferInfo = QueuedTransfer(info.subscriptionId, info.displayName.toString(), amount, number)
-        activeTransferInfo = transferInfo
+        AppState.activeTransferInfo = transferInfo
+
         retryCount = 0
         startTransferInternal(transferInfo)
     }
 
     private fun startTransferInternal(info: QueuedTransfer) {
-        pendingTransferAmount.value = info.amount
-        pendingTransferNumber.value = info.number
+        AppState.pendingTransferAmount.value = info.amount
+        AppState.pendingTransferNumber.value = info.number
+
+
         
         val subManager = getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
@@ -317,21 +299,22 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    fun submitToCloud(number: String, amount: String) {
+    fun submitToCloud(number: String, amount: String, targetDevice: String? = null) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                addLog("📤 Enviando pedido cloud: $amount MB -> $number")
+                AppState.addLog("📤 Enviando pedido cloud: $amount MB -> $number" + if(targetDevice != null) " p/ $targetDevice" else "")
                 val response = RetrofitClient.api.scheduleTransfer(
-                    ScheduleTransferRequest(number, amount, currentAccount ?: "") // Pass account name
+                    ScheduleTransferRequest(number, amount, sessionManager.account ?: "", targetDevice) // Pass account name and targetDevice
                 )
                 withContext(Dispatchers.Main) {
                     if (response.id != null) {
                         Toast.makeText(this@MainActivity, "Agendado com Sucesso! (ID ${response.id})", Toast.LENGTH_SHORT).show()
-                        addLog("✅ Pedido agendado na nuvem.")
+                        AppState.addLog("✅ Pedido agendado na nuvem.")
                     } else {
                         Toast.makeText(this@MainActivity, "Erro: ${response.error}", Toast.LENGTH_LONG).show()
                     }
                 }
+
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Falha de conexão: ${e.message}", Toast.LENGTH_LONG).show()
@@ -340,19 +323,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun addLog(msg: String) {
-        val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        val logEntry = "[$time] $msg"
-        // Keep only the last 50 logs to save memory
-        if (connectionLogs.size >= 50) connectionLogs.removeAt(0)
-        connectionLogs.add(logEntry)
-        Log.d("MainActivity", "AppLog: $msg")
-    }
+    // Use AppState.addLog globally
 
-    private fun getBatteryPercentage(): Int {
-        val bm = getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager
-        return bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY).let { if (it < 0) 100 else it }
-    }
+
 
     fun obtainUniqueDeviceId(): String {
         return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
@@ -369,8 +342,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startBackendPolling() {
-        if (isBackendPollingEnabled.value && currentUsername != null) {
+        if (AppState.isBackendPollingEnabled.value && sessionManager.username != null) {
             val intent = Intent(this, PollService::class.java)
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent)
             } else {
@@ -380,21 +354,22 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun reportJobStatus(status: String) {
-        val jobId = currentBackendJobId ?: return
-        val user = currentUsername ?: return
+        val jobId = AppState.currentBackendJobId ?: return
+        val user = sessionManager.username ?: return
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                addLog("Enviando status pro Servidor: $status")
+                AppState.addLog("Enviando status pro Servidor: $status")
                 val response = RetrofitClient.api.updateTransferStatus(UpdateStatusRequest(jobId, status, user))
-                addLog("✅ Servidor confirmou: ${response.message}")
+                AppState.addLog("✅ Servidor confirmou: ${response.message}")
             } catch (e: Exception) {
-                addLog("⚠️ Erro ao atualizar status: ${e.message}")
+                AppState.addLog("⚠️ Erro ao atualizar status: ${e.message}")
             } finally {
-                currentBackendJobId = null
-                isPollingPaused = false // Resume polling
+                AppState.currentBackendJobId = null
+                AppState.isPollingPaused = false // Resume polling
             }
         }
     }
+
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -477,8 +452,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        isAccessibilityEnabled.value = isEnabled
+        AppState.isAccessibilityEnabled.value = isEnabled
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -507,12 +483,13 @@ class MainActivity : ComponentActivity() {
         if (jobId != -1) {
             val amount = intent?.getStringExtra("JOB_AMOUNT") ?: ""
             val number = intent?.getStringExtra("JOB_NUMBER") ?: ""
-            currentBackendJobId = jobId
-            isPollingPaused = true
-            addLog("🟢 Executando Pedido #${jobId}")
+            AppState.currentBackendJobId = jobId
+            AppState.isPollingPaused = true
+            AppState.addLog("🟢 Executando Pedido #${jobId}")
             startSmartTransfer(this, amount, number)
         }
     }
+
 
     private fun requestIgnoreBatteryOptimizations() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -529,9 +506,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sessionManager = SessionManager.getInstance(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         checkAndRequestPermissions()
         createNotificationChannel()
+        
         val filter = IntentFilter().apply {
             addAction("com.example.siminfo.USSD_RESULT")
             addAction("com.example.siminfo.TRANSFER_STATUS")
@@ -542,10 +521,8 @@ class MainActivity : ComponentActivity() {
             registerReceiver(resultReceiver, filter)
         }
 
-        val prefs = getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
-        currentUsername = prefs.getString("USERNAME", null)?.trim()
-        currentAccount = prefs.getString("ACCOUNT", null)?.trim()
-        isBackendPollingEnabled.value = prefs.getBoolean("POLLING_ENABLED", false)
+        // Initialize state from persistence
+        AppState.isBackendPollingEnabled.value = sessionManager.isPollingEnabled
 
         startBackendPolling()
         requestIgnoreBatteryOptimizations()
@@ -553,38 +530,32 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    var isLoggedIn by remember { mutableStateOf(currentUsername != null) }
+                    var isLoggedIn by remember { mutableStateOf(sessionManager.isLoggedIn()) }
 
                     if (!isLoggedIn) {
                         LoginScreen(
                             onLoginSuccess = { user, pass, acc ->
-                                val tUser = user.trim()
-                                val tAcc = acc.trim()
-                                prefs.edit()
-                                    .putString("USERNAME", tUser)
-                                    .putString("PASSWORD", pass.trim())
-                                    .putString("ACCOUNT", tAcc)
-                                    .apply()
-                                currentUsername = tUser
-                                currentAccount = tAcc
+                                sessionManager.username = user
+                                sessionManager.password = pass
+                                sessionManager.account = acc
                                 isLoggedIn = true
                             }
                         )
                     } else {
                         MainScreenContainer(
                             onLogout = {
-                                prefs.edit().clear().apply()
-                                currentUsername = null
-                                currentAccount = null
-                                isBackendPollingEnabled.value = false
+                                sessionManager.logout()
+                                AppState.isBackendPollingEnabled.value = false
                                 isLoggedIn = false
                             }
                         )
+
                     }
                 }
             }
         }
     }
+
 }
 
 @Composable
@@ -655,9 +626,11 @@ fun MainScreenContainer(onLogout: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
+fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
     val context = LocalContext.current
+    val sessionManager = SessionManager.getInstance(context)
     val lifecycleScope = (context as MainActivity).lifecycleScope // Get lifecycleScope from MainActivity
+
     var showTransferDialog by remember { mutableStateOf(false) }
     var transferNumber by remember { mutableStateOf("") }
     var transferAmount by remember { mutableStateOf("") }
@@ -689,7 +662,7 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
         Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = if (isBackendPollingEnabled.value) Color(0xFF2E7D32).copy(alpha = 0.1f) else Color(0xFF1C1C1E))
+            colors = CardDefaults.cardColors(containerColor = if (AppState.isBackendPollingEnabled.value) Color(0xFF2E7D32).copy(alpha = 0.1f) else Color(0xFF1C1C1E))
         ) {
             Row(
                 modifier = Modifier.padding(24.dp).fillMaxWidth(),
@@ -698,30 +671,31 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isBackendPollingEnabled.value) "SERVIÇO ATIVO" else "SERVIÇO DESLIGADO",
+                        text = if (AppState.isBackendPollingEnabled.value) "SERVIÇO ATIVO" else "SERVIÇO DESLIGADO",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
-                        color = if (isBackendPollingEnabled.value) Color(0xFF4CAF50) else Color.Gray
+                        color = if (AppState.isBackendPollingEnabled.value) Color(0xFF4CAF50) else Color.Gray
                     )
                     Text(
-                        text = if (isBackendPollingEnabled.value) "A processar pedidos..." else "Toque para iniciar",
+                        text = if (AppState.isBackendPollingEnabled.value) "A processar pedidos..." else "Toque para iniciar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
                 }
+
                 Switch(
-                    checked = isBackendPollingEnabled.value,
+                    checked = AppState.isBackendPollingEnabled.value,
                     onCheckedChange = { isChecked ->
-                        isBackendPollingEnabled.value = isChecked
-                        val prefs = (context as? MainActivity)?.getSharedPreferences("FambaPrefs", Context.MODE_PRIVATE)
-                        prefs?.edit()?.putBoolean("POLLING_ENABLED", isChecked)?.apply()
+                        AppState.isBackendPollingEnabled.value = isChecked
+                        sessionManager.isPollingEnabled = isChecked
                         
                         // Sync with server pause state
                         (context as? MainActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
                             try {
-                                RetrofitClient.api.togglePause(PauseRequest(currentUsername ?: "", !isChecked))
+                                RetrofitClient.api.togglePause(PauseRequest(sessionManager.username ?: "", !isChecked))
                             } catch (e: Exception) { Log.e("MainActivity", "Error sync pause") }
                         }
+
                         
                         // AUTO-BALANCE CHECK when starting
                         if (isChecked) {
@@ -738,7 +712,8 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
         
-        if (!isAccessibilityEnabled.value) {
+        if (!AppState.isAccessibilityEnabled.value) {
+
             Card(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFB00020)),
@@ -778,18 +753,21 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text("SALDO TOTAL DISPONÍVEL", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-                val totalBalanceFormatted = remember(ussdBalances) {
-                    val total = ussdBalances.values.sumOf { parseBalanceToMb(it) }
-                    formatBalance(total)
+                val totalBalanceFormatted = remember {
+                    derivedStateOf {
+                        val total = AppState.ussdBalances.values.sumOf { parseBalanceToMb(it) }
+                        formatBalance(total)
+                    }
                 }
-                Text(totalBalanceFormatted, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+                Text(totalBalanceFormatted.value, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
 
-                if (ussdBalances.isNotEmpty()) {
+                if (AppState.ussdBalances.isNotEmpty()) {
                     Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray.copy(alpha = 0.5f))
                     val sims = remember(context) { getSimInfo(context) }
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        ussdBalances.keys.sorted().forEach { subId ->
-                            val balance = ussdBalances[subId] ?: ""
+                        AppState.ussdBalances.keys.sorted().forEach { subId ->
+                            val balance = AppState.ussdBalances[subId] ?: ""
+
                             val simIndex = sims.indexOfFirst { it.subscriptionId == subId } + 1
                             val simName = sims.find { it.subscriptionId == subId }?.displayName ?: "SIM $subId"
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -835,20 +813,50 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                     title = { Text("Lista de Espera") },
                     text = {
                         LazyColumn {
-                            items(waitingList, key = { it.timestamp }) { item ->
+                            items(AppState.waitingList, key = { it.timestamp }) { item ->
                                 Column(modifier = Modifier.padding(vertical = 4.dp)) {
                                     Text("${item.amount} MB para ${item.number}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Text("SIM: ${item.carrierName}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                                     Divider(color = Color.DarkGray)
                                 }
                             }
-                            if (waitingList.isEmpty()) {
+                            if (AppState.waitingList.isEmpty()) {
                                 item { Text("Sem transferências retidas.", color = MaterialTheme.colorScheme.onSurface) }
                             }
                         }
                     },
+
                     confirmButton = {
-                        TextButton(onClick = { showWaitingListDialog = false }) { Text("OK", color = Color(0xFFFFD600)) }
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (AppState.waitingList.isNotEmpty()) {
+                                Button(
+                                    onClick = { 
+                                        lifecycleScope.launch(Dispatchers.IO) {
+                                            try {
+                                                val res = RetrofitClient.api.retryFailedJobs(RetryFailedRequest(sessionManager.account ?: ""))
+                                                withContext(Dispatchers.Main) {
+                                                    if (res.success) {
+                                                        AppState.waitingList.clear()
+                                                        Toast.makeText(context, "Pedidos devolvidos à fila!", Toast.LENGTH_SHORT).show()
+                                                        showWaitingListDialog = false
+                                                    } else {
+                                                        Toast.makeText(context, "Erro: ${res.error}", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                withContext(Dispatchers.Main) { Toast.makeText(context, "Erro de conexão", Toast.LENGTH_SHORT).show() }
+                                            }
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Reprocessar Falhas no Servidor", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            TextButton(onClick = { showWaitingListDialog = false }, modifier = Modifier.align(Alignment.End)) { Text("FECHAR", color = Color(0xFFFFD600)) }
+                        }
                     }
                 )
             }
@@ -892,7 +900,7 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                             modifier = Modifier.padding(8.dp).fillMaxSize(),
                             reverseLayout = true
                         ) {
-                            items(connectionLogs.asReversed()) { log ->
+                            items(AppState.connectionLogs.asReversed()) { log ->
                                 Text(
                                     text = log,
                                     style = MaterialTheme.typography.bodySmall,
@@ -901,6 +909,7 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                                 )
                             }
                         }
+
                     }
                 },
                 confirmButton = {
@@ -911,6 +920,17 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
     }
 
     if (showTransferDialog) {
+        var deviceList by remember { mutableStateOf<List<Device>>(emptyList()) }
+        var selectedDevice by remember { mutableStateOf("auto") }
+        var dropdownExpanded by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            try {
+                val res = RetrofitClient.api.getDevices(sessionManager.account)
+                deviceList = res.devices
+            } catch (e: Exception) { }
+        }
+
         AlertDialog(
             onDismissRequest = { if (countdownSeconds == 0) showTransferDialog = false },
             title = { Text(if (countdownSeconds > 0) "A Enviar em $countdownSeconds..." else "Agendar Transferência") },
@@ -938,6 +958,48 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        // Dropdown for targetDevice
+                        ExposedDropdownMenuBox(
+                            expanded = dropdownExpanded,
+                            onExpandedChange = { dropdownExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = if (selectedDevice == "auto") "Modo Automático" else deviceList.find { it.username == selectedDevice }?.name ?: selectedDevice,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Aparelho Destino") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = dropdownExpanded,
+                                onDismissRequest = { dropdownExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Modo Automático (Qualquer online)") },
+                                    onClick = {
+                                        selectedDevice = "auto"
+                                        dropdownExpanded = false
+                                    }
+                                )
+                                deviceList.forEach { device ->
+                                    DropdownMenuItem(
+                                        text = { 
+                                            Column {
+                                                Text(device.name ?: device.username, fontWeight = FontWeight.Bold)
+                                                Text("Saldo: ${device.balance ?: "0 MB"} | Bateria: ${device.battery}%", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                            }
+                                        },
+                                        onClick = {
+                                            selectedDevice = device.username
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -951,7 +1013,8 @@ fun DashboardScreen(submitToCloud: (String, String) -> Unit) {
                                     delay(1000)
                                     countdownSeconds--
                                 }
-                                submitToCloud(transferNumber, transferAmount)
+                                val target = if (selectedDevice == "auto") null else selectedDevice
+                                submitToCloud(transferNumber, transferAmount, target)
                                 showTransferDialog = false
                                 transferNumber = ""
                                 transferAmount = ""
@@ -1132,15 +1195,18 @@ fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
 @Composable
 fun FleetManagementScreen() {
     val context = LocalContext.current
+    val sessionManager = SessionManager.getInstance(context)
+
     LaunchedEffect(Unit) {
         while (true) {
+
             try {
-                val accToSearch = currentAccount?.trim() ?: ""
+                val accToSearch = sessionManager.account?.trim() ?: ""
                 Log.d("FleetQuery", "Searching devices for account: '$accToSearch'")
                 val response = RetrofitClient.api.getDevices(accToSearch)
                 Log.d("FleetQuery", "Found ${response.devices.size} devices")
-                deviceList.clear()
-                deviceList.addAll(response.devices)
+                AppState.deviceList.clear()
+                AppState.deviceList.addAll(response.devices)
             } catch (e: Exception) {
                 Log.e("FleetQuery", "Erro ao buscar aparelhos: ${e.message}")
             }
@@ -1154,12 +1220,13 @@ fun FleetManagementScreen() {
 
         Button(
             onClick = { 
-                val newState = !isBackendPollingEnabled.value
-                isBackendPollingEnabled.value = newState 
+                val newState = !AppState.isBackendPollingEnabled.value
+
+                AppState.isBackendPollingEnabled.value = newState 
                 // Explicitly sync pause state with server
                 (context as? MainActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
                     try {
-                        RetrofitClient.api.togglePause(PauseRequest(currentUsername ?: "", !newState))
+                        RetrofitClient.api.togglePause(PauseRequest(sessionManager.username ?: "", !newState))
                     } catch (e: Exception) {
                          Log.e("MainActivity", "Erro sync pause: ${e.message}")
                     }
@@ -1167,17 +1234,18 @@ fun FleetManagementScreen() {
             },
             modifier = Modifier.fillMaxWidth().height(80.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
+                containerColor = if (AppState.isBackendPollingEnabled.value) Color(0xFFF44336) else Color(0xFF4CAF50)
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = if (isBackendPollingEnabled.value) "PARAR SINCRONIA" else "INICIAR SINCRONIA",
+                text = if (AppState.isBackendPollingEnabled.value) "PARAR SINCRONIA" else "INICIAR SINCRONIA",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         }
+
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -1185,15 +1253,16 @@ fun FleetManagementScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(deviceList, key = { it.username }) { device ->
+            items(AppState.deviceList, key = { it.username }) { device ->
                 DeviceCard(device)
             }
-            if (deviceList.isEmpty()) {
+            if (AppState.deviceList.isEmpty()) {
                 item {
                     Text("Nenhum outro aparelho online", modifier = Modifier.padding(16.dp), color = Color.DarkGray)
                 }
             }
         }
+
     }
 }
 
@@ -1220,10 +1289,11 @@ fun DeviceCard(device: Device) {
                                 RetrofitClient.api.togglePause(PauseRequest(device.username, !device.isPaused))
                                 withContext(Dispatchers.Main) {
                                     // Local optimistic update
-                                    val idx = deviceList.indexOfFirst { it.username == device.username }
+                                    val idx = AppState.deviceList.indexOfFirst { it.username == device.username }
                                     if (idx != -1) {
-                                        deviceList[idx] = deviceList[idx].copy(paused = if (!device.isPaused) 1 else 0)
+                                        AppState.deviceList[idx] = AppState.deviceList[idx].copy(paused = if (!device.isPaused) 1 else 0)
                                     }
+
                                 }
                             } catch (e: Exception) {
                                 Log.e("MainActivity", "Erro ao pausar: ${e.message}")
@@ -1266,8 +1336,10 @@ fun SettingsManagementScreen(onLogout: () -> Unit) {
         }
         
         Spacer(modifier = Modifier.height(32.dp))
+        val sessionManager = SessionManager.getInstance(LocalContext.current)
         Text("Aparelho Registado como:", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-        Text(currentUsername ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(sessionManager.username ?: "Desconhecido", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+
     }
 }
 fun formatBalance(mbValue: Double): String {

@@ -100,16 +100,16 @@ class USSDService : AccessibilityService() {
         if (isInteractive) {
             when {
                 normalizedText.contains("numero do recipiente") || normalizedText.contains("digita o numero") || normalizedText.contains("receptor") -> {
-                    pendingTransferNumber.value?.let { findAndInput(nodeInfo, it) }
+                    AppState.pendingTransferNumber.value?.let { findAndInput(nodeInfo, it) }
                 }
                 normalizedText.contains("quantos megas") || normalizedText.contains("quantidade") || normalizedText.contains("introduza o valor") -> {
-                    pendingTransferAmount.value?.let { findAndInput(nodeInfo, it) }
+                    AppState.pendingTransferAmount.value?.let { findAndInput(nodeInfo, it) }
                 }
                 normalizedText.contains("servicos de internet") || normalizedText.contains("serviços de internet") -> {
-                    if (pendingTransferAmount.value != null) findAndInput(nodeInfo, "8")
+                    if (AppState.pendingTransferAmount.value != null) findAndInput(nodeInfo, "8")
                 }
                 normalizedText.contains("transferir megas") -> {
-                    if (pendingTransferAmount.value != null) findAndInput(nodeInfo, "2")
+                    if (AppState.pendingTransferAmount.value != null) findAndInput(nodeInfo, "2")
                 }
             }
         } else {

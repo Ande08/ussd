@@ -120,7 +120,7 @@ db.serialize(() => {
 
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
-    let { number, amount, account } = req.body;
+    let { number, amount, account, targetDevice } = req.body;
     account = account?.trim();
 
     if (!number || !amount || !account) {
@@ -133,26 +133,16 @@ app.post('/api/transfer', async (req, res) => {
 
         const ownerAccountId = accRow.id;
 
-        // --- INDUSTRIAL ROUTING LOGIC (Query Mestra) ---
-        const activeThreshold = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace("T", " ").replace("Z", "");
-
-        // Find eligible devices in the SAME account, prioritize by balance
-        const eligibleDevices = await dbAll(`
-            SELECT username, name, balance FROM devices 
-            WHERE account_id = ? AND paused = 0 AND last_seen > ?
-            ORDER BY CAST(REPLACE(balance, ' MB', '') AS FLOAT) DESC
-        `, [ownerAccountId, activeThreshold]);
-
         let assignedTo = null;
         let assignedName = "Fila Geral (Aguardando Dispositivo)";
 
-        if (eligibleDevices.length > 0) {
-            const amountVal = parseFloat(amount);
-            // Check if any has enough balance
-            const capable = eligibleDevices.find(d => parseFloat(d.balance || 0) >= amountVal);
-            if (capable) {
-                assignedTo = capable.username;
-                assignedName = capable.name || assignedTo;
+        if (targetDevice && targetDevice !== "auto") {
+            const specificDev = await dbGet(`SELECT name FROM devices WHERE username = ? AND account_id = ?`, [targetDevice, ownerAccountId]);
+            if (specificDev) {
+                assignedTo = targetDevice;
+                assignedName = specificDev.name || targetDevice;
+            } else {
+                return res.status(404).json({ error: 'Dispositivo alvo não encontrado na conta.' });
             }
         }
 
@@ -295,7 +285,7 @@ app.post('/api/transfer/pending', async (req, res) => {
     try {
         // Find device's account name
         const device = await dbGet(`
-            SELECT a.name as account_name FROM devices d
+            SELECT d.*, a.name as account_name FROM devices d
             JOIN accounts a ON d.account_id = a.id
             WHERE d.username = ?
         `, [username]);
@@ -390,6 +380,23 @@ app.post('/api/device/pause', async (req, res) => {
         res.json({ success: true, message: `Dispositivo ${paused ? 'pausado' : 'retomado'}.` });
     } catch (err) {
         res.status(500).json({ error: 'Erro ao alternar pausa.' });
+    }
+});
+
+// 5c. App Endpoint: Retry failed jobs
+app.post('/api/transfer/retry_failed', async (req, res) => {
+    const { account } = req.body;
+    if (!account) return res.status(400).json({ error: 'Conta é obrigatória.' });
+
+    try {
+        await dbRun(
+            `UPDATE transfers SET status = 'PENDENTE', locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE status = 'FALHA' AND owner_account = ?`,
+            [account]
+        );
+        res.json({ success: true, message: 'Pedidos falhados foram devolvidos à fila.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao reprocessar pedidos.' });
     }
 });
 

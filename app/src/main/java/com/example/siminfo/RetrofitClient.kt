@@ -90,7 +90,12 @@ data class SimpleResponse(
 data class ScheduleTransferRequest(
     val number: String,
     val amount: String,
-    val account: String // Renamed from username to match backend
+    val account: String, // Renamed from username to match backend
+    val targetDevice: String? = null
+)
+
+data class RetryFailedRequest(
+    val account: String
 )
 
 data class ScheduleTransferResponse(
@@ -124,6 +129,9 @@ interface BackendApi {
 
     @POST("api/device/pause")
     suspend fun togglePause(@Body request: PauseRequest): SimpleResponse
+
+    @POST("api/transfer/retry_failed")
+    suspend fun retryFailedJobs(@Body request: RetryFailedRequest): SimpleResponse
 }
 
 // Retrofit Object
