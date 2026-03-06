@@ -10,6 +10,28 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+// Socket.io Setup
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer, {
+    cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+io.on('connection', (socket) => {
+    console.log(`[Socket] Novo ID: ${socket.id}`);
+
+    socket.on('register_device', (data) => {
+        if (data && data.username) {
+            const room = data.username.toLowerCase().trim();
+            socket.join(room);
+            console.log(`[Socket] Dispositivo ${room} registrado para PUSH.`);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('[Socket] Desconectado');
+    });
+});
+
 // Initialize SQLite database
 const dbPath = path.resolve(__dirname, 'queue.db');
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -168,6 +190,19 @@ app.post('/api/transfer', async (req, res) => {
         `, [number, amount, account, normalizedTarget === 'auto' ? null : assignedTo]);
 
         console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${normalizedTarget})`);
+
+        // --- REAL-TIME PUSH ---
+        if (assignedTo) {
+            const room = assignedTo.toLowerCase().trim();
+            io.to(room).emit('new_job', {
+                id: result.lastID,
+                number,
+                amount,
+                account
+            });
+            console.log(`[Push] Evento enviado para sala: ${room}`);
+        }
+
         res.status(201).json({
             id: result.lastID,
             message: 'Pedido agendado.',
@@ -525,6 +560,6 @@ setInterval(async () => {
 }, 30000); // Run every 30 seconds
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Servidor USSD-Backend rodando na porta ${PORT}`);
+httpServer.listen(PORT, () => {
+    console.log(`Servidor USSD-Backend (com WebSockets) rodando na porta ${PORT}`);
 });

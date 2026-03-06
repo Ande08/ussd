@@ -45,6 +45,9 @@ class PollService : Service() {
                     continue
                 }
 
+                // --- WebSocket Connection Check ---
+                SocketManager.connect(applicationContext, username)
+
                 // --- Heartbeat (Always send even if paused) ---
                 try {
                     val currentBattery = (applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
@@ -78,16 +81,16 @@ class PollService : Service() {
                     Log.e("PollService", "Erro ao sincronizar dispositivos: ${e.message}")
                 }
 
-                // --- Job Check (Only if NOT paused) ---
+                // --- Job Check Fallback (30s interval) ---
                 if (AppState.isBackendPollingEnabled.value && !AppState.isPollingPaused && AppState.currentBackendJobId == null) {
                     try {
                         val response = RetrofitClient.api.getPendingTransfer(PendingRequest(username))
                         val job = response.job
                         if (job == null) {
-                            Log.d("PollService", "Servidor respondeu: Sem pedidos para esta conta/saldo.")
+                            Log.d("PollService", "Polling Fallback: Sem pedidos pendentes.")
                             releaseWakeLock()
                         } else {
-                            Log.i("PollService", "!!! NOVO PEDIDO RECEBIDO: ID ${job.id} !!!")
+                            Log.i("PollService", "!!! NOVO PEDIDO RECEBIDO (VIA FALLBACK): ID ${job.id} !!!")
                             val intent = Intent(this@PollService, MainActivity::class.java).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                                 putExtra("JOB_ID", job.id)
@@ -99,11 +102,12 @@ class PollService : Service() {
                             startActivity(intent)
                         }
                     } catch (e: Exception) {
-                        Log.e("PollService", "Erro Polling: ${e.message}")
+                        Log.e("PollService", "Erro Polling Fallback: ${e.message}")
                     }
                 }
 
-                delay(2000)
+                // Polling fallback is now 30 seconds since we have WebSockets
+                delay(30000)
             }
         }
     }

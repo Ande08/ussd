@@ -70,4 +70,9 @@ dependencies {
     // Navigation & UI
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Socket.io Client
+    implementation("io.socket:socket.io-client:2.1.0") {
+        exclude(group = "org.json", module = "json")
+    }
 }
