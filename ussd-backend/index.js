@@ -112,6 +112,18 @@ db.serialize(() => {
     // Insert a default admin device for immediate testing if it doesn't exist
     db.run(`INSERT OR IGNORE INTO accounts (name, password) VALUES ('admin_acc', 'admin123')`);
 
+    // Audit Logs Table
+    db.run(`
+        CREATE TABLE IF NOT EXISTS transfer_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transfer_id INTEGER,
+            username TEXT,
+            status TEXT,
+            message TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // One-time cleanup for existing data (Trim whitespace)
     db.run(`UPDATE devices SET account = TRIM(account), username = TRIM(username) WHERE account IS NOT NULL`);
 });
@@ -187,8 +199,8 @@ app.post('/api/device/login', async (req, res) => {
     try {
         console.log(`[Login Attempt] Device: ${username}, Account: ${account}`);
 
-        // 1. Authenticate Account
-        const accRow = await dbGet(`SELECT id FROM accounts WHERE name = ? AND password = ?`, [account, password]);
+        // 1. Authenticate Account (Case-Insensitive name)
+        const accRow = await dbGet(`SELECT id FROM accounts WHERE LOWER(name) = LOWER(?) AND password = ?`, [account, password]);
 
         if (accRow) {
             console.log(`[Login Success] Account Auth OK. Syncing device: ${username}`);
@@ -207,7 +219,7 @@ app.post('/api/device/login', async (req, res) => {
 
             res.json({ success: true, message: 'Login efetuado com sucesso na conta ' + account });
         } else {
-            const accExists = await dbGet(`SELECT name, password FROM accounts WHERE name = ?`, [account]);
+            const accExists = await dbGet(`SELECT name, password FROM accounts WHERE LOWER(name) = LOWER(?)`, [account]);
             if (accExists) {
                 console.log(`[Login Fail] Account found: ${account}, but password mismatch.`);
                 res.status(401).json({ success: false, error: 'Senha da conta incorreta' });
@@ -236,7 +248,7 @@ app.post('/api/device/register', async (req, res) => {
     }
 
     try {
-        const accExists = await dbGet(`SELECT id FROM accounts WHERE name = ?`, [account]);
+        const accExists = await dbGet(`SELECT id FROM accounts WHERE LOWER(name) = LOWER(?)`, [account]);
         if (accExists) {
             return res.status(400).json({ error: 'Esta conta já existe. Use o Login.' });
         }
@@ -275,7 +287,7 @@ app.post('/api/device/status', async (req, res) => {
 
     try {
         await dbRun(
-            `UPDATE devices SET balance = ?, paused = ?, battery = ?, last_seen = CURRENT_TIMESTAMP WHERE username = ?`,
+            `UPDATE devices SET balance = ?, paused = ?, battery = ?, last_seen = CURRENT_TIMESTAMP WHERE LOWER(username) = LOWER(?)`,
             [String(balance), paused ? 1 : 0, battery !== undefined ? battery : 100, username]
         );
         res.json({ success: true });
@@ -284,17 +296,30 @@ app.post('/api/device/status', async (req, res) => {
     }
 });
 
+// 3b. Monitor Endpoint: Health Check
+app.get('/api/health', (req, res) => {
+    db.get("SELECT 1", [], (err) => {
+        if (err) return res.status(500).json({ status: 'DOWN', error: err.message });
+        res.json({
+            status: 'OK',
+            time: new Date().toISOString(),
+            database: 'Connected',
+            uptime: Math.floor(process.uptime()) + 's'
+        });
+    });
+});
+
 // 4. App Endpoint: Fetch next pending request (Concurreny Safe)
 app.post('/api/transfer/pending', async (req, res) => {
     const { username } = req.body;
     if (!username) return res.status(400).json({ error: 'Username é obrigatório para pedir trabalhos.' });
 
     try {
-        // Find device's account name
+        // Find device's account name (Case-Insensitive)
         const device = await dbGet(`
             SELECT d.*, a.name as account_name FROM devices d
             JOIN accounts a ON d.account_id = a.id
-            WHERE d.username = ?
+            WHERE LOWER(d.username) = LOWER(?)
         `, [username]);
 
         if (!device) return res.status(400).json({ error: 'Dispositivo não encontrado ou não associado a uma conta.' });
@@ -304,7 +329,7 @@ app.post('/api/transfer/pending', async (req, res) => {
 
         // First, check if there's a job explicitly assigned to this device
         let pending = await dbGet(
-            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND assigned_to = ? ORDER BY created_at ASC LIMIT 1`,
+            `SELECT * FROM transfers WHERE status = 'PENDENTE' AND LOWER(assigned_to) = LOWER(?) ORDER BY created_at ASC LIMIT 1`,
             [username]
         );
 
@@ -391,6 +416,13 @@ app.post('/api/transfer/update', async (req, res) => {
             `UPDATE transfers SET status = ?, locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
             [status, id]
         );
+
+        // Audit log
+        await dbRun(
+            `INSERT INTO transfer_logs (transfer_id, username, status, message) VALUES (?, ?, ?, ?)`,
+            [id, username, status, `Update reported by client`]
+        );
+
         res.json({ message: `Pedido ${id} atualizado para ${status}.` });
     } catch (err) {
         console.error(err);
@@ -465,6 +497,7 @@ setInterval(async () => {
         for (let job of stalledJobs) {
             console.log(`[Auto-Unlock] Unlocking job ${job.id} from ${job.locked_by} due to timeout.`);
             await dbRun(`UPDATE transfers SET status = 'PENDENTE', locked_by = NULL, locked_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [job.id]);
+            await dbRun(`INSERT INTO transfer_logs (transfer_id, username, status, message) VALUES (?, ?, 'PENDENTE', ?)`, [job.id, job.locked_by, 'Auto-unlocked due to timeout']);
         }
 
         // B. Assigned to offline devices
