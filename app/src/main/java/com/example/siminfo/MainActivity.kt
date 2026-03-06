@@ -131,7 +131,9 @@ class MainActivity : ComponentActivity() {
                 AppState.ussdBalances[info.simId] = String.format(Locale.US, "%.1f MB", newBal)
             }
 
+            // Sincronizar balance atualizado com o servidor imediatamente
             reportJobStatus("SUCESSO")
+            sendHeartbeatNow()
 
             retryCount = 0
             AppState.pendingTransferAmount.value = null
@@ -350,6 +352,25 @@ class MainActivity : ComponentActivity() {
                 startForegroundService(intent)
             } else {
                 startService(intent)
+            }
+        }
+    }
+
+    // Envia pulso imediato após transferência para sincronizar saldo com servidor
+    fun sendHeartbeatNow() {
+        val user = sessionManager.username ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val battery = (getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager)
+                    .getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                val totalBalance = AppState.ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString() + " MB"
+                RetrofitClient.api.updateDeviceStatus(
+                    DeviceStatusRequest(user, totalBalance, !AppState.isBackendPollingEnabled.value, battery)
+                )
+                AppState.addLog("⚡ Saldo pós-transferência sincronizado: $totalBalance")
+                Log.d("MainActivity", "Post-transfer heartbeat sent: $totalBalance")
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Erro a enviar pulso pós-transferência: ${e.message}")
             }
         }
     }
