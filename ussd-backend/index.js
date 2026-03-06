@@ -156,6 +156,18 @@ db.serialize(() => {
         )
     `);
 
+    // Confirmation Table (Anti-fraud)
+    db.run(`
+        CREATE TABLE IF NOT EXISTS confirmations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT,
+            code TEXT UNIQUE,
+            amount TEXT,
+            used BOOLEAN DEFAULT 0,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // One-time cleanup for existing data (Trim whitespace)
     db.run(`UPDATE devices SET account = TRIM(account), username = TRIM(username) WHERE account IS NOT NULL`);
 });
@@ -171,8 +183,9 @@ app.delete('/api/admin/clear-transfers', async (req, res) => {
     try {
         await dbRun(`DELETE FROM transfers`);
         await dbRun(`DELETE FROM transfer_logs`);
-        console.log('[Admin] Todos os pedidos e logs apagados.');
-        res.json({ message: 'Todos os pedidos (incluindo pendentes) foram apagados.' });
+        await dbRun(`DELETE FROM confirmations`);
+        console.log('[Admin] Todos os pedidos, logs e confirmacoes apagados.');
+        res.json({ message: 'Todos os pedidos e confirmacoes foram apagados.' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -196,11 +209,46 @@ app.delete('/api/admin/reset-all', async (req, res) => {
     }
 });
 
+// 0c. FambaPay: Register confirmed payment code
+app.post('/api/confirmations/register', async (req, res) => {
+    const { type, code, amount, secret } = req.body;
+    if (secret !== (process.env.ADMIN_SECRET || 'famba-admin')) {
+        return res.status(403).json({ error: 'Acesso negado.' });
+    }
+
+    console.log(`[FambaPay] Novo Pagamento Capturado: ${type} | Code: ${code} | Amount: ${amount}`);
+
+    try {
+        await dbRun(
+            `INSERT OR IGNORE INTO confirmations (type, code, amount) VALUES (?, ?, ?)`,
+            [type, code, amount]
+        );
+        res.json({ message: 'Pagamento registrado com sucesso.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 1. Bot Endpoint: Add new request to queue
 app.post('/api/transfer', async (req, res) => {
-    let { number, amount, account, targetDevice } = req.body;
+    let { number, amount, account, targetDevice, paymentCode } = req.body;
     account = account?.trim()?.toLowerCase();
     targetDevice = targetDevice?.trim()?.toLowerCase();
+
+    // Optional: Verification of payment if code is provided
+    if (paymentCode) {
+        try {
+            const conf = await dbGet(`SELECT * FROM confirmations WHERE code = ? AND used = 0`, [paymentCode]);
+            if (!conf) {
+                return res.status(400).json({ error: 'Código de pagamento inválido ou já utilizado.' });
+            }
+            // Mark as used immediately to prevent double spending
+            await dbRun(`UPDATE confirmations SET used = 1 WHERE id = ?`, [conf.id]);
+            console.log(`[Anti-Fraud] Código ${paymentCode} validado e consumido.`);
+        } catch (e) {
+            console.error(`[Anti-Fraud Error] ${e.message}`);
+        }
+    }
 
     if (!number || !amount || !account) {
         return res.status(400).json({ error: 'Número, Quantidade e Conta são obrigatórios.' });
