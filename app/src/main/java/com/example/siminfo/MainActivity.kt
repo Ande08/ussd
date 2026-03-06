@@ -667,6 +667,8 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
     val lifecycleScope = (context as MainActivity).lifecycleScope // Get lifecycleScope from MainActivity
 
     var showTransferDialog by remember { mutableStateOf(false) }
+    var showWaitingListDialog by remember { mutableStateOf(false) }
+    var showLogsDialog by remember { mutableStateOf(false) }
     var transferNumber by remember { mutableStateOf("") }
     var transferAmount by remember { mutableStateOf("") }
     var countdownSeconds by remember { mutableIntStateOf(0) }
@@ -834,7 +836,6 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                 Text("Agendar transf...", color = Color.Black, fontWeight = FontWeight.Bold, maxLines = 1, style = MaterialTheme.typography.labelMedium)
             }
 
-            var showWaitingListDialog by remember { mutableStateOf(false) }
             Button(
                 onClick = { showWaitingListDialog = true },
                 modifier = Modifier.weight(1f).height(56.dp),
