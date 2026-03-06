@@ -73,6 +73,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 class MainActivity : ComponentActivity() {
     private lateinit var sessionManager: SessionManager
@@ -670,7 +672,10 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
     var countdownSeconds by remember { mutableIntStateOf(0) }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header
@@ -925,65 +930,65 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
         // Get activity context safely
         val activity = LocalContext.current as MainActivity
 
-        // Action Buttons Row: Manual Heartbeat
-        Button(
-            onClick = {
-                val user = sessionManager.username ?: return@Button
-                val acc = sessionManager.account ?: return@Button
-                activity.lifecycleScope.launch(Dispatchers.IO) {
-                    try {
-                        AppState.addLog("⚡ Forçando Heartbeat manual...")
-                        val battery = (activity.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
-                            .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-                        val balance = AppState.ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString() + " MB"
-                        
-                        RetrofitClient.api.updateDeviceStatus(
-                            DeviceStatusRequest(user, balance, !AppState.isBackendPollingEnabled.value, battery)
-                        )
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(activity, "Pulso enviado com sucesso!", Toast.LENGTH_SHORT).show()
-                            AppState.addLog("💖 Pulso manual OK")
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(activity, "Erro ao enviar pulso", Toast.LENGTH_SHORT).show()
-                            AppState.addLog("⚠️ Erro no pulso manual: ${e.message}")
-                        }
+        // Logs & History Section
+        Text("Gerenciamento", style = MaterialTheme.typography.labelMedium, color = Color.Gray, modifier = Modifier.align(Alignment.Start).padding(start = 8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+        ) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                // Heartbeat & Sync Row
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            val user = sessionManager.username ?: return@Button
+                            activity.lifecycleScope.launch(Dispatchers.IO) {
+                                try {
+                                    AppState.addLog("⚡ Forçando Heartbeat manual...")
+                                    val battery = (activity.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
+                                        .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                                    val balance = AppState.ussdBalances.values.sumOf { parseBalanceToMb(it) }.toString() + " MB"
+                                    RetrofitClient.api.updateDeviceStatus(DeviceStatusRequest(user, balance, !AppState.isBackendPollingEnabled.value, battery))
+                                    withContext(Dispatchers.Main) { Toast.makeText(activity, "Pulso enviado!", Toast.LENGTH_SHORT).show() }
+                                } catch (e: Exception) { withContext(Dispatchers.Main) { Toast.makeText(activity, "Erro no pulso", Toast.LENGTH_SHORT).show() } }
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("💖 Heartbeat", style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    OutlinedButton(
+                        onClick = { activity.startConsultarTodos() },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = activity.isConsultingAll.value != true,
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(if (activity.isConsultingAll.value) "Consultando..." else "🔄 Sincronizar", style = MaterialTheme.typography.labelSmall)
                     }
                 }
-            },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text("💖 Forçar Pulso (Heartbeat)", color = Color.White, fontWeight = FontWeight.Bold)
-        }
-        
-        Spacer(modifier = Modifier.height(12.dp))
 
-        // Action Buttons Row 2: Manual Sync
-        OutlinedButton(
-            onClick = { activity.startConsultarTodos() },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(16.dp),
-            enabled = activity.isConsultingAll.value != true
-        ) {
-            val btnStatus = activity.consultationStatus.value ?: "Sincronizar Saldos Agora"
-            Text(btnStatus, fontWeight = FontWeight.Bold)
-        }
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        var showLogsDialog by remember { mutableStateOf(false) }
-        Button(
-            onClick = { showLogsDialog = true },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Icon(Icons.Default.History, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Ver Histórico / Logs", color = Color.White)
+                // Logs Button (Full Width)
+                Button(
+                    onClick = { showLogsDialog = true },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.History, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Ver Histórico de Logs", color = Color.White, style = MaterialTheme.typography.labelMedium)
+                }
+            }
         }
 
         if (showLogsDialog) {
@@ -1005,14 +1010,15 @@ fun DashboardScreen(submitToCloud: (String, String, String?) -> Unit) {
                                 )
                             }
                         }
-
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showLogsDialog = false }) { Text("FECHAR") }
+                    TextButton(onClick = { showLogsDialog = false }) { Text("FECHAR", color = Color(0xFFFFD600)) }
                 }
             )
         }
+        
+        Spacer(modifier = Modifier.height(24.dp))
     }
 
     if (showTransferDialog) {
