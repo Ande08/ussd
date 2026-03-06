@@ -80,10 +80,12 @@ class PollService : Service() {
                 if (AppState.isBackendPollingEnabled.value && !AppState.isPollingPaused && AppState.currentBackendJobId == null) {
                     try {
                         val response = RetrofitClient.api.getPendingTransfer(PendingRequest(username))
-                        if (response.job != null) {
-                            val job = response.job
-                            Log.d("PollService", "Pedido #${job.id} Recebido!")
-                            
+                        val job = response.job
+                        if (job == null) {
+                            Log.d("PollService", "Servidor respondeu: Sem pedidos para esta conta/saldo.")
+                            releaseWakeLock()
+                        } else {
+                            Log.i("PollService", "!!! NOVO PEDIDO RECEBIDO: ID ${job.id} !!!")
                             val intent = Intent(this@PollService, MainActivity::class.java).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                                 putExtra("JOB_ID", job.id)

@@ -141,17 +141,21 @@ app.post('/api/transfer', async (req, res) => {
             const specificDev = await dbGet(`SELECT name FROM devices WHERE username = ? AND account_id = ?`, [targetDevice, ownerAccountId]);
             if (specificDev) {
                 assignedTo = targetDevice;
+                assignedTo = targetDevice.toLowerCase(); // Normalize targetDevice
                 assignedName = specificDev.name || targetDevice;
             } else {
                 return res.status(404).json({ error: 'Dispositivo alvo não encontrado na conta.' });
             }
         }
 
-        const result = await dbRun(
-            `INSERT INTO transfers (number, amount, status, assigned_to, owner_account) VALUES (?, ?, 'PENDENTE', ?, ?)`,
-            [number, amount, assignedTo, account]
-        );
+        const normalizedTarget = targetDevice ? targetDevice.toLowerCase() : 'auto';
 
+        const result = await dbRun(`
+            INSERT INTO transfers (number, amount, owner_account, assigned_to, status)
+            VALUES (?, ?, ?, ?, 'PENDENTE')
+        `, [number, amount, account, normalizedTarget === 'auto' ? null : assignedTo]);
+
+        console.log(`[New Job] ${amount} MB to ${number} (Account: ${account}, Target: ${normalizedTarget})`);
         res.status(201).json({
             id: result.lastID,
             message: 'Pedido agendado.',
@@ -264,8 +268,10 @@ app.post('/api/device/register', async (req, res) => {
 
 // 3. App Endpoint: Status Heartbeat
 app.post('/api/device/status', async (req, res) => {
-    const { username, balance, paused, battery } = req.body;
-    if (!username) return res.status(400).json({ error: 'Username é obrigatório.' });
+    const { username, battery, balance, paused } = req.body;
+    if (!username) return res.status(400).json({ error: 'Username missing' });
+
+    console.log(`[Heartbeat] ${username} | Bat: ${battery}% | Bal: ${balance} | Paused: ${paused}`);
 
     try {
         await dbRun(
@@ -306,22 +312,39 @@ app.post('/api/transfer/pending', async (req, res) => {
         if (!pending && device.paused === 0) {
             // Find the oldest unassigned job
             const unassigned = await dbAll(
-                `SELECT * FROM transfers WHERE status = 'PENDENTE' AND assigned_to IS NULL AND (owner_account = ? OR owner_account IS NULL) ORDER BY created_at ASC`,
+                `SELECT * FROM transfers WHERE status = 'PENDENTE' AND assigned_to IS NULL AND (LOWER(owner_account) = LOWER(?) OR owner_account IS NULL) ORDER BY created_at ASC`,
                 [device.account_name]
             );
 
+            if (unassigned.length > 0) {
+                console.log(`[Poll] ${username} found ${unassigned.length} unassigned jobs for account ${device.account_name}`);
+            }
+
             // Find the first unassigned job this device can afford
             const deviceBalance = parseFloat(device.balance || 0);
-            pending = unassigned.find(job => parseFloat(job.amount || 0) <= deviceBalance);
+            pending = unassigned.find(job => {
+                const jobAmount = parseFloat(job.amount || 0);
+                if (jobAmount <= deviceBalance) return true;
+                console.log(`[Poll Skip] Job ${job.id} needs ${jobAmount}, device ${username} has ${deviceBalance}`);
+                return false;
+            });
 
-            // If device cannot afford any unassigned job, or there are no unassigned jobs, return null
+            if (!pending && unassigned.length > 0) {
+                await dbRun("COMMIT");
+                console.log(`[Poll] ${username} -> All ${unassigned.length} jobs rejected due to balance (${deviceBalance} MB).`);
+                return res.json({ message: 'Nenhum pedido compatível com seu saldo.', job: null });
+            }
+
             if (!pending) {
                 await dbRun("COMMIT");
-                return res.json({ message: 'Nenhum pedido pendente ou saldo insuficiente.', job: null });
+                return res.json({ message: 'Sem pedidos não atribuídos.', job: null });
             }
         } else if (!pending) {
             // Device is paused and has no explicitly assigned jobs
             await dbRun("COMMIT");
+            if (device.paused !== 0) {
+                console.log(`[Poll] ${username} is PAUSED. Skipping unassigned jobs.`);
+            }
             return res.json({ message: 'Dispositivo pausado e sem pedidos diretos.', job: null });
         }
 
